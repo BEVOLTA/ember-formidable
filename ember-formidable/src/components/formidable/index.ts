@@ -1,6 +1,8 @@
+import { restartableTask } from 'ember-concurrency';
 import { modifier } from 'ember-modifier';
-import _uniq from 'lodash';
+import _isEmpty from 'lodash/isEmpty';
 import _set from 'lodash/set';
+import _uniq from 'lodash/uniq';
 import { tracked, TrackedObject } from 'tracked-built-ins';
 
 import { action, get } from '@ember/object';
@@ -37,11 +39,13 @@ const inputUtils = (input: HTMLInputElement) => {
 
 interface IFormidable {
   values: Values;
-  validator?: any;
+  validator?: Function;
+  validatorOptions?: any;
   onValuesChanged: (data: Values, api: any) => void;
   onChange?: (event: Event, api: any) => void;
   onSubmit?: (event: SubmitEvent, api: any) => void;
   updateEvents?: TUpdateEvents[];
+  shouldUseNativeValidation?: boolean;
 }
 
 interface RegisterOptions {
@@ -65,32 +69,59 @@ interface RegisterOptions {
 */
 export default class Formidable extends Component<IFormidable> {
   @tracked values: Values = new TrackedObject(this.args.values);
+
+  // --- SUBMIT
+  @tracked isSubmitSuccessful = false;
+  @tracked isSubmitted = false;
+  @tracked submitCount = 0;
+
+  // --- VALIDATION
   @tracked validations: Record<string, object> = {};
+
+  // --- ERRORS
   @tracked errors: Record<string, object> = new TrackedObject({});
 
+  // --- PARSER
   @tracked parsers: Record<
     string,
     Pick<RegisterOptions, 'valueAsDate' | 'valueAsNumber'>
   > = {};
   validator = this.args.validator;
 
+  // --- ROLLBACK
   rollbackValues: Values = this.isModel
     ? { ...this.args.values }
     : structuredClone(this.args.values);
 
+  // --- UTILS
   get isModel() {
     return this.args.values instanceof Model;
   }
 
-  get api() {
-    return {
-      values: this.parsedValues,
-      setValue: this.setValue,
-      register: this.register,
-      onSubmit: this.onSubmit,
-      validate: this.validate,
-      errors: this.errors,
-    };
+  // --- STATES
+  get isSubmitting(): boolean {
+    return this.submit.isRunning;
+  }
+
+  get isValidating() {
+    return this.validate.isRunning;
+  }
+  get isValid() {
+    return _isEmpty(this.errors);
+  }
+  get invalidFields() {
+    return;
+  }
+
+  get isDirty() {
+    return;
+  }
+  get dirtyFields() {
+    return;
+  }
+
+  get isPristine() {
+    return;
   }
 
   get updateEvents() {
@@ -116,59 +147,51 @@ export default class Formidable extends Component<IFormidable> {
     }
   }
 
+  get api() {
+    return {
+      values: this.parsedValues,
+      setValue: this.setValue,
+      getValue: this.getValue,
+      getValues: this.getValues,
+      register: this.register,
+      onSubmit: (e: SubmitEvent) => this.submit.perform(e),
+      validate: this.validate,
+      errors: this.errors,
+      setError: this.setError,
+      clearError: this.clearError,
+      clearErrors: this.clearErrors,
+      defautlValues: this.rollbackValues,
+      isSubmitting: this.isSubmitting,
+      isValid: this.isValid,
+      isValidating: this.isValidating,
+      invalidFields: this.invalidFields,
+      isDirty: this.isDirty,
+      dirtyFields: this.dirtyFields,
+      isPristine: this.isPristine,
+    };
+  }
+
+  // --- STATES HANDLERS
+
   @action
-  async validate() {
-    if (!this.validator) {
-      return;
+  getValue(key: string) {
+    if (
+      this.isModel &&
+      this.values['relationshipFor']?.(key)?.meta?.kind == 'belongsTo'
+    ) {
+      return this.values['belongsTo'](key).value();
     }
-    try {
-      const validData = await this.validator.validate(this.parsedValues, {
-        abortEarly: false,
-      });
-      console.log(validData);
-    } catch (err) {
-      const { name, message } = err as Error;
-      this.errors[name] = {
-        message,
-      };
-    }
+    return get(this.parsedValues, key);
   }
 
   @action
-  onSubmit(event: SubmitEvent) {
-    event.preventDefault();
-    if (this.updateEvents.includes('onSubmit')) {
-      this.validate();
-    }
-    if (this.args.onSubmit) {
-      return this.args.onSubmit(event, this.api);
-    }
-
-    if (this.updateEvents.includes('onSubmit')) {
-      this.args.onValuesChanged(this.parsedValues, this.api);
-    }
+  getFieldState(name: string) {
+    // (name: string) => ({isDirty, isTouched, invalid, error})
   }
 
   @action
-  onChange(event: InputEvent) {
-    if (this.updateEvents.includes('onChange')) {
-      this.validate();
-    }
-    if (this.args.onChange) {
-      return this.args.onChange(event, this.api);
-    }
-    if (!event.target) {
-      throw new Error(
-        'FORMIDABLE - No input element found when value got set.',
-      );
-    }
-    const target = event.target as HTMLInputElement;
-
-    this.setValue(target.name, target.value);
-
-    if (this.updateEvents.includes('onChange')) {
-      this.args.onValuesChanged(this.parsedValues, this.api);
-    }
+  getValues() {
+    return this.parsedValues;
   }
 
   @action
@@ -206,13 +229,75 @@ export default class Formidable extends Component<IFormidable> {
   }
 
   @action
-  setFocus(name: string) {
-    (document.querySelector(`[name="${name}"]`) as HTMLInputElement)?.focus();
+  clearError(key: string) {
+    this.errors = _set(this.errors, key, undefined);
   }
 
   @action
-  getValues() {
-    return this.parsedValues;
+  clearErrors() {
+    this.errors = {};
+  }
+
+  // --- TASKS
+  validate = restartableTask(async (field?: string) => {
+    if (!this.validator) {
+      return;
+    }
+    const validation = await this.validator(this.parsedValues, {
+      shouldUseNativeValidation: this.args.shouldUseNativeValidation,
+      ...this.args.validatorOptions,
+    });
+    if (field) {
+      this.errors = _set(this.errors, field, get(validation, field));
+    } else {
+      this.errors = await this.validator(this.parsedValues, {
+        shouldUseNativeValidation: this.args.shouldUseNativeValidation,
+        ...this.args.validatorOptions,
+      });
+    }
+  });
+
+  submit = restartableTask(async (event: SubmitEvent) => {
+    event.preventDefault();
+    if (this.updateEvents.includes('onSubmit')) {
+      await this.validate.perform();
+    }
+    if (this.args.onSubmit) {
+      return this.args.onSubmit(event, this.api);
+    }
+
+    if (this.updateEvents.includes('onSubmit')) {
+      this.args.onValuesChanged(this.parsedValues, this.api);
+    }
+  });
+
+  // --- EVENT HANLDERS
+
+  @action
+  onChange(event: InputEvent) {
+    if (this.updateEvents.includes('onChange')) {
+      this.validate.perform();
+    }
+    if (this.args.onChange) {
+      return this.args.onChange(event, this.api);
+    }
+    if (!event.target) {
+      throw new Error(
+        'FORMIDABLE - No input element found when value got set.',
+      );
+    }
+    const target = event.target as HTMLInputElement;
+
+    this.setValue(target.name, target.value);
+
+    if (this.updateEvents.includes('onChange')) {
+      this.args.onValuesChanged(this.parsedValues, this.api);
+    }
+  }
+
+  @action
+  setFocus(name: string) {
+    (document.querySelector(`[name="${name}"]`) as HTMLInputElement)?.focus();
   }
 
   register = modifier(
@@ -277,7 +362,7 @@ export default class Formidable extends Component<IFormidable> {
       // HANDLERS
       const handleInput = async (event: Event) => {
         if (this.updateEvents.includes('onChange')) {
-          await this.validate();
+          await this.validate.perform();
         }
         if (onChange) {
           return onChange(event);
@@ -295,7 +380,7 @@ export default class Formidable extends Component<IFormidable> {
 
       const handleBlur = async (event: Event) => {
         if (this.updateEvents.includes('onBlur')) {
-          await this.validate();
+          await this.validate.perform();
         }
         if (onBlur) {
           return onBlur(event);
@@ -312,7 +397,9 @@ export default class Formidable extends Component<IFormidable> {
       };
 
       const preventDefault = (e: Event) => {
-        e.preventDefault();
+        if (!this.args.shouldUseNativeValidation) {
+          e.preventDefault();
+        }
         const target = e.target as any;
         if (target && !this.validator) {
           const message = (target as any).validationMessage;

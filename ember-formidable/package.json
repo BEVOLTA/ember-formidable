@@ -91,7 +91,9 @@
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-ts": "3.2.0",
     "ember-modifier": "4.1.0",
-    "typescript": "5.1.6"
+    "ember-concurrency": "3.0.0",
+    "typescript": "5.1.6",
+    "yup": "1.2.0"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
