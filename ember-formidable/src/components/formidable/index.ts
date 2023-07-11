@@ -1,5 +1,7 @@
-import { restartableTask } from 'ember-concurrency';
+import { restartableTask, TaskGenerator } from 'ember-concurrency';
+import { taskFor } from 'ember-concurrency-ts';
 import { modifier } from 'ember-modifier';
+import _cloneDeep from 'lodash/cloneDeep';
 import _isEmpty from 'lodash/isEmpty';
 import _set from 'lodash/set';
 import _uniq from 'lodash/uniq';
@@ -13,13 +15,15 @@ import {
 } from '@embroider/macros';
 import Component from '@glimmer/component';
 
-let Model: Function;
+type TUpdateEvents = 'onChange' | 'onSubmit' | 'onBlur';
+type Values = Record<string, any>;
+
+let Model: Function | undefined;
 if (macroCondition(dependencySatisfies('ember-data', '*'))) {
   Model = (importSync('@ember-data/model') as { default: Function }).default;
 }
 
-type Values = Record<string, any>;
-type TUpdateEvents = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
+const DATA_NAME = 'data-formidable-name';
 
 const inputUtils = (input: HTMLInputElement) => {
   return {
@@ -31,17 +35,18 @@ const inputUtils = (input: HTMLInputElement) => {
         input.setAttribute(attribute, `${value}`);
       }
     },
-    isFormInput: ['INPUT', 'SELECT'].includes(input.tagName),
+    isFormInput: ['INPUT', 'SELECT', 'CHECKBOX'].includes(input.tagName),
     isInput: input.tagName === 'INPUT',
     isSelect: input.tagName === 'SELECT',
+    isCheckbox: input.type === 'checkbox',
   };
 };
 
 interface IFormidable {
-  values: Values;
+  values?: Values;
   validator?: Function;
   validatorOptions?: any;
-  onValuesChanged: (data: Values, api: any) => void;
+  onValuesChanged?: (data: Values, api: any) => void;
   onChange?: (event: Event, api: any) => void;
   onSubmit?: (event: SubmitEvent, api: any) => void;
   updateEvents?: TUpdateEvents[];
@@ -65,10 +70,9 @@ interface RegisterOptions {
 
 /* TODO:
 - Make it work for selects / radios
-- Add a conditional to keep invalid HTML default
 */
 export default class Formidable extends Component<IFormidable> {
-  @tracked values: Values = new TrackedObject(this.args.values);
+  @tracked values: Values = new TrackedObject(this.args.values ?? {});
 
   // --- SUBMIT
   @tracked isSubmitSuccessful = false;
@@ -90,21 +94,24 @@ export default class Formidable extends Component<IFormidable> {
 
   // --- ROLLBACK
   rollbackValues: Values = this.isModel
-    ? { ...this.args.values }
-    : structuredClone(this.args.values);
+    ? { ...(this.args.values ?? {}) }
+    : _cloneDeep(this.args.values ?? {});
 
   // --- UTILS
   get isModel() {
+    if (!Model) {
+      return false;
+    }
     return this.args.values instanceof Model;
   }
 
   // --- STATES
   get isSubmitting(): boolean {
-    return this.submit.isRunning;
+    return taskFor(this.submit).isRunning;
   }
 
   get isValidating() {
-    return this.validate.isRunning;
+    return taskFor(this.validate).isRunning;
   }
   get isValid() {
     return _isEmpty(this.errors);
@@ -128,7 +135,7 @@ export default class Formidable extends Component<IFormidable> {
     return this.args.updateEvents ?? ['onSubmit'];
   }
 
-  get parsedValues() {
+  get parsedValues(): Values {
     if (this.isModel) {
       return this.values;
     } else {
@@ -154,7 +161,7 @@ export default class Formidable extends Component<IFormidable> {
       getValue: this.getValue,
       getValues: this.getValues,
       register: this.register,
-      onSubmit: (e: SubmitEvent) => this.submit.perform(e),
+      onSubmit: (e: SubmitEvent) => taskFor(this.submit).perform(e),
       validate: this.validate,
       errors: this.errors,
       setError: this.setError,
@@ -221,7 +228,7 @@ export default class Formidable extends Component<IFormidable> {
         //@ts-ignore
         messages: [...(this.errors[key]?.messages ?? []), value],
         //@ts-ignore
-        type: this.errors[key]?.type,
+        type: this.errors[key]?.type ?? 'custom',
       };
     } else {
       this.errors[key] = value;
@@ -239,44 +246,44 @@ export default class Formidable extends Component<IFormidable> {
   }
 
   // --- TASKS
-  validate = restartableTask(async (field?: string) => {
+  @restartableTask
+  *validate(field?: string): TaskGenerator<void> {
     if (!this.validator) {
       return;
     }
-    const validation = await this.validator(this.parsedValues, {
+    const validation = yield this.validator(this.parsedValues, {
       shouldUseNativeValidation: this.args.shouldUseNativeValidation,
       ...this.args.validatorOptions,
     });
     if (field) {
       this.errors = _set(this.errors, field, get(validation, field));
     } else {
-      this.errors = await this.validator(this.parsedValues, {
-        shouldUseNativeValidation: this.args.shouldUseNativeValidation,
-        ...this.args.validatorOptions,
-      });
+      // TODO: Not good yet.
+      this.errors = validation;
     }
-  });
+  }
 
-  submit = restartableTask(async (event: SubmitEvent) => {
+  @restartableTask
+  *submit(event: SubmitEvent): TaskGenerator<void> {
     event.preventDefault();
     if (this.updateEvents.includes('onSubmit')) {
-      await this.validate.perform();
+      taskFor(this.validate).perform();
     }
     if (this.args.onSubmit) {
       return this.args.onSubmit(event, this.api);
     }
 
-    if (this.updateEvents.includes('onSubmit')) {
+    if (this.updateEvents.includes('onSubmit') && this.args.onValuesChanged) {
       this.args.onValuesChanged(this.parsedValues, this.api);
     }
-  });
+  }
 
   // --- EVENT HANLDERS
 
   @action
   onChange(event: InputEvent) {
     if (this.updateEvents.includes('onChange')) {
-      this.validate.perform();
+      taskFor(this.validate).perform();
     }
     if (this.args.onChange) {
       return this.args.onChange(event, this.api);
@@ -290,14 +297,17 @@ export default class Formidable extends Component<IFormidable> {
 
     this.setValue(target.name, target.value);
 
-    if (this.updateEvents.includes('onChange')) {
+    if (this.updateEvents.includes('onChange') && this.args.onValuesChanged) {
       this.args.onValuesChanged(this.parsedValues, this.api);
     }
   }
 
   @action
   setFocus(name: string) {
-    (document.querySelector(`[name="${name}"]`) as HTMLInputElement)?.focus();
+    (
+      (document.querySelector(`[name="${name}"]`) as HTMLInputElement | null) ??
+      (document.querySelector(`[${DATA_NAME}="${name}"]`) as HTMLInputElement)
+    ).focus();
   }
 
   register = modifier(
@@ -318,9 +328,11 @@ export default class Formidable extends Component<IFormidable> {
         onBlur,
       }: RegisterOptions,
     ) => {
-      const { setUnlessExists, isFormInput, isInput } = inputUtils(input);
+      const { setUnlessExists, isFormInput, isInput, isCheckbox } =
+        inputUtils(input);
 
       if (!isFormInput) {
+        setUnlessExists(DATA_NAME, name);
         return;
       }
 
@@ -338,7 +350,10 @@ export default class Formidable extends Component<IFormidable> {
           setUnlessExists('required', required);
           setUnlessExists('pattern', strPattern);
 
-          setUnlessExists('value', get(this.args.values, name));
+          setUnlessExists(
+            isCheckbox ? 'checked' : 'value',
+            get(this.args.values ?? {}, name),
+          );
         }
       }
 
@@ -362,7 +377,7 @@ export default class Formidable extends Component<IFormidable> {
       // HANDLERS
       const handleInput = async (event: Event) => {
         if (this.updateEvents.includes('onChange')) {
-          await this.validate.perform();
+          await taskFor(this.validate).perform();
         }
         if (onChange) {
           return onChange(event);
@@ -373,14 +388,17 @@ export default class Formidable extends Component<IFormidable> {
           );
         }
         this.setValue(name, (event.target as HTMLInputElement).value);
-        if (this.updateEvents.includes('onChange')) {
+        if (
+          this.updateEvents.includes('onChange') &&
+          this.args.onValuesChanged
+        ) {
           this.args.onValuesChanged(this.parsedValues, this.api);
         }
       };
 
       const handleBlur = async (event: Event) => {
         if (this.updateEvents.includes('onBlur')) {
-          await this.validate.perform();
+          await taskFor(this.validate).perform();
         }
         if (onBlur) {
           return onBlur(event);
@@ -391,7 +409,7 @@ export default class Formidable extends Component<IFormidable> {
           );
         }
         this.setValue(name, (event.target as HTMLInputElement).value);
-        if (this.updateEvents.includes('onBlur')) {
+        if (this.updateEvents.includes('onBlur') && this.args.onValuesChanged) {
           this.args.onValuesChanged(this.parsedValues, this.api);
         }
       };

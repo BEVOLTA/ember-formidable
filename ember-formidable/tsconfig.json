@@ -1,9 +1,5 @@
 {
   "extends": "@tsconfig/ember/tsconfig.json",
-  "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "allowJs": true
-  },
   "include": ["src/**/*", "unpublished-development-types/**/*"],
   "glint": {
     "environment": "ember-loose"
