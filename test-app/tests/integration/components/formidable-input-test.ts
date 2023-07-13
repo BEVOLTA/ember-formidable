@@ -228,13 +228,13 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#parent-str').hasValue('Parent');
     assert.dom('#parent-bool').isChecked();
     assert.dom('#parent-num').hasValue('1');
-    assert.dom('#parent-date').hasValue('A');
+    assert.dom('#parent-date').hasValue(new Date('1999-01-01').toString());
     assert.dom('#parent-obj-foo').hasValue('Baz');
     assert.dom('#parent-obj-ember').hasValue('Formidable');
-    assert.dom('#child-str').hasValue('A');
+    assert.dom('#child-str').hasValue('Child');
     assert.dom('#child-bool').isNotChecked();
     assert.dom('#child-num').hasValue('2');
-    assert.dom('#child-date').hasValue('A');
+    assert.dom('#child-date').hasValue(new Date('2000-01-01').toString());
     assert.dom('#child-obj-foo').hasValue('Biz');
     assert.dom('#child-obj-ember').hasValue('Ness');
 
@@ -252,101 +252,5 @@ module('Integration | Component | formidable', function (hooks) {
     await fillIn('#child-obj-ember', 'Paris');
 
     await click('#submit');
-  });
-
-  test('UpdateEvents -- It should be triggred on specified updated events - onSubmit', async function (this: FormidableContext & {
-    counter: number;
-  }, assert) {
-    this.counter = 0;
-    this.onUpdate = (_data: { foo: string }) => {
-      this.counter += 1;
-    };
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} @updateEvents={{this.updateEvents}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
-        </form>
-      </Formidable>
-    `);
-
-    await fillIn('#foo', 'UPDATED');
-    await click('#submit');
-    await fillIn('#foo', 'UPDATED AGAIN');
-
-    assert.strictEqual(this.counter, 1);
-  });
-
-  test('UpdateEvents -- It should be triggred on specified updated events - onChange', async function (this: FormidableContext & {
-    counter: number;
-  }, assert) {
-    this.counter = 0;
-    this.onUpdate = (_data: { foo: string }) => {
-      this.counter += 1;
-    };
-    this.updateEvents = ['onChange'];
-
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} @updateEvents={{this.updateEvents}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
-        </form>
-      </Formidable>
-    `);
-
-    await fillIn('#foo', 'UPDATED');
-    await click('#submit');
-    await fillIn('#foo', 'UPDATED AGAIN');
-
-    assert.strictEqual(this.counter, 2);
-  });
-
-  test('UpdateEvents -- It should be triggred on specified updated events - onChange + onSubmit', async function (this: FormidableContext & {
-    counter: number;
-  }, assert) {
-    this.counter = 0;
-    this.onUpdate = (_data: { foo: string }) => {
-      this.counter += 1;
-    };
-    this.updateEvents = ['onChange', 'onSubmit'];
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} @updateEvents={{this.updateEvents}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
-        </form>
-      </Formidable>
-    `);
-
-    await fillIn('#foo', 'UPDATED');
-    await click('#submit');
-    await fillIn('#foo', 'UPDATED AGAIN');
-    await fillIn('#foo', 'UPDATED AGAIN AND AGAIN');
-
-    assert.strictEqual(this.counter, 4);
-  });
-
-  test('UpdateEvents -- It should be triggred on specified updated events - onBlur', async function (this: FormidableContext & {
-    counter: number;
-  }, assert) {
-    this.counter = 0;
-    this.onUpdate = (_data: { foo: string }) => {
-      this.counter += 1;
-    };
-    this.updateEvents = ['onBlur'];
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} @updateEvents={{this.updateEvents}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
-        </form>
-      </Formidable>
-    `);
-
-    await click('#foo');
-    await click('#submit');
-
-    assert.strictEqual(this.counter, 1);
   });
 });

@@ -64,8 +64,8 @@ interface RegisterOptions {
   valueAsNumber?: boolean;
   valueAsDate?: boolean;
   pattern?: RegExp | string;
-  onChange?: (event: Event) => void;
-  onBlur?: (event: Event) => void;
+  onChange?: (event: Event, api: any) => void;
+  onBlur?: (event: Event, api: any) => void;
 }
 
 /* TODO:
@@ -167,7 +167,7 @@ export default class Formidable extends Component<IFormidable> {
       setError: this.setError,
       clearError: this.clearError,
       clearErrors: this.clearErrors,
-      defautlValues: this.rollbackValues,
+      defaultValues: this.rollbackValues,
       isSubmitting: this.isSubmitting,
       isValid: this.isValid,
       isValidating: this.isValidating,
@@ -188,6 +188,7 @@ export default class Formidable extends Component<IFormidable> {
     ) {
       return this.values['belongsTo'](key).value();
     }
+    console.log(key);
     return get(this.parsedValues, key);
   }
 
@@ -380,7 +381,7 @@ export default class Formidable extends Component<IFormidable> {
           await taskFor(this.validate).perform();
         }
         if (onChange) {
-          return onChange(event);
+          return onChange(event, this.api);
         }
         if (!event.target) {
           throw new Error(
@@ -401,7 +402,7 @@ export default class Formidable extends Component<IFormidable> {
           await taskFor(this.validate).perform();
         }
         if (onBlur) {
-          return onBlur(event);
+          return onBlur(event, this.api);
         }
         if (!event.target) {
           throw new Error(
