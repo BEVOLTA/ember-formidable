@@ -75,8 +75,8 @@ export default class Formidable extends Component<IFormidable> {
   @tracked values: Values = new TrackedObject(this.args.values ?? {});
 
   // --- SUBMIT
-  @tracked isSubmitSuccessful = false;
-  @tracked isSubmitted = false;
+  @tracked isSubmitSuccessful: boolean | undefined = undefined;
+  @tracked isSubmitted = false; // TODO: Set to false when rollback
   @tracked submitCount = 0;
 
   // --- VALIDATION
@@ -266,16 +266,24 @@ export default class Formidable extends Component<IFormidable> {
 
   @restartableTask
   *submit(event: SubmitEvent): TaskGenerator<void> {
-    event.preventDefault();
-    if (this.updateEvents.includes('onSubmit')) {
-      taskFor(this.validate).perform();
-    }
-    if (this.args.onSubmit) {
-      return this.args.onSubmit(event, this.api);
-    }
+    this.isSubmitted = true;
+    this.submitCount += 1;
 
-    if (this.updateEvents.includes('onSubmit') && this.args.onValuesChanged) {
-      this.args.onValuesChanged(this.parsedValues, this.api);
+    try {
+      event.preventDefault();
+      if (this.updateEvents.includes('onSubmit')) {
+        taskFor(this.validate).perform();
+      }
+      if (this.args.onSubmit) {
+        return this.args.onSubmit(event, this.api);
+      }
+
+      if (this.updateEvents.includes('onSubmit') && this.args.onValuesChanged) {
+        this.args.onValuesChanged(this.parsedValues, this.api);
+      }
+      this.isSubmitSuccessful = true;
+    } catch {
+      this.isSubmitSuccessful = false;
     }
   }
 
