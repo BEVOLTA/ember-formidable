@@ -18,13 +18,19 @@ export default {
     addon.publicEntrypoints([
       'components/**/*.js',
       'services/**/*.js',
-      'template-registry.js',
+      'resolvers/**/*.js',
+      'registry.js',
     ]),
 
     // These are the modules that should get reexported into the traditional
     // "app" tree. Things in here should also be in publicEntrypoints above, but
     // not everything in publicEntrypoints necessarily needs to go here.
-    addon.appReexports(['components/**/*.js', 'services/**/*.js']),
+
+    addon.appReexports([
+      'components/**/*.js',
+      'services/**/*.js',
+      'resolvers/**/*.js',
+    ]),
 
     // compile TypeScript
     typescript({
@@ -41,7 +47,6 @@ export default {
 
     // Ensure that standalone .hbs files are properly integrated as Javascript.
     addon.hbs(),
-
 
     // Remove leftover build artifacts when starting a new build.
     addon.clean(),

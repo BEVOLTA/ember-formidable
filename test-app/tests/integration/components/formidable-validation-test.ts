@@ -58,6 +58,7 @@ module('Integration | Component | formidable', function (hooks) {
     this.values = {
       foo: 'DEFAULT',
     };
+
     this.updateEvents = ['onSubmit'];
   });
 

@@ -105,6 +105,7 @@
     "stylelint-prettier": "^3.0.0",
     "tracked-built-ins": "^3.1.1",
     "typescript": "5.0.4",
+    "yup": "1.2.0",
     "webpack": "^5.78.0"
   },
   "engines": {

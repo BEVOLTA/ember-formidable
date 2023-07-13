@@ -474,6 +474,9 @@ importers:
       webpack:
         specifier: ^5.78.0
         version: 5.78.0
+      yup:
+        specifier: 1.2.0
+        version: 1.2.0
 
 packages:
 
