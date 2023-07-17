@@ -15,7 +15,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
     await render(hbs`
       <Formidable @values={{this.values}}  as |values api|>
-          <button id="change" {{on "click" (fn api.setValue "foo" "CHANGED")}}>CHANGE</button>
+          <button id="change" type="button" {{on "click" (fn api.setValue "foo" "CHANGED")}}>CHANGE</button>
           <p id="value">{{api.getValue "foo"}}</p>
           <p id="default">{{api.defaultValues.foo}}</p>
       </Formidable>
@@ -31,7 +31,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
     await render(hbs`
     <Formidable @values={{this.values}}  as |values api|>
-        <button id="change" {{on "click" (fn api.setValue "foo" 505)}}>CHANGE</button>
+        <button id="change" type="button" {{on "click" (fn api.setValue "foo" 505)}}>CHANGE</button>
         <p id="value">{{api.getValue "foo"}}</p>
         <p id="default">{{api.defaultValues.foo}}</p>
     </Formidable>
@@ -50,7 +50,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
     await render(hbs`
     <Formidable @values={{this.values}}  as |values api|>
-        <button id="change" {{on "click" (fn api.setValue "foo" this.date)}}>CHANGE</button>
+        <button id="change" type="button" {{on "click" (fn api.setValue "foo" this.date)}}>CHANGE</button>
         <p id="value">{{api.getValue "foo"}}</p>
         <p id="default">{{api.defaultValues.foo}}</p>
     </Formidable>
@@ -66,7 +66,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
     await render(hbs`
     <Formidable @values={{this.values}}  as |values api|>
-        <button id="change" {{on "click" (fn api.setValue "foo" (hash bar="Surprise!"))}}>CHANGE</button>
+        <button id="change" type="button" {{on "click" (fn api.setValue "foo" (hash bar="Surprise!"))}}>CHANGE</button>
         <p id="value">{{api.getValue "foo.bar"}}</p>
         <p id="default">{{api.defaultValues.foo.bar}}</p>
     </Formidable>
@@ -82,7 +82,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
     await render(hbs`
     <Formidable @values={{this.values}}  as |values api|>
-        <button id="change" {{on "click" (fn api.setValue "foo" (array "Hello" "Goodbye"))}}>CHANGE</button>
+        <button id="change" type="button" {{on "click" (fn api.setValue "foo" (array "Hello" "Goodbye"))}}>CHANGE</button>
         <p id="value0">{{api.getValue "foo.0"}}</p>
         <p id="value1">{{api.getValue "foo.1"}}</p>
         <p id="default0">{{get api.defaultValues "foo.0"}}</p>

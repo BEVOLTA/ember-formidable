@@ -2,15 +2,15 @@ import { TestContext } from '@ember/test-helpers';
 
 export interface FormidableContext extends TestContext {
   // -- ARGS
-  values: Record<string, any>;
+  values: Record<string, unknown>;
   validator?: () => void;
-  validatorOptions?: any;
-  onValuesChanged: (data: Record<string, any>, api: any) => void;
-  onChange?: (event: Event, api: any) => void;
-  onSubmit?: (event: SubmitEvent, api: any) => void;
+  validatorOptions?: unknown;
+  onValuesChanged: (data: Record<string, unknown>, api: unknown) => void;
+  onChange?: (event: Event, api: unknown) => void;
+  onSubmit?: (event: SubmitEvent, api: unknown) => void;
   updateEvents?: string[];
   shouldUseNativeValidation?: boolean;
 
   // -- HANDLERS
-  onUpdate: (values: any) => void;
+  onUpdate: (values: any, api: any) => void;
 }

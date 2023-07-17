@@ -27,15 +27,17 @@ const DATA_NAME = 'data-formidable-name';
 
 const inputUtils = (input: HTMLInputElement) => {
   return {
-    setUnlessExists: (
+    setAttribute: (
       attribute: string,
       value: string | number | undefined | boolean,
     ) => {
-      if (!input.getAttribute(attribute) && value) {
+      if (_isEmpty(value)) {
+        input.removeAttribute(attribute);
+      } else {
         input.setAttribute(attribute, `${value}`);
       }
     },
-    isFormInput: ['INPUT', 'SELECT', 'CHECKBOX'].includes(input.tagName),
+    isFormInput: ['INPUT', 'SELECT'].includes(input.tagName),
     isInput: input.tagName === 'INPUT',
     isSelect: input.tagName === 'SELECT',
     isCheckbox: input.type === 'checkbox',
@@ -115,6 +117,7 @@ export default class Formidable extends Component<IFormidable> {
 
   // --- UTILS
   get isModel() {
+    console.log(Model);
     if (!Model) {
       return false;
     }
@@ -155,6 +158,7 @@ export default class Formidable extends Component<IFormidable> {
   }
 
   get parsedValues(): Values {
+    console.log(this.isModel);
     if (this.isModel) {
       return this.values;
     } else {
@@ -201,6 +205,7 @@ export default class Formidable extends Component<IFormidable> {
       clearErrors: this.clearErrors,
       rollback: this.rollback,
       defaultValues: this.rollbackValues,
+      isSubmitted: this.isSubmitted,
       isSubmitting: this.isSubmitting,
       isValid: this.isValid,
       isValidating: this.isValidating,
@@ -215,7 +220,7 @@ export default class Formidable extends Component<IFormidable> {
 
   @action
   rollback(
-    name: string,
+    name?: string,
     { keepError, keepDirty, defaultValue }: IRollbackContext = {},
   ) {
     if (name) {
@@ -228,27 +233,16 @@ export default class Formidable extends Component<IFormidable> {
         delete this.dirtyFields[name];
       }
     } else {
-      this.values = _cloneDeep(this.rollbackValues);
+      this.values = new TrackedObject(_cloneDeep(this.rollbackValues));
+
       if (!keepError) {
-        this.errors = {};
+        this.errors = new TrackedObject({});
       }
       if (!keepDirty) {
-        this.dirtyFields = {};
+        this.dirtyFields = new TrackedObject({});
       }
       this.isSubmitted = false;
     }
-  }
-
-  @action
-  getValue(key: string) {
-    if (
-      this.isModel &&
-      this.values['relationshipFor']?.(key)?.meta?.kind == 'belongsTo'
-    ) {
-      return this.values['belongsTo'](key).value();
-    }
-    console.log(key);
-    return get(this.parsedValues, key);
   }
 
   @action
@@ -259,6 +253,18 @@ export default class Formidable extends Component<IFormidable> {
     const isInvalid = !_isEmpty(error);
 
     return { isDirty, isPristine, isInvalid, error };
+  }
+
+  @action
+  getValue(key: string) {
+    if (
+      this.isModel &&
+      this.parsedValues['relationshipFor']?.(key)?.meta?.kind == 'belongsTo'
+    ) {
+      return this.parsedValues['belongsTo'](key).value();
+    }
+    console.log(this.parsedValues, this.values);
+    return get(this.parsedValues, key);
   }
 
   @action
@@ -307,7 +313,7 @@ export default class Formidable extends Component<IFormidable> {
 
   @action
   clearErrors() {
-    this.errors = {};
+    this.errors = new TrackedObject({});
   }
 
   // --- TASKS
@@ -324,7 +330,7 @@ export default class Formidable extends Component<IFormidable> {
       this.errors = _set(this.errors, field, get(validation, field));
     } else {
       // TODO: Not good yet.
-      this.errors = validation;
+      this.errors = new TrackedObject(validation);
     }
   }
 
@@ -345,6 +351,7 @@ export default class Formidable extends Component<IFormidable> {
       if (this.updateEvents.includes('onSubmit') && this.args.onValuesChanged) {
         this.args.onValuesChanged(this.parsedValues, this.api);
       }
+
       this.isSubmitSuccessful = true;
     } catch {
       this.isSubmitSuccessful = false;
@@ -406,37 +413,38 @@ export default class Formidable extends Component<IFormidable> {
         onFocus,
       }: RegisterOptions,
     ) => {
-      const { setUnlessExists, isFormInput, isInput, isCheckbox } =
+      const { setAttribute, isFormInput, isInput, isCheckbox } =
         inputUtils(input);
 
       if (!isFormInput) {
-        setUnlessExists(DATA_NAME, name);
+        setAttribute(DATA_NAME, name);
         return;
       }
 
       // ATTRIBUTES
       if (isInput) {
         if (input.type === 'number') {
-          setUnlessExists('min', min);
-          setUnlessExists('max', max);
+          setAttribute('min', min);
+          setAttribute('max', max);
         } else {
           const strPattern =
             typeof pattern === 'string' ? pattern : pattern?.toString();
-          setUnlessExists('minLength', minLength);
-          setUnlessExists('maxLength', maxLength);
-          setUnlessExists('disabled', disabled);
-          setUnlessExists('required', required);
-          setUnlessExists('pattern', strPattern);
-
-          setUnlessExists(
-            isCheckbox ? 'checked' : 'value',
-            get(this.args.values ?? {}, name),
-          );
+          setAttribute('minlength', minLength);
+          setAttribute('maxlength', maxLength);
+          setAttribute('disabled', disabled);
+          setAttribute('required', required);
+          setAttribute('pattern', strPattern);
         }
       }
 
       if (isFormInput) {
-        setUnlessExists('name', name);
+        setAttribute('name', name);
+
+        if (isCheckbox) {
+          input.checked = this.getValue(name) ?? false;
+        } else if (isInput) {
+          input.value = this.getValue(name);
+        }
       }
 
       // VALIDATIONS
@@ -454,19 +462,19 @@ export default class Formidable extends Component<IFormidable> {
 
       // HANDLERS
       const handleInput = async (event: Event) => {
-        this.dirtyFields[name] = true;
-        if (this.updateEvents.includes('onChange')) {
-          await taskFor(this.validate).perform();
-        }
-        if (onChange) {
-          return onChange(event, this.api);
-        }
         if (!event.target) {
           throw new Error(
             'FORMIDABLE - No input element found when value got set.',
           );
         }
+        this.dirtyFields[name] = true;
+        if (this.updateEvents.includes('onChange')) {
+          await taskFor(this.validate).perform();
+        }
         this.setValue(name, (event.target as HTMLInputElement).value);
+        if (onChange) {
+          return onChange(event, this.api);
+        }
         if (
           this.updateEvents.includes('onChange') &&
           this.args.onValuesChanged
@@ -476,36 +484,39 @@ export default class Formidable extends Component<IFormidable> {
       };
 
       const handleBlur = async (event: Event) => {
-        if (this.updateEvents.includes('onBlur')) {
-          await taskFor(this.validate).perform();
-        }
-        if (onBlur) {
-          return onBlur(event, this.api);
-        }
         if (!event.target) {
           throw new Error(
             'FORMIDABLE - No input element found when value got set.',
           );
         }
+        if (this.updateEvents.includes('onBlur')) {
+          await taskFor(this.validate).perform();
+        }
         this.setValue(name, (event.target as HTMLInputElement).value);
+        if (onBlur) {
+          return onBlur(event, this.api);
+        }
         if (this.updateEvents.includes('onBlur') && this.args.onValuesChanged) {
           this.args.onValuesChanged(this.parsedValues, this.api);
         }
       };
 
       const handleFocus = async (event: Event) => {
-        if (this.updateEvents.includes('onFocus')) {
-          await taskFor(this.validate).perform();
-        }
-        if (onFocus) {
-          return onFocus(event, this.api);
-        }
         if (!event.target) {
           throw new Error(
             'FORMIDABLE - No input element found when value got set.',
           );
         }
+
+        if (this.updateEvents.includes('onFocus')) {
+          await taskFor(this.validate).perform();
+        }
+
         this.setValue(name, (event.target as HTMLInputElement).value);
+        if (onFocus) {
+          return onFocus(event, this.api);
+        }
+
         if (
           this.updateEvents.includes('onFocus') &&
           this.args.onValuesChanged
@@ -535,6 +546,7 @@ export default class Formidable extends Component<IFormidable> {
           }
         }
       };
+
       // EVENTS
       input.addEventListener('input', handleInput);
       input.addEventListener('invalid', preventDefault);

@@ -59,7 +59,6 @@ module('Integration | Component | formidable', function (hooks) {
     this.values = {
       foo: 'DEFAULT',
     };
-    this.updateEvents = ['onSubmit'];
   });
 
   test('Values -- It should update the value -- text', async function (this: FormidableContext, assert) {
@@ -67,7 +66,7 @@ module('Integration | Component | formidable', function (hooks) {
       assert.strictEqual(data.foo, 'CHANGED');
     };
     await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} @updateEvents={{this.updateEvents}} as |values api|>
+      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
           <input type="text" id="foo" {{api.register "foo"}} />
           <button id="submit"  type="submit">SUBMIT</button>
@@ -87,7 +86,7 @@ module('Integration | Component | formidable', function (hooks) {
       assert.strictEqual(data.foo, 5);
     };
     await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} @updateEvents={{this.updateEvents}} as |values api|>
+      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
           <input type="text" id="foo" {{api.register "foo" valueAsNumber=true}} />
           <button id="submit"  type="submit">SUBMIT</button>
@@ -107,7 +106,7 @@ module('Integration | Component | formidable', function (hooks) {
       assert.deepEqual(data.foo, new Date('2001-05-05'));
     };
     await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} @updateEvents={{this.updateEvents}} as |values api|>
+      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
           <input type="text" id="foo" {{api.register "foo" valueAsDate=true}} />
           <button id="submit"  type="submit">SUBMIT</button>
@@ -132,7 +131,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} @updateEvents={{this.updateEvents}} as |values api|>
+      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
           <input type="text" id="foo" {{api.register "foo.bar"}} />
           <button id="submit"  type="submit">SUBMIT</button>
@@ -153,7 +152,7 @@ module('Integration | Component | formidable', function (hooks) {
       assert.deepEqual(data.foo, ['*', '**']);
     };
     await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} @updateEvents={{this.updateEvents}} as |values api|>
+      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
           <input type="text" id="foo0" {{api.register "foo.0"}} />
           <input type="text" id="foo1" {{api.register "foo.1"}} />
@@ -192,22 +191,22 @@ module('Integration | Component | formidable', function (hooks) {
       child,
     });
     this.onUpdate = (data: ParentModel) => {
-      assert.deepEqual(data.str, 'New Parent');
+      assert.strictEqual(data.str, 'New Parent');
       assert.false(data.bool);
-      assert.deepEqual(data.num, 101);
-      assert.strictEqual(data.date, new Date('2050-01-01'));
-      assert.strictEqual(data.obj, { foo: { bar: 'Bisous' }, ember: 'Great' });
-      assert.deepEqual(data.child.str, 'New Child');
+      assert.strictEqual(data.num, 101);
+      assert.deepEqual(data.date, new Date('2050-01-01'));
+      assert.deepEqual(data.obj, { foo: { bar: 'Bisous' }, ember: 'Great' });
+      assert.strictEqual(data.child.str, 'New Child');
       assert.true(data.child.bool);
-      assert.deepEqual(data.child.num, 202);
-      assert.strictEqual(data.child.date, new Date('1990-01-01'));
-      assert.strictEqual(data.child.obj, {
+      assert.strictEqual(data.child.num, 202);
+      assert.deepEqual(data.child.date, new Date('1990-01-01'));
+      assert.deepEqual(data.child.obj, {
         foo: { bar: 'Bonjour' },
         ember: 'Paris',
       });
     };
     await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} @updateEvents={{this.updateEvents}} as |values api|>
+      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
           <input type="text" id="parent-str" {{api.register "str"}} />
           <input type="checkbox" id="parent-bool" {{api.register "bool"}} />
