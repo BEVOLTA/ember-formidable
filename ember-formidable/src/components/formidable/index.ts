@@ -15,7 +15,7 @@ import {
 } from '@embroider/macros';
 import Component from '@glimmer/component';
 
-type TUpdateEvents = 'onChange' | 'onSubmit' | 'onBlur';
+type TUpdateEvents = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
 type Values = Record<string, any>;
 
 let Model: Function | undefined;
@@ -42,6 +42,17 @@ const inputUtils = (input: HTMLInputElement) => {
   };
 };
 
+interface IRollbackContext {
+  keepError?: boolean;
+  keepDirty?: boolean;
+  defaultValue?: boolean;
+}
+interface IFieldState {
+  isDirty: boolean;
+  isPristine: boolean;
+  isInvalid: boolean;
+  error?: object;
+}
 interface IFormidable {
   values?: Values;
   validator?: Function;
@@ -66,6 +77,7 @@ interface RegisterOptions {
   pattern?: RegExp | string;
   onChange?: (event: Event, api: any) => void;
   onBlur?: (event: Event, api: any) => void;
+  onFocus?: (event: Event, api: any) => void;
 }
 
 /* TODO:
@@ -76,7 +88,7 @@ export default class Formidable extends Component<IFormidable> {
 
   // --- SUBMIT
   @tracked isSubmitSuccessful: boolean | undefined = undefined;
-  @tracked isSubmitted = false; // TODO: Set to false when rollback
+  @tracked isSubmitted = false;
   @tracked submitCount = 0;
 
   // --- VALIDATION
@@ -85,11 +97,15 @@ export default class Formidable extends Component<IFormidable> {
   // --- ERRORS
   @tracked errors: Record<string, object> = new TrackedObject({});
 
+  // --- DIRTY FIELDS
+  @tracked dirtyFields: Record<string, boolean> = new TrackedObject({});
+
   // --- PARSER
-  @tracked parsers: Record<
+  parsers: Record<
     string,
     Pick<RegisterOptions, 'valueAsDate' | 'valueAsNumber'>
   > = {};
+
   validator = this.args.validator;
 
   // --- ROLLBACK
@@ -113,22 +129,25 @@ export default class Formidable extends Component<IFormidable> {
   get isValidating() {
     return taskFor(this.validate).isRunning;
   }
+
   get isValid() {
     return _isEmpty(this.errors);
   }
-  get invalidFields() {
-    return;
+  get invalidFields(): Record<string, boolean> {
+    return Object.keys(this.errors).reduce(
+      (invalid: Record<string, boolean>, key) => {
+        return _set(invalid, key, true);
+      },
+      {},
+    );
   }
 
   get isDirty() {
-    return;
-  }
-  get dirtyFields() {
-    return;
+    return !this.isPristine;
   }
 
   get isPristine() {
-    return;
+    return _isEmpty(this.dirtyFields);
   }
 
   get updateEvents() {
@@ -154,12 +173,25 @@ export default class Formidable extends Component<IFormidable> {
     }
   }
 
+  get fieldsState(): Record<string, IFieldState> {
+    return Object.keys(this.values).reduce((state, key) => {
+      const isDirty = this.dirtyFields[key] ?? false;
+      const isPristine = !isDirty;
+      const error = this.errors[key];
+      const isInvalid = !_isEmpty(error);
+
+      return _set(state, key, { isDirty, isPristine, isInvalid, error });
+    }, {});
+  }
+
   get api() {
     return {
       values: this.parsedValues,
       setValue: this.setValue,
       getValue: this.getValue,
       getValues: this.getValues,
+      getFieldState: this.getFieldState,
+      fieldsState: this.fieldsState,
       register: this.register,
       onSubmit: (e: SubmitEvent) => taskFor(this.submit).perform(e),
       validate: this.validate,
@@ -167,6 +199,7 @@ export default class Formidable extends Component<IFormidable> {
       setError: this.setError,
       clearError: this.clearError,
       clearErrors: this.clearErrors,
+      rollback: this.rollback,
       defaultValues: this.rollbackValues,
       isSubmitting: this.isSubmitting,
       isValid: this.isValid,
@@ -181,6 +214,32 @@ export default class Formidable extends Component<IFormidable> {
   // --- STATES HANDLERS
 
   @action
+  rollback(
+    name: string,
+    { keepError, keepDirty, defaultValue }: IRollbackContext = {},
+  ) {
+    if (name) {
+      this.values[name] =
+        defaultValue ?? this.rollbackValues[name] ?? undefined;
+      if (!keepError) {
+        delete this.errors[name];
+      }
+      if (!keepDirty) {
+        delete this.dirtyFields[name];
+      }
+    } else {
+      this.values = _cloneDeep(this.rollbackValues);
+      if (!keepError) {
+        this.errors = {};
+      }
+      if (!keepDirty) {
+        this.dirtyFields = {};
+      }
+      this.isSubmitted = false;
+    }
+  }
+
+  @action
   getValue(key: string) {
     if (
       this.isModel &&
@@ -193,8 +252,13 @@ export default class Formidable extends Component<IFormidable> {
   }
 
   @action
-  getFieldState(name: string) {
-    // (name: string) => ({isDirty, isTouched, invalid, error})
+  getFieldState(name: string): IFieldState {
+    const isDirty = this.dirtyFields[name] ?? false;
+    const isPristine = !isDirty;
+    const error = this.errors[name];
+    const isInvalid = !_isEmpty(error);
+
+    return { isDirty, isPristine, isInvalid, error };
   }
 
   @action
@@ -317,6 +381,10 @@ export default class Formidable extends Component<IFormidable> {
       (document.querySelector(`[name="${name}"]`) as HTMLInputElement | null) ??
       (document.querySelector(`[${DATA_NAME}="${name}"]`) as HTMLInputElement)
     ).focus();
+
+    if (this.updateEvents.includes('onFocus')) {
+      taskFor(this.validate).perform();
+    }
   }
 
   register = modifier(
@@ -335,6 +403,7 @@ export default class Formidable extends Component<IFormidable> {
         valueAsDate,
         onChange,
         onBlur,
+        onFocus,
       }: RegisterOptions,
     ) => {
       const { setUnlessExists, isFormInput, isInput, isCheckbox } =
@@ -385,6 +454,7 @@ export default class Formidable extends Component<IFormidable> {
 
       // HANDLERS
       const handleInput = async (event: Event) => {
+        this.dirtyFields[name] = true;
         if (this.updateEvents.includes('onChange')) {
           await taskFor(this.validate).perform();
         }
@@ -423,6 +493,27 @@ export default class Formidable extends Component<IFormidable> {
         }
       };
 
+      const handleFocus = async (event: Event) => {
+        if (this.updateEvents.includes('onFocus')) {
+          await taskFor(this.validate).perform();
+        }
+        if (onFocus) {
+          return onFocus(event, this.api);
+        }
+        if (!event.target) {
+          throw new Error(
+            'FORMIDABLE - No input element found when value got set.',
+          );
+        }
+        this.setValue(name, (event.target as HTMLInputElement).value);
+        if (
+          this.updateEvents.includes('onFocus') &&
+          this.args.onValuesChanged
+        ) {
+          this.args.onValuesChanged(this.parsedValues, this.api);
+        }
+      };
+
       const preventDefault = (e: Event) => {
         if (!this.args.shouldUseNativeValidation) {
           e.preventDefault();
@@ -452,12 +543,19 @@ export default class Formidable extends Component<IFormidable> {
         input.addEventListener('blur', handleBlur);
       }
 
+      if (onFocus || this.updateEvents.includes('onFocus')) {
+        input.addEventListener('focusin', handleFocus);
+      }
+
       return () => {
         input.removeEventListener('input', handleInput);
         input.removeEventListener('invalid', preventDefault);
 
         if (onBlur || this.updateEvents.includes('onBlur')) {
           input.removeEventListener('blur', handleBlur);
+        }
+        if (onFocus || this.updateEvents.includes('onFocus')) {
+          input.removeEventListener('focus', handleFocus);
         }
       };
     },
