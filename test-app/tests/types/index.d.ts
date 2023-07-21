@@ -3,7 +3,7 @@ import { TestContext } from '@ember/test-helpers';
 export interface FormidableContext extends TestContext {
   // -- ARGS
   values: Record<string, unknown>;
-  validator?: () => void;
+  validator?: (schema: any) => void;
   validatorOptions?: unknown;
   onValuesChanged: (data: Record<string, unknown>, api: unknown) => void;
   onChange?: (event: Event, api: unknown) => void;

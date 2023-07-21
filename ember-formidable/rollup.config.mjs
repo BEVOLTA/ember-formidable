@@ -18,7 +18,6 @@ export default {
     addon.publicEntrypoints([
       'components/**/*.js',
       'services/**/*.js',
-      'resolvers/**/*.js',
       'registry.js',
     ]),
 
@@ -26,11 +25,7 @@ export default {
     // "app" tree. Things in here should also be in publicEntrypoints above, but
     // not everything in publicEntrypoints necessarily needs to go here.
 
-    addon.appReexports([
-      'components/**/*.js',
-      'services/**/*.js',
-      'resolvers/**/*.js',
-    ]),
+    addon.appReexports(['components/**/*.js', 'services/**/*.js']),
 
     // compile TypeScript
     typescript({

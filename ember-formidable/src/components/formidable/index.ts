@@ -4,22 +4,18 @@ import { modifier } from 'ember-modifier';
 import _cloneDeep from 'lodash/cloneDeep';
 import _isEmpty from 'lodash/isEmpty';
 import _set from 'lodash/set';
-import _uniq from 'lodash/uniq';
 import { tracked, TrackedObject } from 'tracked-built-ins';
 
 import { action, get } from '@ember/object';
-import {
-  dependencySatisfies,
-  importSync,
-  macroCondition,
-} from '@embroider/macros';
+import { importSync, macroCondition, moduleExists } from '@embroider/macros';
 import Component from '@glimmer/component';
 
 type TUpdateEvents = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
 type Values = Record<string, any>;
 
 let Model: Function | undefined;
-if (macroCondition(dependencySatisfies('ember-data', '*'))) {
+
+if (macroCondition(moduleExists('ember-data'))) {
   Model = (importSync('@ember-data/model') as { default: Function }).default;
 }
 
@@ -43,6 +39,13 @@ const inputUtils = (input: HTMLInputElement) => {
     isCheckbox: input.type === 'checkbox',
   };
 };
+
+type TFormidableErrors = Record<string, IFormidableError[]>;
+interface IFormidableError {
+  type: string;
+  message: string;
+  value: unknown;
+}
 
 interface IRollbackContext {
   keepError?: boolean;
@@ -97,7 +100,7 @@ export default class Formidable extends Component<IFormidable> {
   @tracked validations: Record<string, object> = {};
 
   // --- ERRORS
-  @tracked errors: Record<string, object> = new TrackedObject({});
+  @tracked errors: TFormidableErrors = new TrackedObject({});
 
   // --- DIRTY FIELDS
   @tracked dirtyFields: Record<string, boolean> = new TrackedObject({});
@@ -117,7 +120,6 @@ export default class Formidable extends Component<IFormidable> {
 
   // --- UTILS
   get isModel() {
-    console.log(Model);
     if (!Model) {
       return false;
     }
@@ -145,6 +147,12 @@ export default class Formidable extends Component<IFormidable> {
     );
   }
 
+  get errorMessages() {
+    return Object.values(this.errors)
+      .flat()
+      .map((err) => err.message);
+  }
+
   get isDirty() {
     return !this.isPristine;
   }
@@ -158,7 +166,6 @@ export default class Formidable extends Component<IFormidable> {
   }
 
   get parsedValues(): Values {
-    console.log(this.isModel);
     if (this.isModel) {
       return this.values;
     } else {
@@ -198,8 +205,9 @@ export default class Formidable extends Component<IFormidable> {
       fieldsState: this.fieldsState,
       register: this.register,
       onSubmit: (e: SubmitEvent) => taskFor(this.submit).perform(e),
-      validate: this.validate,
+      validate: () => taskFor(this.validate).perform(),
       errors: this.errors,
+      errorMessages: this.errorMessages,
       setError: this.setError,
       clearError: this.clearError,
       clearErrors: this.clearErrors,
@@ -214,6 +222,10 @@ export default class Formidable extends Component<IFormidable> {
       dirtyFields: this.dirtyFields,
       isPristine: this.isPristine,
     };
+  }
+
+  constructor(owner: any, args: IFormidable) {
+    super(owner, args);
   }
 
   // --- STATES HANDLERS
@@ -263,7 +275,7 @@ export default class Formidable extends Component<IFormidable> {
     ) {
       return this.parsedValues['belongsTo'](key).value();
     }
-    console.log(this.parsedValues, this.values);
+
     return get(this.parsedValues, key);
   }
 
@@ -293,7 +305,7 @@ export default class Formidable extends Component<IFormidable> {
   }
 
   @action
-  setError(key: string, value: string | { message?: string; type?: string }) {
+  setError(key: string, value: string | IFormidableError) {
     if (typeof value === 'string') {
       this.errors[key] = {
         //@ts-ignore
@@ -302,7 +314,7 @@ export default class Formidable extends Component<IFormidable> {
         type: this.errors[key]?.type ?? 'custom',
       };
     } else {
-      this.errors[key] = value;
+      this.errors[key] = [value];
     }
   }
 
@@ -322,14 +334,17 @@ export default class Formidable extends Component<IFormidable> {
     if (!this.validator) {
       return;
     }
-    const validation = yield this.validator(this.parsedValues, {
-      shouldUseNativeValidation: this.args.shouldUseNativeValidation,
-      ...this.args.validatorOptions,
-    });
+    const validation: TFormidableErrors = yield this.validator(
+      this.parsedValues,
+      {
+        shouldUseNativeValidation: this.args.shouldUseNativeValidation,
+        ...this.args.validatorOptions,
+      },
+    );
+
     if (field) {
       this.errors = _set(this.errors, field, get(validation, field));
     } else {
-      // TODO: Not good yet.
       this.errors = new TrackedObject(validation);
     }
   }
@@ -461,7 +476,7 @@ export default class Formidable extends Component<IFormidable> {
       this.parsers[name] = { valueAsNumber, valueAsDate };
 
       // HANDLERS
-      const handleInput = async (event: Event) => {
+      const handleChange = async (event: Event) => {
         if (!event.target) {
           throw new Error(
             'FORMIDABLE - No input element found when value got set.',
@@ -530,25 +545,27 @@ export default class Formidable extends Component<IFormidable> {
           e.preventDefault();
         }
         const target = e.target as any;
-        if (target && !this.validator) {
+        if (target && this.args.shouldUseNativeValidation) {
+          const name = target.name;
+          taskFor(this.validate).perform(name);
           const message = (target as any).validationMessage;
-          if (this.errors[target.name]) {
-            const { messages } = this.errors[target.name] as any;
-            this.errors[target.name] = {
-              messages: _uniq([...messages, message]),
-              ...this.errors[target.name],
-            };
+          //TODO: Define the type with validity
+          const error: IFormidableError = {
+            type: target.validity,
+            value: target.value,
+            message,
+          };
+          if (this.errors[name]) {
+            this.errors[name]?.push(error);
           } else {
-            this.errors[target.name] = {
-              messages: message,
-              validity: target.validity,
-            };
+            this.errors[target.name] = [error];
           }
         }
       };
 
       // EVENTS
-      input.addEventListener('input', handleInput);
+
+      input.addEventListener(isInput ? 'input' : 'change', handleChange);
       input.addEventListener('invalid', preventDefault);
 
       if (onBlur || this.updateEvents.includes('onBlur')) {
@@ -560,7 +577,7 @@ export default class Formidable extends Component<IFormidable> {
       }
 
       return () => {
-        input.removeEventListener('input', handleInput);
+        input.removeEventListener(isInput ? 'input' : 'change', handleChange);
         input.removeEventListener('invalid', preventDefault);
 
         if (onBlur || this.updateEvents.includes('onBlur')) {

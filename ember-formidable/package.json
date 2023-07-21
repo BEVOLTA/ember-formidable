@@ -108,13 +108,13 @@
     "type": "addon",
     "main": "addon-main.cjs",
     "app-js": {
-      "./components/formidable/index.js": "./dist/_app_/components/formidable/index.js",
-      "./resolvers/yup.js": "./dist/_app_/resolvers/yup.js"
+      "./components/formidable/index.js": "./dist/_app_/components/formidable/index.js"
     }
   },
   "exports": {
     ".": "./dist/index.js",
     "./*": "./dist/*.js",
-    "./addon-main.js": "./addon-main.cjs"
+    "./addon-main.js": "./addon-main.cjs",
+    "./resolvers/yup": "./dist/resolvers/yup/index.js"
   }
 }
