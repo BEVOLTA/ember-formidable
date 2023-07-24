@@ -3,6 +3,7 @@ import { taskFor } from 'ember-concurrency-ts';
 import { modifier } from 'ember-modifier';
 import _cloneDeep from 'lodash/cloneDeep';
 import _isEmpty from 'lodash/isEmpty';
+import _isNil from 'lodash/isNil';
 import _set from 'lodash/set';
 import { tracked, TrackedObject } from 'tracked-built-ins';
 
@@ -27,16 +28,18 @@ const inputUtils = (input: HTMLInputElement) => {
       attribute: string,
       value: string | number | undefined | boolean,
     ) => {
-      if (_isEmpty(value)) {
+      if (_isNil(value) || !`${value}`.trim()) {
         input.removeAttribute(attribute);
       } else {
         input.setAttribute(attribute, `${value}`);
       }
     },
-    isFormInput: ['INPUT', 'SELECT'].includes(input.tagName),
+    isFormInput: ['INPUT', 'SELECT', 'TEXTAREA'].includes(input.tagName),
     isInput: input.tagName === 'INPUT',
+    isTextarea: input.tagName === 'TEXTAREA',
     isSelect: input.tagName === 'SELECT',
     isCheckbox: input.type === 'checkbox',
+    isRadio: input.type === 'radio',
   };
 };
 
@@ -85,9 +88,6 @@ interface RegisterOptions {
   onFocus?: (event: Event, api: any) => void;
 }
 
-/* TODO:
-- Make it work for selects / radios
-*/
 export default class Formidable extends Component<IFormidable> {
   @tracked values: Values = new TrackedObject(this.args.values ?? {});
 
@@ -97,7 +97,7 @@ export default class Formidable extends Component<IFormidable> {
   @tracked submitCount = 0;
 
   // --- VALIDATION
-  @tracked validations: Record<string, object> = {};
+  @tracked validations: Record<string, object> = new TrackedObject({});
 
   // --- ERRORS
   @tracked errors: TFormidableErrors = new TrackedObject({});
@@ -337,7 +337,7 @@ export default class Formidable extends Component<IFormidable> {
     const validation: TFormidableErrors = yield this.validator(
       this.parsedValues,
       {
-        shouldUseNativeValidation: this.args.shouldUseNativeValidation,
+        validations: this.validations,
         ...this.args.validatorOptions,
       },
     );
@@ -428,8 +428,15 @@ export default class Formidable extends Component<IFormidable> {
         onFocus,
       }: RegisterOptions,
     ) => {
-      const { setAttribute, isFormInput, isInput, isCheckbox } =
-        inputUtils(input);
+      const {
+        setAttribute,
+        isFormInput,
+        isInput,
+        isCheckbox,
+        isRadio,
+        isTextarea,
+        isSelect,
+      } = inputUtils(input);
 
       if (!isFormInput) {
         setAttribute(DATA_NAME, name);
@@ -437,40 +444,46 @@ export default class Formidable extends Component<IFormidable> {
       }
 
       // ATTRIBUTES
-      if (isInput) {
-        if (input.type === 'number') {
-          setAttribute('min', min);
-          setAttribute('max', max);
-        } else {
+
+      if (isInput && input.type === 'number') {
+        setAttribute('min', min);
+        setAttribute('max', max);
+      } else if (isInput || isTextarea) {
+        setAttribute('minlength', minLength);
+        setAttribute('maxlength', maxLength);
+        setAttribute('disabled', disabled);
+        setAttribute('required', required);
+
+        if (isInput) {
           const strPattern =
             typeof pattern === 'string' ? pattern : pattern?.toString();
-          setAttribute('minlength', minLength);
-          setAttribute('maxlength', maxLength);
-          setAttribute('disabled', disabled);
-          setAttribute('required', required);
           setAttribute('pattern', strPattern);
         }
       }
 
       if (isFormInput) {
         setAttribute('name', name);
-
+        const value = this.getValue(name);
         if (isCheckbox) {
-          input.checked = this.getValue(name) ?? false;
-        } else if (isInput) {
-          input.value = this.getValue(name);
+          input.checked = value ?? false;
+        } else if (isRadio) {
+          input.checked = input.value === value;
+        } else if (isInput || isTextarea) {
+          input.value = value ?? '';
         }
       }
 
       // VALIDATIONS
-      this.validations[name] = {
-        min,
-        max,
-        minLength,
-        maxLength,
-        disabled,
-        required,
-      };
+      if (this.args.shouldUseNativeValidation) {
+        this.validations[name] = {
+          min,
+          max,
+          minLength,
+          maxLength,
+          disabled,
+          required,
+        };
+      }
 
       // PARSERS
       this.parsers[name] = { valueAsNumber, valueAsDate };
@@ -544,28 +557,14 @@ export default class Formidable extends Component<IFormidable> {
         if (!this.args.shouldUseNativeValidation) {
           e.preventDefault();
         }
-        const target = e.target as any;
-        if (target && this.args.shouldUseNativeValidation) {
-          const name = target.name;
-          taskFor(this.validate).perform(name);
-          const message = (target as any).validationMessage;
-          //TODO: Define the type with validity
-          const error: IFormidableError = {
-            type: target.validity,
-            value: target.value,
-            message,
-          };
-          if (this.errors[name]) {
-            this.errors[name]?.push(error);
-          } else {
-            this.errors[target.name] = [error];
-          }
-        }
       };
 
       // EVENTS
 
-      input.addEventListener(isInput ? 'input' : 'change', handleChange);
+      input.addEventListener(
+        isInput || isSelect || isTextarea ? 'input' : 'change',
+        handleChange,
+      );
       input.addEventListener('invalid', preventDefault);
 
       if (onBlur || this.updateEvents.includes('onBlur')) {
@@ -577,7 +576,10 @@ export default class Formidable extends Component<IFormidable> {
       }
 
       return () => {
-        input.removeEventListener(isInput ? 'input' : 'change', handleChange);
+        input.removeEventListener(
+          isInput || isSelect || isTextarea ? 'input' : 'change',
+          handleChange,
+        );
         input.removeEventListener('invalid', preventDefault);
 
         if (onBlur || this.updateEvents.includes('onBlur')) {

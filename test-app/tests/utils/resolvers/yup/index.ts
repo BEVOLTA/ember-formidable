@@ -6,10 +6,10 @@ const formatYupError = (errors: Array<Yup.ValidationError>) => {
 
     const formattedError = { type, message: errors.join('\n'), value };
 
-    if (acc[path || 'formidable__unknown']) {
-      acc[path || 'formidable__unknown']?.push(formattedError);
+    if (acc[path || 'formidable__error']) {
+      acc[path || 'formidable__error']?.push(formattedError);
     } else {
-      acc[path ?? 'unknown'] = [formattedError];
+      acc[path ?? 'formidable__error'] = [formattedError];
     }
     return acc;
   }, {});

@@ -1,5 +1,10 @@
 {{page-title "TestApp"}}
 
 <h2 id="title">Welcome to Ember</h2>
-
+<Formidable @shouldUseNativeValidation={{true}} as |values api|>
+  <form {{on "submit" api.onSubmit}}>
+    <input type="text" id="foo" {{api.register "name" minLength=4}} />
+    <button id="submit" type="submit">SUBMIT</button>
+  </form>
+</Formidable>
 {{outlet}}
