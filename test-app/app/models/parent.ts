@@ -8,7 +8,8 @@ export default class ParentModel extends Model {
   @attr('number') num!: number;
   @attr('date') date!: Date;
   @attr({ defaultValue: () => ({}) }) obj!: object;
-  @belongsTo('child', { async: false }) child!: ChildModel;
+
+  @belongsTo('child', { async: false, inverse: null }) child!: ChildModel;
 }
 
 // DO NOT DELETE: this is how TypeScript knows how to look up your models.

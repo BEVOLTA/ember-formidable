@@ -113,6 +113,26 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#dewey').isChecked();
   });
 
+  test('Values -- It should update the value -- checkbox', async function (this: FormidableContext, assert) {
+    this.values = {
+      foo: true,
+    };
+    this.onUpdate = (data: { foo: boolean }) => {
+      assert.strictEqual(data.foo, false);
+    };
+    await render(hbs`
+      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
+        <form {{on "submit" api.onSubmit}}>
+          <input type="checkbox" id="foo" {{api.register "foo"}} />
+          <button id="submit"  type="submit">SUBMIT</button>
+        </form>
+      </Formidable>
+    `);
+    assert.dom('#foo').isChecked();
+    await click('#foo');
+    await click('#submit');
+  });
+
   test('Values -- It should update the value -- number', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 3,
@@ -225,6 +245,7 @@ module('Integration | Component | formidable', function (hooks) {
       obj: { foo: { bar: 'Baz' }, ember: 'Formidable' },
       child,
     });
+
     this.onUpdate = (data: ParentModel) => {
       assert.strictEqual(data.str, 'New Parent');
       assert.false(data.bool);
@@ -240,6 +261,7 @@ module('Integration | Component | formidable', function (hooks) {
         ember: 'Paris',
       });
     };
+
     await render(hbs`
       <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
@@ -259,6 +281,7 @@ module('Integration | Component | formidable', function (hooks) {
         </form>
       </Formidable>
     `);
+
     assert.dom('#parent-str').hasValue('Parent');
     assert.dom('#parent-bool').isChecked();
     assert.dom('#parent-num').hasValue('1');

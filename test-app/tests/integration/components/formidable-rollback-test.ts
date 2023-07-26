@@ -6,51 +6,6 @@ import { FormidableContext } from 'test-app/tests/types';
 
 import { click, fillIn, render } from '@ember/test-helpers';
 
-// values: Values;
-// validator?: Function;
-// validatorOptions?: any;
-// onValuesChanged: (data: Values, api: any) => void;
-// onChange?: (event: Event, api: any) => void;
-// onSubmit?: (event: SubmitEvent, api: any) => void;
-// updateEvents?: TUpdateEvents[];
-// shouldUseNativeValidation?: boolean;
-
-// return {
-//   values: this.parsedValues,
-//   setValue: this.setValue,
-//   getValue: this.getValue,
-//   getValues: this.getValues,
-//   register: this.register,
-//   onSubmit: (e: SubmitEvent) => this.submit.perform(e),
-//   validate: this.validate,
-//   errors: this.errors,
-//   setError: this.setError,
-//   clearError: this.clearError,
-//   clearErrors: this.clearErrors,
-//   defautlValues: this.rollbackValues,
-//   isSubmitting: this.isSubmitting,
-//   isValid: this.isValid,
-//   isValidating: this.isValidating,
-//   invalidFields: this.invalidFields,
-//   isDirty: this.isDirty,
-//   dirtyFields: this.dirtyFields,
-//   isPristine: this.isPristine,
-// };
-
-// interface RegisterOptions {
-//   // HTML Input attributes
-//   disabled?: boolean;
-//   required?: boolean;
-//   maxLength?: number;
-//   minLength?: number;
-//   max?: number;
-//   min?: number;
-//   valueAsNumber?: boolean;
-//   valueAsDate?: boolean;
-//   pattern?: RegExp | string;
-//   onChange?: (event: Event) => void;
-//   onBlur?: (event: Event) => void;
-// }
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
@@ -199,3 +154,4 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#isSubmitted').hasText('false');
   });
 });
+// TODO: Test with models
