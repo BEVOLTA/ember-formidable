@@ -1,6 +1,10 @@
-import { restartableTask, TaskGenerator } from 'ember-concurrency';
+import {
+  restartableTask,
+  TaskGenerator,
+  TaskInstance,
+} from 'ember-concurrency';
 import { taskFor } from 'ember-concurrency-ts';
-import { modifier } from 'ember-modifier';
+import { FunctionBasedModifier, modifier } from 'ember-modifier';
 import _cloneDeep from 'lodash/cloneDeep';
 import _isEmpty from 'lodash/isEmpty';
 import _isNil from 'lodash/isNil';
@@ -73,14 +77,51 @@ interface IFieldState {
   isInvalid: boolean;
   error?: object;
 }
+
+interface FormidableApi {
+  values: Values;
+  setValue: (
+    key: string,
+    value: string | boolean,
+    context?: ISetValueContext,
+  ) => void;
+  getValue: (key: string) => unknown;
+  getValues: () => unknown;
+  getFieldState: (name: string) => IFieldState;
+  fieldsState: Record<string, IFieldState>;
+  register: FunctionBasedModifier<{
+    Args: {
+      Positional: [string];
+      Named: RegisterOptions;
+    };
+    Element: HTMLInputElement;
+  }>;
+  onSubmit: (e: SubmitEvent) => TaskInstance<void>;
+  validate: () => void;
+  errors: TFormidableErrors;
+  errorMessages: string[];
+  setError: (key: string, value: string | IFormidableError) => void;
+  clearError: (key: string) => void;
+  clearErrors: () => void;
+  rollback: (name?: string, context?: IRollbackContext) => void;
+  defaultValues: Values;
+  isSubmitted: boolean;
+  isSubmitting: boolean;
+  isValid: boolean;
+  isValidating: boolean;
+  invalidFields: Record<string, boolean>;
+  isDirty: boolean;
+  dirtyFields: Record<string, boolean>;
+  isPristine: boolean;
+}
 interface IFormidable {
   serviceId?: string;
   values?: Values;
   validator?: Function;
   validatorOptions?: any;
-  onValuesChanged?: (data: Values, api: any) => void;
-  onChange?: (event: Event, api: any) => void;
-  onSubmit?: (event: SubmitEvent, api: any) => void;
+  onValuesChanged?: (data: Values, api: FormidableApi) => void;
+  onChange?: (event: Event, api: FormidableApi) => void;
+  onSubmit?: (event: SubmitEvent, api: FormidableApi) => void;
   updateEvents?: TUpdateEvents[];
   shouldUseNativeValidation?: boolean;
 }
@@ -93,13 +134,17 @@ interface RegisterOptions {
   minLength?: number;
   max?: number;
   min?: number;
+  pattern?: RegExp | string;
+
+  // Format
   valueAsNumber?: boolean;
   valueAsDate?: boolean;
   valueFormat: (value: string) => unknown;
-  pattern?: RegExp | string;
-  onChange?: (event: Event, api: any) => void;
-  onBlur?: (event: Event, api: any) => void;
-  onFocus?: (event: Event, api: any) => void;
+
+  // Handlers
+  onChange?: (event: Event, api: FormidableApi) => void;
+  onBlur?: (event: Event, api: FormidableApi) => void;
+  onFocus?: (event: Event, api: FormidableApi) => void;
 }
 
 export default class Formidable extends Component<IFormidable> {
@@ -218,7 +263,7 @@ export default class Formidable extends Component<IFormidable> {
     }, {});
   }
 
-  get api() {
+  get api(): FormidableApi {
     return {
       values: this.parsedValues,
       setValue: this.setValue,
@@ -250,13 +295,13 @@ export default class Formidable extends Component<IFormidable> {
   constructor(owner: any, args: IFormidable) {
     super(owner, args);
     if (this.args.serviceId) {
-      this.formidable.register(this.args.serviceId, () => this.api);
+      this.formidable._register(this.args.serviceId, () => this.api);
     }
   }
 
   willDestroy(): void {
     if (this.args.serviceId) {
-      this.formidable.unregister(this.args.serviceId);
+      this.formidable._unregister(this.args.serviceId);
     }
   }
 

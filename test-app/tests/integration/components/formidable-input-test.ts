@@ -118,7 +118,7 @@ module('Integration | Component | formidable', function (hooks) {
       foo: true,
     };
     this.onUpdate = (data: { foo: boolean }) => {
-      assert.strictEqual(data.foo, false);
+      assert.false(data.foo);
     };
     await render(hbs`
       <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>

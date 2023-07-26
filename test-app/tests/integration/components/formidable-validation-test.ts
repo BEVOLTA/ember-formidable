@@ -116,7 +116,7 @@ module('Integration | Component | formidable', function (hooks) {
     await render(hbs`
       <Formidable @values={{this.values}} @shouldUseNativeValidation={{true}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "name" minLength=4}} />
+          <input type="text" id="foo" {{api.register "name"}} />
           <button id="submit"  type="submit">SUBMIT</button>
         </form>
       </Formidable>
@@ -125,6 +125,7 @@ module('Integration | Component | formidable', function (hooks) {
     await fillIn('#foo', 'A');
     // await pauseTest();
     await click('#submit');
+
     assert.ok(false);
   });
 });

@@ -5,16 +5,6 @@ import Service from '@ember/service';
 export default class FormidableService extends Service {
   @tracked formidableApis: Record<string, any> = {};
 
-  register(id: string, getData: () => any) {
-    this.formidableApis[id] = getData;
-  }
-
-  unregister(id: string) {
-    if (this.formidableApis[id]) {
-      delete this.formidableApis[id];
-    }
-  }
-
   getFormidableApi(id: string) {
     if (!this.formidableApis[id]) {
       throw new Error(
@@ -38,6 +28,16 @@ export default class FormidableService extends Service {
       acc[field] = getValue(field);
       return acc;
     }, {});
+  }
+
+  _register(id: string, getData: () => any) {
+    this.formidableApis[id] = getData;
+  }
+
+  _unregister(id: string) {
+    if (this.formidableApis[id]) {
+      delete this.formidableApis[id];
+    }
   }
 }
 
