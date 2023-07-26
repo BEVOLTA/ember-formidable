@@ -8,6 +8,7 @@ import { FunctionBasedModifier, modifier } from 'ember-modifier';
 import _cloneDeep from 'lodash/cloneDeep';
 import _isEmpty from 'lodash/isEmpty';
 import _isNil from 'lodash/isNil';
+import _isObject from 'lodash/isObject';
 import _set from 'lodash/set';
 import { tracked, TrackedObject } from 'tracked-built-ins';
 
@@ -200,7 +201,7 @@ export default class Formidable<
   validator = this.args.validator;
 
   // --- ROLLBACK
-  rollbackValues: Values = _cloneDeep(this.args.values ?? {}) as Values;
+  rollbackValues: Values;
 
   // --- UTILS
   get isModel() {
@@ -314,6 +315,21 @@ export default class Formidable<
 
   constructor(owner: any, args: FormidableArgs<Values>) {
     super(owner, args);
+    if (this.isModel) {
+      const { values = {} as Values } = this.args;
+      const rollbackValues: Values = {} as Values;
+      (values as Values)['eachAttribute']((key: keyof Values) => {
+        const value = get(values, key);
+        if (_isObject(value)) {
+          rollbackValues[key] = _cloneDeep(value);
+        } else {
+          rollbackValues[key] = value;
+        }
+      });
+      this.rollbackValues = rollbackValues;
+    } else {
+      this.rollbackValues = _cloneDeep(this.args.values ?? {}) as Values;
+    }
     if (this.args.serviceId) {
       this.formidable._register(this.args.serviceId, () => this.api);
     }
