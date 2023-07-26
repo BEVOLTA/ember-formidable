@@ -22,8 +22,9 @@ import Component from '@glimmer/component';
 
 import FormidableService from '../../services/formidable';
 
-type TUpdateEvents = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
-type Values = Record<string, any>;
+type UpdateEvents = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
+
+type GenericObject = Record<string, any>;
 
 let Model: Function | undefined;
 
@@ -54,7 +55,24 @@ const inputUtils = (input: HTMLInputElement) => {
   };
 };
 
-type FormidableErrors = Record<string, FormidableError[]>;
+type FormidableErrors<
+  T extends string | number | symbol = string | number | symbol,
+> = Record<T, FormidableError[]>;
+
+type DirtyFields<Values extends GenericObject = GenericObject> = Record<
+  keyof Values,
+  boolean
+>;
+
+type InvalidFields<Values extends GenericObject = GenericObject> = Record<
+  keyof Values,
+  boolean
+>;
+
+type Parser<Values extends GenericObject = GenericObject> = Record<
+  keyof Values,
+  Pick<RegisterOptions, 'valueAsDate' | 'valueAsNumber' | 'valueFormat'>
+>;
 interface FormidableError {
   type: string;
   message: string;
@@ -78,27 +96,27 @@ interface FieldState {
   error?: object;
 }
 
-interface FormidableApi {
+interface FormidableApi<Values extends GenericObject = GenericObject> {
   values: Values;
   setValue: (
     key: string,
     value: string | boolean,
     context?: SetValueContext,
   ) => void;
-  getValue: (key: string) => unknown;
-  getValues: () => unknown;
+  getValue: (key: keyof Values) => unknown;
+  getValues: () => Values;
   getFieldState: (name: string) => FieldState;
-  fieldsState: Record<string, FieldState>;
+  fieldsState: Record<keyof Values, FieldState>;
   register: FunctionBasedModifier<{
     Args: {
-      Positional: [string];
+      Positional: [keyof Values];
       Named: RegisterOptions;
     };
     Element: HTMLInputElement;
   }>;
   onSubmit: (e: SubmitEvent) => TaskInstance<void>;
   validate: () => void;
-  errors: FormidableErrors;
+  errors: FormidableErrors<keyof Values>;
   errorMessages: string[];
   setError: (key: string, value: string | FormidableError) => void;
   clearError: (key: string) => void;
@@ -109,24 +127,24 @@ interface FormidableApi {
   isSubmitting: boolean;
   isValid: boolean;
   isValidating: boolean;
-  invalidFields: Record<string, boolean>;
+  invalidFields: Record<keyof Values, boolean>;
   isDirty: boolean;
-  dirtyFields: Record<string, boolean>;
+  dirtyFields: Record<keyof Values, boolean>;
   isPristine: boolean;
 }
-interface FormidableArgs {
+interface FormidableArgs<Values extends GenericObject = GenericObject> {
   serviceId?: string;
   values?: Values;
   validator?: Function;
   validatorOptions?: any;
-  onValuesChanged?: (data: Values, api: FormidableApi) => void;
-  onChange?: (event: Event, api: FormidableApi) => void;
-  onSubmit?: (event: SubmitEvent, api: FormidableApi) => void;
-  updateEvents?: TUpdateEvents[];
+  onValuesChanged?: (data: Values, api: FormidableApi<Values>) => void;
+  onChange?: (event: Event, api: FormidableApi<Values>) => void;
+  onSubmit?: (event: SubmitEvent, api: FormidableApi<Values>) => void;
+  updateEvents?: UpdateEvents[];
   shouldUseNativeValidation?: boolean;
 }
 
-interface RegisterOptions {
+interface RegisterOptions<Values extends GenericObject = GenericObject> {
   // HTML Input attributes
   disabled?: boolean;
   required?: boolean;
@@ -142,19 +160,21 @@ interface RegisterOptions {
   valueFormat: (value: string) => unknown;
 
   // Handlers
-  onChange?: (event: Event, api: FormidableApi) => void;
-  onBlur?: (event: Event, api: FormidableApi) => void;
-  onFocus?: (event: Event, api: FormidableApi) => void;
+  onChange?: (event: Event, api: FormidableApi<Values>) => void;
+  onBlur?: (event: Event, api: FormidableApi<Values>) => void;
+  onFocus?: (event: Event, api: FormidableApi<Values>) => void;
 }
 
-export default class Formidable extends Component<FormidableArgs> {
+export default class Formidable<
+  Values extends GenericObject = GenericObject,
+> extends Component<FormidableArgs<Values>> {
   @service formidable!: FormidableService;
 
   // --- VALUES
   @tracked
   values: Values = this.isModel
-    ? this.args.values ?? {}
-    : new TrackedObject(this.args.values ?? {});
+    ? this.args.values ?? ({} as Values)
+    : (new TrackedObject(this.args.values ?? {}) as Values);
 
   // --- SUBMIT
   @tracked isSubmitSuccessful: boolean | undefined = undefined;
@@ -162,26 +182,25 @@ export default class Formidable extends Component<FormidableArgs> {
   @tracked submitCount = 0;
 
   // --- VALIDATION
-  @tracked validations: Record<string, object> = new TrackedObject({});
+  @tracked validations: Record<keyof Values, object> = new TrackedObject(
+    {},
+  ) as Record<keyof Values, object>;
 
   // --- ERRORS
   @tracked errors: FormidableErrors = new TrackedObject({});
 
   // --- DIRTY FIELDS
-  @tracked dirtyFields: Record<string, boolean> = new TrackedObject({});
+  @tracked dirtyFields: DirtyFields<Values> = new TrackedObject(
+    {},
+  ) as DirtyFields<Values>;
 
   // --- PARSER
-  parsers: Record<
-    string,
-    Pick<RegisterOptions, 'valueAsDate' | 'valueAsNumber' | 'valueFormat'>
-  > = {};
+  parsers: Parser<Values> = {} as Parser<Values>;
 
   validator = this.args.validator;
 
   // --- ROLLBACK
-  rollbackValues: Values = this.isModel
-    ? this.args.values ?? {}
-    : _cloneDeep(this.args.values ?? {});
+  rollbackValues: Values = _cloneDeep(this.args.values ?? {}) as Values;
 
   // --- UTILS
   get isModel() {
@@ -203,13 +222,14 @@ export default class Formidable extends Component<FormidableArgs> {
   get isValid() {
     return _isEmpty(this.errors);
   }
-  get invalidFields(): Record<string, boolean> {
+
+  get invalidFields(): InvalidFields<Values> {
     return Object.keys(this.errors).reduce(
       (invalid: Record<string, boolean>, key) => {
         return _set(invalid, key, true);
       },
       {},
-    );
+    ) as InvalidFields<Values>;
   }
 
   get errorMessages() {
@@ -248,22 +268,22 @@ export default class Formidable extends Component<FormidableArgs> {
           return _set(obj, key, new Date(value));
         }
         return _set(obj, key, value);
-      }, {});
+      }, {}) as Values;
     }
   }
 
-  get fieldsState(): Record<string, FieldState> {
+  get fieldsState(): Record<keyof Values, FieldState> {
     return Object.keys(this.values).reduce((state, key) => {
-      const isDirty = this.dirtyFields[key] ?? false;
+      const isDirty = this.dirtyFields[key as keyof Values] ?? false;
       const isPristine = !isDirty;
       const error = this.errors[key];
       const isInvalid = !_isEmpty(error);
 
       return _set(state, key, { isDirty, isPristine, isInvalid, error });
-    }, {});
+    }, {}) as Record<keyof Values, FieldState>;
   }
 
-  get api(): FormidableApi {
+  get api(): FormidableApi<Values> {
     return {
       values: this.parsedValues,
       setValue: this.setValue,
@@ -292,7 +312,7 @@ export default class Formidable extends Component<FormidableArgs> {
     };
   }
 
-  constructor(owner: any, args: FormidableArgs) {
+  constructor(owner: any, args: FormidableArgs<Values>) {
     super(owner, args);
     if (this.args.serviceId) {
       this.formidable._register(this.args.serviceId, () => this.api);
@@ -309,28 +329,33 @@ export default class Formidable extends Component<FormidableArgs> {
 
   @action
   rollback(
-    name?: string,
+    name?: keyof Values,
     { keepError, keepDirty, defaultValue }: RollbackContext = {},
   ) {
     if (name) {
-      this.values[name] =
-        defaultValue ?? this.rollbackValues[name] ?? undefined;
+      this.values[name] = (defaultValue ??
+        this.rollbackValues[name] ??
+        undefined) as Values[keyof Values];
       if (!keepError) {
         delete this.errors[name];
       }
       if (!keepDirty) {
-        delete this.dirtyFields[name];
+        delete this.dirtyFields[name as keyof Values];
       }
     } else {
-      this.values = this.isModel
-        ? this.rollbackValues
-        : new TrackedObject(_cloneDeep(this.rollbackValues));
+      if (this.isModel) {
+        Object.entries(this.rollbackValues).forEach(([key, value]) => {
+          this.values['set'](key, value);
+        });
+      } else {
+        this.values = new TrackedObject(_cloneDeep(this.rollbackValues));
+      }
 
       if (!keepError) {
         this.errors = new TrackedObject({});
       }
       if (!keepDirty) {
-        this.dirtyFields = new TrackedObject({});
+        this.dirtyFields = new TrackedObject({}) as DirtyFields<Values>;
       }
       this.isSubmitted = false;
     }
@@ -347,7 +372,7 @@ export default class Formidable extends Component<FormidableArgs> {
   }
 
   @action
-  getValue(key: string) {
+  getValue(key: keyof Values) {
     if (
       this.isModel &&
       this.parsedValues['relationshipFor']?.(key)?.meta?.kind == 'belongsTo'
@@ -355,9 +380,6 @@ export default class Formidable extends Component<FormidableArgs> {
       return this.parsedValues['belongsTo'](key).value();
     }
 
-    if (this.isModel) {
-      return this.parsedValues[key];
-    }
     return get(this.parsedValues, key);
   }
 
@@ -368,7 +390,7 @@ export default class Formidable extends Component<FormidableArgs> {
 
   @action
   setValue(
-    key: string,
+    key: keyof Values,
     value: string | boolean,
     { shouldValidate, shouldDirty }: SetValueContext = {},
   ) {
@@ -386,7 +408,7 @@ export default class Formidable extends Component<FormidableArgs> {
 
       this.values['set'](key, _value);
     } else {
-      this.values[key] = value;
+      this.values[key] = value as Values[keyof Values];
     }
     if (shouldDirty) {
       this.dirtyFields[key] = true;
@@ -434,7 +456,7 @@ export default class Formidable extends Component<FormidableArgs> {
 
   // --- TASKS
   @restartableTask
-  *validate(field?: string): TaskGenerator<void> {
+  *validate(field?: keyof Values): TaskGenerator<void> {
     if (!this.validator) {
       return;
     }
@@ -503,7 +525,7 @@ export default class Formidable extends Component<FormidableArgs> {
   register = modifier(
     (
       input: HTMLInputElement,
-      [name]: [string],
+      [name]: [keyof Values],
       {
         disabled,
         required,
@@ -531,7 +553,7 @@ export default class Formidable extends Component<FormidableArgs> {
       } = inputUtils(input);
 
       if (!isFormInput) {
-        setAttribute(DATA_NAME, name);
+        setAttribute(DATA_NAME, name as string);
         return;
       }
 
@@ -554,7 +576,7 @@ export default class Formidable extends Component<FormidableArgs> {
       }
 
       if (isFormInput) {
-        setAttribute('name', name);
+        setAttribute('name', name as string);
         const value = this.getValue(name);
         if (isCheckbox) {
           input.checked = value ?? false;
@@ -597,7 +619,7 @@ export default class Formidable extends Component<FormidableArgs> {
         );
 
         if (onChange) {
-          return onChange(event, this.api);
+          return onChange(event, this.api as FormidableApi<GenericObject>);
         }
         if (
           this.updateEvents.includes('onChange') &&
@@ -618,7 +640,7 @@ export default class Formidable extends Component<FormidableArgs> {
         }
         this.setValue(name, (event.target as HTMLInputElement).value);
         if (onBlur) {
-          return onBlur(event, this.api);
+          return onBlur(event, this.api as FormidableApi<GenericObject>);
         }
         if (this.updateEvents.includes('onBlur') && this.args.onValuesChanged) {
           this.args.onValuesChanged(this.parsedValues, this.api);
@@ -638,7 +660,7 @@ export default class Formidable extends Component<FormidableArgs> {
 
         this.setValue(name, (event.target as HTMLInputElement).value);
         if (onFocus) {
-          return onFocus(event, this.api);
+          return onFocus(event, this.api as FormidableApi<GenericObject>);
         }
 
         if (

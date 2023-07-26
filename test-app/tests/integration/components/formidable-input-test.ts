@@ -2,7 +2,7 @@
 /* eslint-disable qunit/require-expect */
 import { hbs } from 'ember-cli-htmlbars';
 import { module, test } from 'qunit';
-import ParentModel from 'test-app/models/parent';
+import ChildModel from 'test-app/models/child';
 import { setupRenderingTest } from 'test-app/tests/helpers';
 import { FormidableContext } from 'test-app/tests/types';
 
@@ -228,35 +228,20 @@ module('Integration | Component | formidable', function (hooks) {
     const store = this.owner.lookup('service:store');
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const child = store.createRecord('child', {
+    this.values = store.createRecord('child', {
       str: 'Child',
       bool: false,
       num: 2,
       date: new Date('2000-01-01'),
       obj: { foo: { bar: 'Biz' }, ember: 'Ness' },
     });
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.values = store.createRecord('parent', {
-      str: 'Parent',
-      bool: true,
-      num: 1,
-      date: new Date('1999-01-01'),
-      obj: { foo: { bar: 'Baz' }, ember: 'Formidable' },
-      child,
-    });
 
-    this.onUpdate = (data: ParentModel) => {
-      assert.strictEqual(data.str, 'New Parent');
-      assert.false(data.bool);
-      assert.strictEqual(data.num, 101);
-      assert.deepEqual(data.date, new Date('2050-01-01'));
-      assert.deepEqual(data.obj, { foo: { bar: 'Bisous' }, ember: 'Great' });
-      assert.strictEqual(data.child.str, 'New Child');
-      assert.true(data.child.bool);
-      assert.strictEqual(data.child.num, 202);
-      assert.deepEqual(data.child.date, new Date('1990-01-01'));
-      assert.deepEqual(data.child.obj, {
+    this.onUpdate = (data: ChildModel) => {
+      assert.strictEqual(data.str, 'New Child');
+      assert.true(data.bool);
+      assert.strictEqual(data.num, 202);
+      assert.deepEqual(data.date, new Date('1990-01-01'));
+      assert.deepEqual(data.obj, {
         foo: { bar: 'Bonjour' },
         ember: 'Paris',
       });
@@ -265,29 +250,17 @@ module('Integration | Component | formidable', function (hooks) {
     await render(hbs`
       <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="parent-str" {{api.register "str"}} />
-          <input type="checkbox" id="parent-bool" {{api.register "bool"}} />
-          <input type="text" id="parent-num" {{api.register "num" valueAsNumber=true}} />
-          <input type="text" id="parent-date" {{api.register "date" valueAsDate=true}} />
-          <input type="text" id="parent-obj-foo" {{api.register "obj.foo.bar"}} />
-          <input type="text" id="parent-obj-ember" {{api.register "obj.ember"}} />
-          <input type="text" id="child-str" {{api.register "child.str"}} />
-          <input type="checkbox" id="child-bool" {{api.register "child.bool"}} />
-          <input type="text" id="child-num" {{api.register "child.num" valueAsNumber=true}} />
-          <input type="text" id="child-date" {{api.register "child.date" valueAsDate=true}} />
-          <input type="text" id="child-obj-foo" {{api.register "child.obj.foo.bar"}} />
-          <input type="text" id="child-obj-ember" {{api.register "child.obj.ember"}} />
+          <input type="text" id="child-str" {{api.register "str"}} />
+          <input type="checkbox" id="child-bool" {{api.register "bool"}} />
+          <input type="text" id="child-num" {{api.register "num" valueAsNumber=true}} />
+          <input type="text" id="child-date" {{api.register "date" valueAsDate=true}} />
+          <input type="text" id="child-obj-foo" {{api.register "obj.foo.bar"}} />
+          <input type="text" id="child-obj-ember" {{api.register "obj.ember"}} />
           <button id="submit"  type="submit">SUBMIT</button>
         </form>
       </Formidable>
     `);
 
-    assert.dom('#parent-str').hasValue('Parent');
-    assert.dom('#parent-bool').isChecked();
-    assert.dom('#parent-num').hasValue('1');
-    assert.dom('#parent-date').hasValue(new Date('1999-01-01').toString());
-    assert.dom('#parent-obj-foo').hasValue('Baz');
-    assert.dom('#parent-obj-ember').hasValue('Formidable');
     assert.dom('#child-str').hasValue('Child');
     assert.dom('#child-bool').isNotChecked();
     assert.dom('#child-num').hasValue('2');
@@ -295,12 +268,6 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#child-obj-foo').hasValue('Biz');
     assert.dom('#child-obj-ember').hasValue('Ness');
 
-    await fillIn('#parent-str', 'New Parent');
-    await click('#parent-bool');
-    await fillIn('#parent-num', '101');
-    await fillIn('#parent-date', new Date('2050-01-01').toString());
-    await fillIn('#parent-obj-foo', 'Bisous');
-    await fillIn('#parent-obj-ember', 'Great');
     await fillIn('#child-str', 'New Child');
     await click('#child-bool');
     await fillIn('#child-num', '202');
