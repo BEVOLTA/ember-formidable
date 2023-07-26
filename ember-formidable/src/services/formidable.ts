@@ -26,6 +26,19 @@ export default class FormidableService extends Service {
     }
     return this.formidableApis[id]();
   }
+
+  getValue(id: string, field: string) {
+    const { getValue } = this.getFormidableApi(id);
+    return getValue(field);
+  }
+
+  getValues(id: string, fields: string[]) {
+    const { getValue } = this.getFormidableApi(id);
+    return fields.reduce((acc: Record<string, unknown>, field) => {
+      acc[field] = getValue(field);
+      return acc;
+    }, {});
+  }
 }
 
 declare module '@ember/service' {

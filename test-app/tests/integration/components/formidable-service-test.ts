@@ -14,6 +14,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.ok(formidable);
     this.values = {
       foo: 'DEFAULT',
+      bar: 'BAZ',
     };
 
     await render(hbs`
@@ -33,6 +34,17 @@ module('Integration | Component | formidable', function (hooks) {
       // @ts-ignore
       formidable.getFormidableApi('test').values.foo,
       'CHANGED'
+    );
+    assert.strictEqual(
+      // @ts-ignore
+      formidable.getValue('test', 'foo'),
+      'CHANGED'
+    );
+
+    assert.deepEqual(
+      // @ts-ignore
+      formidable.getValues('test', ['foo', 'bar']),
+      { foo: 'CHANGED', bar: 'BAZ' }
     );
   });
 });
