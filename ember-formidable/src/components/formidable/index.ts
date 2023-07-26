@@ -54,24 +54,24 @@ const inputUtils = (input: HTMLInputElement) => {
   };
 };
 
-type TFormidableErrors = Record<string, IFormidableError[]>;
-interface IFormidableError {
+type FormidableErrors = Record<string, FormidableError[]>;
+interface FormidableError {
   type: string;
   message: string;
   value: unknown;
 }
 
-interface IRollbackContext {
+interface RollbackContext {
   keepError?: boolean;
   keepDirty?: boolean;
   defaultValue?: boolean;
 }
 
-interface ISetValueContext {
+interface SetValueContext {
   shouldValidate?: boolean;
   shouldDirty?: boolean;
 }
-interface IFieldState {
+interface FieldState {
   isDirty: boolean;
   isPristine: boolean;
   isInvalid: boolean;
@@ -83,12 +83,12 @@ interface FormidableApi {
   setValue: (
     key: string,
     value: string | boolean,
-    context?: ISetValueContext,
+    context?: SetValueContext,
   ) => void;
   getValue: (key: string) => unknown;
   getValues: () => unknown;
-  getFieldState: (name: string) => IFieldState;
-  fieldsState: Record<string, IFieldState>;
+  getFieldState: (name: string) => FieldState;
+  fieldsState: Record<string, FieldState>;
   register: FunctionBasedModifier<{
     Args: {
       Positional: [string];
@@ -98,12 +98,12 @@ interface FormidableApi {
   }>;
   onSubmit: (e: SubmitEvent) => TaskInstance<void>;
   validate: () => void;
-  errors: TFormidableErrors;
+  errors: FormidableErrors;
   errorMessages: string[];
-  setError: (key: string, value: string | IFormidableError) => void;
+  setError: (key: string, value: string | FormidableError) => void;
   clearError: (key: string) => void;
   clearErrors: () => void;
-  rollback: (name?: string, context?: IRollbackContext) => void;
+  rollback: (name?: string, context?: RollbackContext) => void;
   defaultValues: Values;
   isSubmitted: boolean;
   isSubmitting: boolean;
@@ -114,7 +114,7 @@ interface FormidableApi {
   dirtyFields: Record<string, boolean>;
   isPristine: boolean;
 }
-interface IFormidable {
+interface FormidableArgs {
   serviceId?: string;
   values?: Values;
   validator?: Function;
@@ -147,7 +147,7 @@ interface RegisterOptions {
   onFocus?: (event: Event, api: FormidableApi) => void;
 }
 
-export default class Formidable extends Component<IFormidable> {
+export default class Formidable extends Component<FormidableArgs> {
   @service formidable!: FormidableService;
 
   // --- VALUES
@@ -165,7 +165,7 @@ export default class Formidable extends Component<IFormidable> {
   @tracked validations: Record<string, object> = new TrackedObject({});
 
   // --- ERRORS
-  @tracked errors: TFormidableErrors = new TrackedObject({});
+  @tracked errors: FormidableErrors = new TrackedObject({});
 
   // --- DIRTY FIELDS
   @tracked dirtyFields: Record<string, boolean> = new TrackedObject({});
@@ -252,7 +252,7 @@ export default class Formidable extends Component<IFormidable> {
     }
   }
 
-  get fieldsState(): Record<string, IFieldState> {
+  get fieldsState(): Record<string, FieldState> {
     return Object.keys(this.values).reduce((state, key) => {
       const isDirty = this.dirtyFields[key] ?? false;
       const isPristine = !isDirty;
@@ -292,7 +292,7 @@ export default class Formidable extends Component<IFormidable> {
     };
   }
 
-  constructor(owner: any, args: IFormidable) {
+  constructor(owner: any, args: FormidableArgs) {
     super(owner, args);
     if (this.args.serviceId) {
       this.formidable._register(this.args.serviceId, () => this.api);
@@ -310,7 +310,7 @@ export default class Formidable extends Component<IFormidable> {
   @action
   rollback(
     name?: string,
-    { keepError, keepDirty, defaultValue }: IRollbackContext = {},
+    { keepError, keepDirty, defaultValue }: RollbackContext = {},
   ) {
     if (name) {
       this.values[name] =
@@ -337,7 +337,7 @@ export default class Formidable extends Component<IFormidable> {
   }
 
   @action
-  getFieldState(name: string): IFieldState {
+  getFieldState(name: string): FieldState {
     const isDirty = this.dirtyFields[name] ?? false;
     const isPristine = !isDirty;
     const error = this.errors[name];
@@ -370,7 +370,7 @@ export default class Formidable extends Component<IFormidable> {
   setValue(
     key: string,
     value: string | boolean,
-    { shouldValidate, shouldDirty }: ISetValueContext = {},
+    { shouldValidate, shouldDirty }: SetValueContext = {},
   ) {
     if (this.isModel) {
       let _value: string | number | Date | boolean = value;
@@ -397,7 +397,7 @@ export default class Formidable extends Component<IFormidable> {
   }
 
   @action
-  setError(key: string, value: string | IFormidableError) {
+  setError(key: string, value: string | FormidableError) {
     if (typeof value === 'string') {
       this.errors[key] = {
         //@ts-ignore
@@ -438,7 +438,7 @@ export default class Formidable extends Component<IFormidable> {
     if (!this.validator) {
       return;
     }
-    const validation: TFormidableErrors = yield this.validator(
+    const validation: FormidableErrors = yield this.validator(
       this.parsedValues,
       {
         validations: this.validations,
