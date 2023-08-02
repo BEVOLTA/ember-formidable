@@ -109,23 +109,4 @@ module('Integration | Component | formidable', function (hooks) {
     await click('#submit');
     assert.dom('#error').hasText('Name is required.');
   });
-
-  test('Validation -- It should validate -- native', async function (this: FormidableContext, assert) {
-    this.values = validUser;
-
-    await render(hbs`
-      <Formidable @values={{this.values}} @shouldUseNativeValidation={{true}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "name"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
-        </form>
-      </Formidable>
-    `);
-    // assert.dom('#name').hasValue('John Doe');
-    await fillIn('#foo', 'A');
-    // await pauseTest();
-    await click('#submit');
-
-    assert.ok(false);
-  });
 });

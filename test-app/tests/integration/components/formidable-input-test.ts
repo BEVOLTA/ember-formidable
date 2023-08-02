@@ -115,22 +115,29 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('Values -- It should update the value -- checkbox', async function (this: FormidableContext, assert) {
     this.values = {
-      foo: true,
+      foo: '🐍',
     };
-    this.onUpdate = (data: { foo: boolean }) => {
-      assert.false(data.foo);
+    this.onUpdate = (data: { foo: string }) => {
+      assert.strictEqual(data.foo, '🦎');
     };
     await render(hbs`
       <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
-          <input type="checkbox" id="foo" {{api.register "foo"}} />
+          <input type="checkbox" id="foo" {{api.register "foo"}} value="🐍" />
+          <input type="checkbox" id="bar" {{api.register "foo"}} value="🦎" />
           <button id="submit"  type="submit">SUBMIT</button>
         </form>
       </Formidable>
     `);
     assert.dom('#foo').isChecked();
+    assert.dom('#bar').isNotChecked();
+
     await click('#foo');
+    await click('#bar');
+
     await click('#submit');
+    assert.dom('#foo').isNotChecked();
+    assert.dom('#bar').isChecked();
   });
 
   test('Values -- It should update the value -- number', async function (this: FormidableContext, assert) {
@@ -251,7 +258,7 @@ module('Integration | Component | formidable', function (hooks) {
       <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
           <input type="text" id="child-str" {{api.register "str"}} />
-          <input type="checkbox" id="child-bool" {{api.register "bool"}} />
+          <input type="checkbox" id="child-bool" {{api.register "bool" valueAsBoolean=true}} value="true" />
           <input type="text" id="child-num" {{api.register "num" valueAsNumber=true}} />
           <input type="text" id="child-date" {{api.register "date" valueAsDate=true}} />
           <input type="text" id="child-obj-foo" {{api.register "obj.foo.bar"}} />

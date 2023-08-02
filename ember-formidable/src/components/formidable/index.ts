@@ -72,7 +72,10 @@ type InvalidFields<Values extends GenericObject = GenericObject> = Record<
 
 type Parser<Values extends GenericObject = GenericObject> = Record<
   keyof Values,
-  Pick<RegisterOptions, 'valueAsDate' | 'valueAsNumber' | 'valueFormat'>
+  Pick<
+    RegisterOptions,
+    'valueAsDate' | 'valueAsNumber' | 'valueFormat' | 'valueAsBoolean'
+  >
 >;
 interface FormidableError {
   type: string;
@@ -156,9 +159,10 @@ interface RegisterOptions<Values extends GenericObject = GenericObject> {
   pattern?: RegExp | string;
 
   // Format
+  valueAsBoolean?: boolean;
   valueAsNumber?: boolean;
   valueAsDate?: boolean;
-  valueFormat: (value: string) => unknown;
+  valueFormat: (value: unknown) => any;
 
   // Handlers
   onChange?: (event: Event, api: FormidableApi<Values>) => void;
@@ -267,6 +271,9 @@ export default class Formidable<
         }
         if (this.parsers[key]?.valueAsDate) {
           return _set(obj, key, new Date(value));
+        }
+        if (this.parsers[key]?.valueAsBoolean) {
+          return _set(obj, key, Boolean(value));
         }
         return _set(obj, key, value);
       }, {}) as Values;
@@ -413,12 +420,16 @@ export default class Formidable<
     if (this.isModel) {
       let _value: string | number | Date | boolean = value;
       if (this.parsers[key]) {
-        const { valueAsNumber, valueAsDate } = this.parsers[key]!;
+        const { valueAsNumber, valueAsDate, valueAsBoolean, valueFormat } =
+          this.parsers[key]!;
         if (valueAsNumber) {
           _value = +value;
-        }
-        if (valueAsDate) {
+        } else if (valueAsDate) {
           _value = new Date(`${value}`);
+        } else if (valueAsBoolean) {
+          _value = Boolean(value);
+        } else if (valueFormat) {
+          _value = valueFormat(_value);
         }
       }
 
@@ -550,6 +561,7 @@ export default class Formidable<
         max,
         min,
         pattern,
+        valueAsBoolean,
         valueAsNumber,
         valueAsDate,
         valueFormat,
@@ -567,6 +579,14 @@ export default class Formidable<
         isTextarea,
         isSelect,
       } = inputUtils(input);
+
+      // PARSERS
+      this.parsers[name] = {
+        valueAsNumber,
+        valueAsDate,
+        valueAsBoolean,
+        valueFormat,
+      };
 
       if (!isFormInput) {
         setAttribute(DATA_NAME, name as string);
@@ -594,9 +614,7 @@ export default class Formidable<
       if (isFormInput) {
         setAttribute('name', name as string);
         const value = this.getValue(name);
-        if (isCheckbox) {
-          input.checked = value ?? false;
-        } else if (isRadio) {
+        if (isRadio || isCheckbox) {
           input.checked = input.value === value;
         } else if (isInput || isTextarea) {
           input.value = value ?? '';
@@ -615,9 +633,6 @@ export default class Formidable<
         };
       }
 
-      // PARSERS
-      this.parsers[name] = { valueAsNumber, valueAsDate, valueFormat };
-
       // HANDLERS
       const handleChange = async (event: Event) => {
         if (!event.target) {
@@ -629,10 +644,7 @@ export default class Formidable<
         if (this.updateEvents.includes('onChange')) {
           await taskFor(this.validate).perform();
         }
-        this.setValue(
-          name,
-          (event.target as HTMLInputElement)[isCheckbox ? 'checked' : 'value'],
-        );
+        this.setValue(name, (event.target as HTMLInputElement).value);
 
         if (onChange) {
           return onChange(event, this.api as FormidableApi<GenericObject>);
