@@ -450,7 +450,7 @@ export default class Formidable<
         {
           message: error as string,
           type: 'custom',
-          value: undefined,
+          value: this.getValue(key),
         },
       ];
     } else {
@@ -459,7 +459,7 @@ export default class Formidable<
         {
           message: error.message,
           type: error.type ?? 'custom',
-          value: error.value ?? undefined,
+          value: error.value ?? this.getValue(key),
         },
       ];
     }
@@ -467,7 +467,9 @@ export default class Formidable<
 
   @action
   clearError(key: string) {
-    this.errors = _set(this.errors, key, undefined);
+    if (this.errors[key]) {
+      delete this.errors[key];
+    }
   }
 
   @action

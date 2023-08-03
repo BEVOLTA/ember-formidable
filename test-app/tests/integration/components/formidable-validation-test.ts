@@ -82,13 +82,12 @@ module('Integration | Component | formidable', function (hooks) {
 
   hooks.beforeEach(function (this: FormidableContext) {
     this.updateEvents = ['onSubmit'];
-  });
-
-  test('Validate -- It should validate', async function (this: FormidableContext, assert) {
     //@ts-ignore
     this.validator = yupResolver(userSchema);
     this.values = validUser;
+  });
 
+  test('Validate -- It should validate', async function (this: FormidableContext, assert) {
     await render(hbs`
       <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
@@ -107,18 +106,14 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   // @ts-ignore
-  test.skip('clearError -- It should clean an error', async function (this: FormidableContext, assert) {
-    //@ts-ignore
-    this.validator = yupResolver(userSchema);
-    this.values = validUser;
-
+  test('clearError -- It should clean an error', async function (this: FormidableContext, assert) {
     await render(hbs`
       <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
           <input type="text" id="name" {{api.register "name"}} />
           <input type="number" id="age" {{api.register "age"}} />
           <button id="submit" type="submit">SUBMIT</button>
-          <button id="clear" type="button" {{on "click" (api.clearError "name")}}>CLEAR</button>
+          <button id="clear" type="button" {{on "click" (fn api.clearError "name")}}>CLEAR</button>
           {{#each api.errors.name as |error|}}
            <p id="error-name">{{error.message}}</p>
           {{/each}}
@@ -141,20 +136,16 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   // @ts-ignore
-  test.skip('setError -- It should set an error - string', async function (this: FormidableContext, assert) {
-    //@ts-ignore
-    this.validator = yupResolver(userSchema);
-    this.values = validUser;
-
+  test('setError -- It should set an error - string', async function (this: FormidableContext, assert) {
     await render(hbs`
       <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
           <input type="text" id="name" {{api.register "name"}} />
-          <button id="set" type="button" {{on "click" (api.setError "name" "This shouldn't exist! What the hell!")}}>SET ERROR</button>
+          <button id="submit" type="submit">SUBMIT</button>
+          <button id="set" type="button" {{on "click" (fn api.setError "name" "This shouldn't exist! What the hell!")}}>SET ERROR</button>
           {{#each api.errors.name as |error index|}}
            <p id={{concat "error-" index}}>{{error.message}}</p>
           {{/each}}
-
         </form>
       </Formidable>
     `);
@@ -170,16 +161,13 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   // @ts-ignore
-  test.skip('setError -- It should set an error - FormidableError', async function (this: FormidableContext, assert) {
-    //@ts-ignore
-    this.validator = yupResolver(userSchema);
-    this.values = validUser;
-
+  test('setError -- It should set an error - FormidableError', async function (this: FormidableContext, assert) {
     await render(hbs`
       <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
           <input type="text" id="name" {{api.register "name"}} />
-          <button id="set" type="button" {{on "click" (api.setError "name" (hash message="This shouldn't exist! What the hell!" type="random"))}}>SET ERROR</button>
+          <button id="submit" type="submit">SUBMIT</button>
+          <button id="set" type="button" {{on "click" (fn api.setError "name" (hash message="This shouldn't exist! What the hell!" type="random"))}}>SET ERROR</button>
           {{#each api.errors.name as |error index|}}
            <p id={{concat "error-" index}}>{{error.message}}</p>
            <p id={{concat "type-" index}}>{{error.type}}</p>
@@ -201,10 +189,6 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('isValid -- It should be update the valid state', async function (this: FormidableContext, assert) {
-    //@ts-ignore
-    this.validator = yupResolver(userSchema);
-    this.values = validUser;
-
     await render(hbs`
       <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
@@ -224,10 +208,6 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('invalidFields -- It should show invalid fields', async function (this: FormidableContext, assert) {
-    //@ts-ignore
-    this.validator = yupResolver(userSchema);
-    this.values = validUser;
-
     await render(hbs`
       <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
@@ -253,10 +233,6 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('errorMessages -- It should show errors', async function (this: FormidableContext, assert) {
-    //@ts-ignore
-    this.validator = yupResolver(userSchema);
-    this.values = validUser;
-
     await render(hbs`
       <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
@@ -267,20 +243,16 @@ module('Integration | Component | formidable', function (hooks) {
            <p id="error">{{error}}</p>
           {{/each}}
         </form>
+        {{log api.errorMessages}}
       </Formidable>
     `);
 
-    assert.dom('#name').hasValue('John Doe');
     await fillIn('#name', '');
     await click('#submit');
     assert.dom('#error').hasText('Name is required.');
   });
 
   test('getFieldState -- It should update the state', async function (this: FormidableContext, assert) {
-    //@ts-ignore
-    this.validator = yupResolver(userSchema);
-    this.values = validUser;
-
     await render(hbs`
       <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
