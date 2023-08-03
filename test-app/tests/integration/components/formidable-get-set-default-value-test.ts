@@ -95,4 +95,28 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#default0').hasText('Fish');
     assert.dom('#default1').hasText('Chips');
   });
+
+  test('Get Values -- It should get all the values', async function (this: FormidableContext & {
+    renderValues: (values: object) => void;
+  }, assert) {
+    this.values = {
+      foo: 'BAR',
+      bizz: 'Buzz',
+    };
+
+    this.renderValues = (values: object) => {
+      return Object.values(values);
+    };
+
+    await render(hbs`
+    <Formidable @values={{this.values}}  as |values api|>
+      {{#each (this.renderValues (api.getValues)) as |value|}}
+        <p id={{value}}>{{value}}</p>
+      {{/each}}
+    </Formidable>
+  `);
+
+    assert.dom('#BAR').hasText('BAR');
+    assert.dom('#Buzz').hasText('Buzz');
+  });
 });

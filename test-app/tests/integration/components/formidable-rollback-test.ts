@@ -13,10 +13,7 @@ module('Integration | Component | formidable', function (hooks) {
     this.values = {
       foo: 'DEFAULT',
     };
-    this.onUpdate = (
-      _data,
-      api: { rollback: () => void; isSubmitted: boolean }
-    ) => {
+    this.onUpdate = (_data, api: { rollback: () => void }) => {
       api.rollback();
     };
     await render(hbs`
@@ -42,10 +39,7 @@ module('Integration | Component | formidable', function (hooks) {
     this.values = {
       foo: 404,
     };
-    this.onUpdate = (
-      _data,
-      api: { rollback: () => void; isSubmitted: boolean }
-    ) => {
+    this.onUpdate = (_data, api: { rollback: () => void }) => {
       api.rollback();
     };
     await render(hbs`
@@ -69,10 +63,7 @@ module('Integration | Component | formidable', function (hooks) {
     this.values = {
       foo: new Date('2000-05-05'),
     };
-    this.onUpdate = (
-      _data,
-      api: { rollback: () => void; isSubmitted: boolean }
-    ) => {
+    this.onUpdate = (_data, api: { rollback: () => void }) => {
       api.rollback();
     };
     await render(hbs`
@@ -96,10 +87,7 @@ module('Integration | Component | formidable', function (hooks) {
     this.values = {
       foo: { bar: 'DEFAULT' },
     };
-    this.onUpdate = (
-      _data,
-      api: { rollback: () => void; isSubmitted: boolean }
-    ) => {
+    this.onUpdate = (_data, api: { rollback: () => void }) => {
       api.rollback();
     };
 
@@ -125,10 +113,7 @@ module('Integration | Component | formidable', function (hooks) {
     this.values = {
       foo: ['A', 'B'],
     };
-    this.onUpdate = (
-      _data,
-      api: { rollback: () => void; isSubmitted: boolean }
-    ) => {
+    this.onUpdate = (_data, api: { rollback: () => void }) => {
       api.rollback();
     };
     await render(hbs`
@@ -166,10 +151,7 @@ module('Integration | Component | formidable', function (hooks) {
       obj: { foo: { bar: 'Biz' }, ember: 'Ness' },
     });
 
-    this.onUpdate = (
-      _data,
-      api: { rollback: () => void; isSubmitted: boolean }
-    ) => {
+    this.onUpdate = (_data, api: { rollback: () => void }) => {
       api.rollback();
     };
 

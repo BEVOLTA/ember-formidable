@@ -7,10 +7,11 @@ export default class FormidableService extends Service {
 
   getFormidableApi(id: string) {
     if (!this.formidableApis[id]) {
+      const ids = Object.keys(this.formidableApis);
       throw new Error(
         `Your formidable must have an id for your service to work!
          id: ${id}
-         available formidables: ${Object.keys(this.formidableApis).join(',')}
+         available formidables: ${ids.length ? ids.join(',') : 'None'}
         `,
       );
     }

@@ -47,4 +47,37 @@ module('Integration | Component | formidable', function (hooks) {
       { foo: 'CHANGED', bar: 'BAZ' }
     );
   });
+
+  test('Service -- It should unregister', async function (this: FormidableContext, assert) {
+    const formidable = this.owner.lookup('service:formidable');
+    assert.ok(formidable);
+    this.values = {
+      foo: 'DEFAULT',
+      bar: 'BAZ',
+    };
+
+    await render(hbs`
+      <Formidable @serviceId="test" @values={{this.values}}  as |values api|>
+        <form {{on "submit" api.onSubmit}}>
+          <input type="text" id="foo" {{api.register "foo"}} />
+          <p id="isSubmitted">{{api.isSubmitted}}</p>
+          <button id="submit"  type="submit">SUBMIT</button>
+        </form>
+      </Formidable>
+    `);
+
+    assert.ok(
+      // @ts-ignore
+      formidable.getFormidableApi('test')
+    );
+
+    await render(hbs`
+      <div>EMPTY</div>
+  `);
+
+    assert.throws(
+      // @ts-ignore
+      () => formidable.getFormidableApi('test')
+    );
+  });
 });

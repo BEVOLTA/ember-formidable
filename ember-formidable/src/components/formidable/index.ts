@@ -1,7 +1,7 @@
 import {
   restartableTask,
   TaskGenerator,
-  TaskInstance,
+  TaskInstance
 } from 'ember-concurrency';
 import { taskFor } from 'ember-concurrency-ts';
 import { FunctionBasedModifier, modifier } from 'ember-modifier';
@@ -17,7 +17,7 @@ import { inject as service } from '@ember/service';
 import {
   dependencySatisfies,
   importSync,
-  macroCondition,
+  macroCondition
 } from '@embroider/macros';
 import Component from '@glimmer/component';
 
@@ -110,7 +110,6 @@ interface FormidableApi<Values extends GenericObject = GenericObject> {
   getValue: (key: keyof Values) => unknown;
   getValues: () => Values;
   getFieldState: (name: string) => FieldState;
-  fieldsState: Record<keyof Values, FieldState>;
   register: FunctionBasedModifier<{
     Args: {
       Positional: [keyof Values];
@@ -129,7 +128,10 @@ interface FormidableApi<Values extends GenericObject = GenericObject> {
   defaultValues: Values;
   isSubmitted: boolean;
   isSubmitting: boolean;
+  isSubmitSuccessful: boolean | undefined;
+  submitCount: number;
   isValid: boolean;
+  isInvalid: boolean;
   isValidating: boolean;
   invalidFields: Record<keyof Values, boolean>;
   isDirty: boolean;
@@ -222,10 +224,14 @@ export default class Formidable<
 
   get isValidating() {
     return taskFor(this.validate).isRunning;
-  }
+  } // !!TEST
 
   get isValid() {
     return _isEmpty(this.errors);
+  }
+
+  get isInvalid() {
+    return !this.isValid;
   }
 
   get invalidFields(): InvalidFields<Values> {
@@ -280,17 +286,6 @@ export default class Formidable<
     }
   }
 
-  get fieldsState(): Record<keyof Values, FieldState> {
-    return Object.keys(this.values).reduce((state, key) => {
-      const isDirty = this.dirtyFields[key as keyof Values] ?? false;
-      const isPristine = !isDirty;
-      const error = this.errors[key];
-      const isInvalid = !_isEmpty(error);
-
-      return _set(state, key, { isDirty, isPristine, isInvalid, error });
-    }, {}) as Record<keyof Values, FieldState>;
-  }
-
   get api(): FormidableApi<Values> {
     return {
       values: this.parsedValues,
@@ -298,7 +293,6 @@ export default class Formidable<
       getValue: this.getValue,
       getValues: this.getValues,
       getFieldState: this.getFieldState,
-      fieldsState: this.fieldsState,
       register: this.register,
       onSubmit: (e: SubmitEvent) => taskFor(this.submit).perform(e),
       validate: () => taskFor(this.validate).perform(),
@@ -311,7 +305,10 @@ export default class Formidable<
       defaultValues: this.rollbackValues,
       isSubmitted: this.isSubmitted,
       isSubmitting: this.isSubmitting,
+      isSubmitSuccessful: this.isSubmitSuccessful,
+      submitCount: this.submitCount,
       isValid: this.isValid,
+      isInvalid: this.isInvalid,
       isValidating: this.isValidating,
       invalidFields: this.invalidFields,
       isDirty: this.isDirty,
@@ -414,16 +411,16 @@ export default class Formidable<
   @action
   setValue(
     key: keyof Values,
-    value: string | boolean,
+    value: string | boolean | undefined,
     { shouldValidate, shouldDirty }: SetValueContext = {},
   ) {
     if (this.isModel) {
-      let _value: string | number | Date | boolean = value;
+      let _value: string | number | Date | boolean | undefined = value;
       if (this.parsers[key]) {
         const { valueAsNumber, valueAsDate, valueAsBoolean, valueFormat } =
           this.parsers[key]!;
         if (valueAsNumber) {
-          _value = +value;
+          _value = +(value ?? '');
         } else if (valueAsDate) {
           _value = new Date(`${value}`);
         } else if (valueAsBoolean) {
@@ -431,7 +428,7 @@ export default class Formidable<
         } else if (valueFormat) {
           _value = valueFormat(_value);
         }
-      }
+      } // !!TEST + TODO: Find a better way to squash both values and models
 
       this.values['set'](key, _value);
     } else {
@@ -439,23 +436,32 @@ export default class Formidable<
     }
     if (shouldDirty) {
       this.dirtyFields[key] = true;
-    }
+    } // !!TEST
     if (shouldValidate) {
       taskFor(this.validate).perform(key);
-    }
+    } // !!TEST
   }
 
   @action
-  setError(key: string, value: string | FormidableError) {
-    if (typeof value === 'string') {
-      this.errors[key] = {
-        //@ts-ignore
-        messages: [...(this.errors[key]?.messages ?? []), value],
-        //@ts-ignore
-        type: this.errors[key]?.type ?? 'custom',
-      };
+  setError(key: string, error: string | FormidableError) {
+    if (typeof error === 'string') {
+      this.errors[key] = [
+        ...(this.errors[key] ?? []),
+        {
+          message: error as string,
+          type: 'custom',
+          value: undefined,
+        },
+      ];
     } else {
-      this.errors[key] = [value];
+      this.errors[key] = [
+        ...(this.errors[key] ?? []),
+        {
+          message: error.message,
+          type: error.type ?? 'custom',
+          value: error.value ?? undefined,
+        },
+      ];
     }
   }
 
@@ -479,7 +485,7 @@ export default class Formidable<
     if (this.updateEvents.includes('onFocus')) {
       taskFor(this.validate).perform();
     }
-  }
+  } // !!TEST
 
   // --- TASKS
   @restartableTask
@@ -500,29 +506,31 @@ export default class Formidable<
     } else {
       this.errors = new TrackedObject(validation);
     }
-  }
+  } // !!TEST
 
   @restartableTask
   *submit(event: SubmitEvent): TaskGenerator<void> {
     this.isSubmitted = true;
     this.submitCount += 1;
 
-    try {
-      event.preventDefault();
-      if (this.updateEvents.includes('onSubmit')) {
-        taskFor(this.validate).perform();
-      }
-      if (this.args.onSubmit) {
-        return this.args.onSubmit(event, this.api);
-      }
+    event.preventDefault();
 
-      if (this.updateEvents.includes('onSubmit') && this.args.onValuesChanged) {
-        this.args.onValuesChanged(this.parsedValues, this.api);
-      }
+    if (this.updateEvents.includes('onSubmit')) {
+      yield taskFor(this.validate).perform();
+    }
 
-      this.isSubmitSuccessful = true;
-    } catch {
-      this.isSubmitSuccessful = false;
+    this.isSubmitSuccessful = this.isValid;
+
+    if (!this.isSubmitSuccessful) {
+      return;
+    }
+
+    if (this.args.onSubmit) {
+      return this.args.onSubmit(event, this.api);
+    } // !!TEST
+
+    if (this.updateEvents.includes('onSubmit') && this.args.onValuesChanged) {
+      this.args.onValuesChanged(this.parsedValues, this.api);
     }
   }
 
@@ -535,7 +543,7 @@ export default class Formidable<
     }
     if (this.args.onChange) {
       return this.args.onChange(event, this.api);
-    }
+    } // !!TEST
     if (!event.target) {
       throw new Error(
         'FORMIDABLE - No input element found when value got set.',
@@ -631,7 +639,7 @@ export default class Formidable<
           disabled,
           required,
         };
-      }
+      } // USEFUL?
 
       // HANDLERS
       const handleChange = async (event: Event) => {
@@ -647,7 +655,7 @@ export default class Formidable<
         this.setValue(name, (event.target as HTMLInputElement).value);
 
         if (onChange) {
-          return onChange(event, this.api as FormidableApi<GenericObject>);
+          return onChange(event, this.api as FormidableApi<GenericObject>); // !!TEST
         }
         if (
           this.updateEvents.includes('onChange') &&
@@ -668,12 +676,12 @@ export default class Formidable<
         }
         this.setValue(name, (event.target as HTMLInputElement).value);
         if (onBlur) {
-          return onBlur(event, this.api as FormidableApi<GenericObject>);
+          return onBlur(event, this.api as FormidableApi<GenericObject>); // !!TEST
         }
         if (this.updateEvents.includes('onBlur') && this.args.onValuesChanged) {
           this.args.onValuesChanged(this.parsedValues, this.api);
         }
-      };
+      }; // !!TEST
 
       const handleFocus = async (event: Event) => {
         if (!event.target) {
@@ -697,7 +705,7 @@ export default class Formidable<
         ) {
           this.args.onValuesChanged(this.parsedValues, this.api);
         }
-      };
+      }; // !!TEST
 
       const preventDefault = (e: Event) => {
         if (!this.args.shouldUseNativeValidation) {
