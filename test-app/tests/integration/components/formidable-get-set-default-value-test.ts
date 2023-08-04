@@ -3,8 +3,21 @@ import { hbs } from 'ember-cli-htmlbars';
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'test-app/tests/helpers';
 import { FormidableContext } from 'test-app/tests/types';
+import { yupResolver } from 'test-app/tests/utils/resolvers/yup';
+import * as yup from 'yup';
 
 import { click, render } from '@ember/test-helpers';
+
+// Define a schema for a user object
+const userSchema = yup.object({
+  // Basic string property with required validation
+  name: yup.string().required('Name is required.'),
+});
+
+// Example usage of the user schema
+const validUser = {
+  name: 'John Doe',
+};
 
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
@@ -118,5 +131,42 @@ module('Integration | Component | formidable', function (hooks) {
 
     assert.dom('#BAR').hasText('BAR');
     assert.dom('#Buzz').hasText('Buzz');
+  });
+
+  test('SetValue - it should dirty the field with shouldDirty', async function (this: FormidableContext, assert) {
+    this.values = {
+      foo: 'BAR',
+    };
+    await render(hbs`
+      <Formidable @values={{this.values}}  as |values api|>
+          <button id="change" type="button" {{on "click" (fn api.setValue "foo" "CHANGED" (hash shouldDirty=true))}}>CHANGE</button>
+          <p id="value">{{api.getValue "foo"}}</p>
+          {{#if (get api.dirtyFields 'foo')}}
+              <p id="df-foo">DIRTY</p>
+          {{/if}}
+      </Formidable>
+    `);
+
+    await click('#change');
+    assert.dom('#df-foo').exists();
+  });
+
+  test('SetValue - it should validate the field with shouldValidate', async function (this: FormidableContext, assert) {
+    //@ts-ignore
+    this.validator = yupResolver(userSchema);
+    this.values = validUser;
+
+    await render(hbs`
+      <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
+          <button id="change" type="button" {{on "click" (fn api.setValue "name" "" (hash shouldValidate=true))}}>CHANGE</button>
+          <p id="value">{{api.getValue "name"}}</p>
+          {{#each api.errorMessages as |error|}}
+           <p id="error">{{error}}</p>
+          {{/each}}
+      </Formidable>
+    `);
+
+    await click('#change');
+    assert.dom('#error').exists();
   });
 });

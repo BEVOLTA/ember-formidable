@@ -1,8 +1,4 @@
-import {
-  restartableTask,
-  TaskGenerator,
-  TaskInstance
-} from 'ember-concurrency';
+import { restartableTask, TaskGenerator } from 'ember-concurrency';
 import { taskFor } from 'ember-concurrency-ts';
 import { FunctionBasedModifier, modifier } from 'ember-modifier';
 import _cloneDeep from 'lodash/cloneDeep';
@@ -17,7 +13,7 @@ import { inject as service } from '@ember/service';
 import {
   dependencySatisfies,
   importSync,
-  macroCondition
+  macroCondition,
 } from '@embroider/macros';
 import Component from '@glimmer/component';
 
@@ -56,6 +52,31 @@ const inputUtils = (input: HTMLInputElement) => {
   };
 };
 
+const formatValue = <Values extends GenericObject = GenericObject>(
+  value: any,
+  formatOptions: FormatOptions | undefined,
+) => {
+  if (!formatOptions) {
+    return value;
+  }
+  const { valueAsNumber, valueAsDate, valueFormat, valueAsBoolean } =
+    formatOptions;
+
+  if (valueFormat) {
+    return valueFormat(value);
+  }
+  if (valueAsNumber) {
+    return +value;
+  }
+  if (valueAsDate) {
+    return new Date(value);
+  }
+  if (valueAsBoolean) {
+    return Boolean(value);
+  }
+  return value;
+};
+
 type FormidableErrors<
   T extends string | number | symbol = string | number | symbol,
 > = Record<T, FormidableError[]>;
@@ -70,12 +91,14 @@ type InvalidFields<Values extends GenericObject = GenericObject> = Record<
   boolean
 >;
 
+type FormatOptions = Pick<
+  RegisterOptions,
+  'valueAsDate' | 'valueAsNumber' | 'valueFormat' | 'valueAsBoolean'
+>;
+
 type Parser<Values extends GenericObject = GenericObject> = Record<
   keyof Values,
-  Pick<
-    RegisterOptions,
-    'valueAsDate' | 'valueAsNumber' | 'valueFormat' | 'valueAsBoolean'
-  >
+  FormatOptions
 >;
 interface FormidableError {
   type: string;
@@ -89,7 +112,7 @@ interface RollbackContext {
   defaultValue?: boolean;
 }
 
-interface SetValueContext {
+interface SetContext {
   shouldValidate?: boolean;
   shouldDirty?: boolean;
 }
@@ -103,13 +126,13 @@ interface FieldState {
 interface FormidableApi<Values extends GenericObject = GenericObject> {
   values: Values;
   setValue: (
-    key: string,
+    key: keyof Values,
     value: string | boolean,
-    context?: SetValueContext,
+    context?: SetContext,
   ) => void;
   getValue: (key: keyof Values) => unknown;
   getValues: () => Values;
-  getFieldState: (name: string) => FieldState;
+  getFieldState: (name: keyof Values) => FieldState;
   register: FunctionBasedModifier<{
     Args: {
       Positional: [keyof Values];
@@ -117,14 +140,15 @@ interface FormidableApi<Values extends GenericObject = GenericObject> {
     };
     Element: HTMLInputElement;
   }>;
-  onSubmit: (e: SubmitEvent) => TaskInstance<void>;
+  onSubmit: (e: SubmitEvent) => void;
   validate: () => void;
   errors: FormidableErrors<keyof Values>;
   errorMessages: string[];
-  setError: (key: string, value: string | FormidableError) => void;
-  clearError: (key: string) => void;
+  setError: (key: keyof Values, value: string | FormidableError) => void;
+  clearError: (key: keyof Values) => void;
   clearErrors: () => void;
-  rollback: (name?: string, context?: RollbackContext) => void;
+  rollback: (name?: keyof Values, context?: RollbackContext) => void;
+  setFocus: (name: keyof Values) => void;
   defaultValues: Values;
   isSubmitted: boolean;
   isSubmitting: boolean;
@@ -224,7 +248,7 @@ export default class Formidable<
 
   get isValidating() {
     return taskFor(this.validate).isRunning;
-  } // !!TEST
+  }
 
   get isValid() {
     return _isEmpty(this.errors);
@@ -266,22 +290,7 @@ export default class Formidable<
       return this.values;
     } else {
       return Object.entries(this.values).reduce((obj, [key, value]) => {
-        if (!this.parsers[key]) {
-          return _set(obj, key, value);
-        }
-        if (this.parsers[key]?.valueFormat) {
-          return _set(obj, key, this.parsers[key]?.valueFormat(value));
-        }
-        if (this.parsers[key]?.valueAsNumber) {
-          return _set(obj, key, +value);
-        }
-        if (this.parsers[key]?.valueAsDate) {
-          return _set(obj, key, new Date(value));
-        }
-        if (this.parsers[key]?.valueAsBoolean) {
-          return _set(obj, key, Boolean(value));
-        }
-        return _set(obj, key, value);
+        return _set(obj, key, formatValue(value, this.parsers[key]));
       }, {}) as Values;
     }
   }
@@ -289,7 +298,11 @@ export default class Formidable<
   get api(): FormidableApi<Values> {
     return {
       values: this.parsedValues,
-      setValue: this.setValue,
+      setValue: (
+        key: keyof Values,
+        value: string | boolean | undefined,
+        context?: SetContext,
+      ) => taskFor(this.setValue).perform(key, value, context),
       getValue: this.getValue,
       getValues: this.getValues,
       getFieldState: this.getFieldState,
@@ -302,6 +315,8 @@ export default class Formidable<
       clearError: this.clearError,
       clearErrors: this.clearErrors,
       rollback: this.rollback,
+      setFocus: (name: keyof Values, context?: SetContext) =>
+        taskFor(this.setFocus).perform(name, context),
       defaultValues: this.rollbackValues,
       isSubmitted: this.isSubmitted,
       isSubmitting: this.isSubmitting,
@@ -382,7 +397,7 @@ export default class Formidable<
   }
 
   @action
-  getFieldState(name: string): FieldState {
+  getFieldState(name: keyof Values): FieldState {
     const isDirty = this.dirtyFields[name] ?? false;
     const isPristine = !isDirty;
     const error = this.errors[name];
@@ -409,41 +424,7 @@ export default class Formidable<
   }
 
   @action
-  setValue(
-    key: keyof Values,
-    value: string | boolean | undefined,
-    { shouldValidate, shouldDirty }: SetValueContext = {},
-  ) {
-    if (this.isModel) {
-      let _value: string | number | Date | boolean | undefined = value;
-      if (this.parsers[key]) {
-        const { valueAsNumber, valueAsDate, valueAsBoolean, valueFormat } =
-          this.parsers[key]!;
-        if (valueAsNumber) {
-          _value = +(value ?? '');
-        } else if (valueAsDate) {
-          _value = new Date(`${value}`);
-        } else if (valueAsBoolean) {
-          _value = Boolean(value);
-        } else if (valueFormat) {
-          _value = valueFormat(_value);
-        }
-      } // !!TEST + TODO: Find a better way to squash both values and models
-
-      this.values['set'](key, _value);
-    } else {
-      this.values[key] = value as Values[keyof Values];
-    }
-    if (shouldDirty) {
-      this.dirtyFields[key] = true;
-    } // !!TEST
-    if (shouldValidate) {
-      taskFor(this.validate).perform(key);
-    } // !!TEST
-  }
-
-  @action
-  setError(key: string, error: string | FormidableError) {
+  setError(key: keyof Values, error: string | FormidableError) {
     if (typeof error === 'string') {
       this.errors[key] = [
         ...(this.errors[key] ?? []),
@@ -466,7 +447,7 @@ export default class Formidable<
   }
 
   @action
-  clearError(key: string) {
+  clearError(key: keyof Values) {
     if (this.errors[key]) {
       delete this.errors[key];
     }
@@ -477,17 +458,47 @@ export default class Formidable<
     this.errors = new TrackedObject({});
   }
 
-  @action
-  setFocus(name: string) {
-    (
-      (document.querySelector(`[name="${name}"]`) as HTMLInputElement | null) ??
-      (document.querySelector(`[${DATA_NAME}="${name}"]`) as HTMLInputElement)
-    ).focus();
-
-    if (this.updateEvents.includes('onFocus')) {
-      taskFor(this.validate).perform();
+  @restartableTask
+  *setValue(
+    key: keyof Values,
+    value: string | boolean | undefined,
+    { shouldValidate, shouldDirty }: SetContext = {},
+  ) {
+    if (this.isModel) {
+      this.values['set'](key, formatValue(value, this.parsers[key]));
+    } else {
+      this.values[key] = value as Values[keyof Values];
     }
-  } // !!TEST
+    if (shouldDirty) {
+      this.dirtyFields[key] = true;
+    }
+    if (shouldValidate) {
+      yield taskFor(this.validate).perform(key);
+    }
+  }
+
+  @restartableTask
+  *setFocus(
+    name: keyof Values,
+    { shouldValidate, shouldDirty }: SetContext = {},
+  ) {
+    (
+      (document.querySelector(
+        `[name="${name as string}"]`,
+      ) as HTMLInputElement | null) ??
+      (document.querySelector(
+        `[${DATA_NAME}="${name as string}"]`,
+      ) as HTMLInputElement | null)
+    )?.focus();
+
+    if (shouldDirty) {
+      this.dirtyFields[name] = true;
+    }
+
+    if (shouldValidate) {
+      yield taskFor(this.validate).perform(name);
+    }
+  }
 
   // --- TASKS
   @restartableTask
@@ -508,7 +519,7 @@ export default class Formidable<
     } else {
       this.errors = new TrackedObject(validation);
     }
-  } // !!TEST
+  }
 
   @restartableTask
   *submit(event: SubmitEvent): TaskGenerator<void> {
@@ -529,32 +540,9 @@ export default class Formidable<
 
     if (this.args.onSubmit) {
       return this.args.onSubmit(event, this.api);
-    } // !!TEST
+    }
 
     if (this.updateEvents.includes('onSubmit') && this.args.onValuesChanged) {
-      this.args.onValuesChanged(this.parsedValues, this.api);
-    }
-  }
-
-  // --- EVENT HANLDERS
-
-  @action
-  onChange(event: InputEvent) {
-    if (this.updateEvents.includes('onChange')) {
-      taskFor(this.validate).perform();
-    }
-    if (this.args.onChange) {
-      return this.args.onChange(event, this.api);
-    } // !!TEST
-    if (!event.target) {
-      throw new Error(
-        'FORMIDABLE - No input element found when value got set.',
-      );
-    }
-    const target = event.target as HTMLInputElement;
-    this.setValue(target.name, target.value);
-
-    if (this.updateEvents.includes('onChange') && this.args.onValuesChanged) {
       this.args.onValuesChanged(this.parsedValues, this.api);
     }
   }
@@ -644,70 +632,17 @@ export default class Formidable<
       } // USEFUL?
 
       // HANDLERS
-      const handleChange = async (event: Event) => {
-        if (!event.target) {
-          throw new Error(
-            'FORMIDABLE - No input element found when value got set.',
-          );
-        }
-        this.dirtyFields[name] = true;
-        if (this.updateEvents.includes('onChange')) {
-          await taskFor(this.validate).perform();
-        }
-        this.setValue(name, (event.target as HTMLInputElement).value);
-
-        if (onChange) {
-          return onChange(event, this.api as FormidableApi<GenericObject>); // !!TEST
-        }
-        if (
-          this.updateEvents.includes('onChange') &&
-          this.args.onValuesChanged
-        ) {
-          this.args.onValuesChanged(this.parsedValues, this.api);
-        }
+      const handleChange = (event: Event) => {
+        taskFor(this.onChange).perform(name, event, onChange);
       };
 
       const handleBlur = async (event: Event) => {
-        if (!event.target) {
-          throw new Error(
-            'FORMIDABLE - No input element found when value got set.',
-          );
-        }
-        if (this.updateEvents.includes('onBlur')) {
-          await taskFor(this.validate).perform();
-        }
-        this.setValue(name, (event.target as HTMLInputElement).value);
-        if (onBlur) {
-          return onBlur(event, this.api as FormidableApi<GenericObject>); // !!TEST
-        }
-        if (this.updateEvents.includes('onBlur') && this.args.onValuesChanged) {
-          this.args.onValuesChanged(this.parsedValues, this.api);
-        }
-      }; // !!TEST
+        taskFor(this.onBlur).perform(name, event, onBlur);
+      };
 
       const handleFocus = async (event: Event) => {
-        if (!event.target) {
-          throw new Error(
-            'FORMIDABLE - No input element found when value got set.',
-          );
-        }
-
-        if (this.updateEvents.includes('onFocus')) {
-          await taskFor(this.validate).perform();
-        }
-
-        this.setValue(name, (event.target as HTMLInputElement).value);
-        if (onFocus) {
-          return onFocus(event, this.api as FormidableApi<GenericObject>);
-        }
-
-        if (
-          this.updateEvents.includes('onFocus') &&
-          this.args.onValuesChanged
-        ) {
-          this.args.onValuesChanged(this.parsedValues, this.api);
-        }
-      }; // !!TEST
+        taskFor(this.onFocus).perform(name, event, onFocus);
+      };
 
       const preventDefault = (e: Event) => {
         if (!this.args.shouldUseNativeValidation) {
@@ -747,4 +682,84 @@ export default class Formidable<
       };
     },
   );
+
+  @restartableTask
+  *onChange(
+    name: keyof Values,
+    event: Event,
+    onChange?: (event: Event, api: FormidableApi<GenericObject>) => void,
+  ) {
+    if (!event.target) {
+      throw new Error(
+        'FORMIDABLE - No input element found when value got set.',
+      );
+    }
+
+    yield taskFor(this.setValue).perform(
+      name,
+      (event.target as HTMLInputElement).value,
+      {
+        shouldValidate: this.updateEvents.includes('onChange'),
+        shouldDirty: true,
+      },
+    );
+
+    if (onChange) {
+      return onChange(event, this.api as FormidableApi<GenericObject>);
+    }
+    if (this.updateEvents.includes('onChange') && this.args.onValuesChanged) {
+      this.args.onValuesChanged(this.parsedValues, this.api);
+    }
+  }
+
+  @restartableTask
+  *onBlur(
+    name: keyof Values,
+    event: Event,
+    onBlur?: (event: Event, api: FormidableApi<GenericObject>) => void,
+  ) {
+    if (!event.target) {
+      throw new Error(
+        'FORMIDABLE - No input element found when value got set.',
+      );
+    }
+
+    yield taskFor(this.setValue).perform(
+      name,
+      (event.target as HTMLInputElement).value,
+      { shouldValidate: this.updateEvents.includes('onBlur') },
+    );
+    if (onBlur) {
+      return onBlur(event, this.api as FormidableApi<GenericObject>);
+    }
+    if (this.updateEvents.includes('onBlur') && this.args.onValuesChanged) {
+      this.args.onValuesChanged(this.parsedValues, this.api);
+    }
+  }
+
+  @restartableTask
+  *onFocus(
+    name: keyof Values,
+    event: Event,
+    onFocus?: (event: Event, api: FormidableApi<GenericObject>) => void,
+  ) {
+    if (!event.target) {
+      throw new Error(
+        'FORMIDABLE - No input element found when value got set.',
+      );
+    }
+
+    yield taskFor(this.setValue).perform(
+      name,
+      (event.target as HTMLInputElement).value,
+      { shouldValidate: this.updateEvents.includes('onFocus') },
+    );
+    if (onFocus) {
+      return onFocus(event, this.api as FormidableApi<GenericObject>);
+    }
+
+    if (this.updateEvents.includes('onFocus') && this.args.onValuesChanged) {
+      this.args.onValuesChanged(this.parsedValues, this.api);
+    }
+  }
 }

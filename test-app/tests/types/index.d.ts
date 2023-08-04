@@ -7,6 +7,8 @@ export interface FormidableContext extends TestContext {
   validatorOptions?: unknown;
   onValuesChanged: (data: Record<string, unknown>, api: unknown) => void;
   onChange?: (event: Event, api: unknown) => void;
+  onFocus?: (event: Event, api: unknown) => void;
+  onBlur?: (event: Event, api: unknown) => void;
   onSubmit?: (event: SubmitEvent, api: unknown) => void;
   updateEvents?: string[];
   shouldUseNativeValidation?: boolean;

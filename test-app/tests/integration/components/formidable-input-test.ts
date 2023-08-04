@@ -11,13 +11,10 @@ import { click, fillIn, render, select } from '@ember/test-helpers';
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  hooks.beforeEach(function (this: FormidableContext) {
+  test('Values -- It should update the value -- text', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 'DEFAULT',
     };
-  });
-
-  test('Values -- It should update the value -- text', async function (this: FormidableContext, assert) {
     this.onUpdate = (data: { foo: string }) => {
       assert.strictEqual(data.foo, 'CHANGED');
     };
@@ -35,6 +32,9 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('Values -- It should update the value -- textarea', async function (this: FormidableContext, assert) {
+    this.values = {
+      foo: 'DEFAULT',
+    };
     this.onUpdate = (data: { foo: string }) => {
       assert.strictEqual(data.foo, 'CHANGED');
     };

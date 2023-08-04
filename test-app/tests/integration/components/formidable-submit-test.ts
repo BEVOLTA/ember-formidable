@@ -145,6 +145,34 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#submit-count').hasText('4');
   });
 
+  test('onSubmit -- Should have a custom onSubmit', async function (this: FormidableContext & {
+    submitMessage?: string;
+  }, assert) {
+    // @ts-ignore
+    this.validator = yupResolver(userSchema);
+    this.values = validUser;
+
+    this.onSubmit = (event, api) => {
+      assert.ok(event);
+      assert.ok(api);
+    };
+
+    await render(hbs`
+      <Formidable @values={{this.values}} @validator={{this.validator}} @onSubmit={{this.onSubmit}} as |values api|>
+        <form {{on "submit" api.onSubmit}}>
+          <input type="text" id="name" {{api.register "name"}} />
+          <button id="submit"  type="submit">SUBMIT</button>
+           {{#each api.errorMessages as |error|}}
+            <p id="error">{{error}}</p>
+          {{/each}}
+        </form>
+      </Formidable>
+    `);
+
+    await click('#submit');
+    assert.dom('#error').doesNotExist();
+  });
+
   test('isSubmitting -- Should be true when submitted', async function (this: FormidableContext, assert) {
     this.onUpdate = async (_data, api) => {
       return await new Promise((resolve) => {
