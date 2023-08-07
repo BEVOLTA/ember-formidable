@@ -109,7 +109,6 @@ export default class Formidable<
   @service formidable!: FormidableService;
 
   // --- VALUES
-  @tracked
   values: Values = this.isModel
     ? this.args.values ?? ({} as Values)
     : (new TrackedObject(this.args.values ?? {}) as Values);
@@ -120,15 +119,15 @@ export default class Formidable<
   @tracked submitCount = 0;
 
   // --- VALIDATION
-  @tracked validations: Record<keyof Values, object> = new TrackedObject(
+  validations: Record<keyof Values, object> = new TrackedObject(
     {},
   ) as Record<keyof Values, object>;
 
   // --- ERRORS
-  @tracked errors: FormidableErrors = new TrackedObject({});
+  errors: FormidableErrors = new TrackedObject({});
 
   // --- DIRTY FIELDS
-  @tracked dirtyFields: DirtyFields<Values> = new TrackedObject(
+  dirtyFields: DirtyFields<Values> = new TrackedObject(
     {},
   ) as DirtyFields<Values>;
 
