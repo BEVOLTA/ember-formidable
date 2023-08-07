@@ -7,13 +7,10 @@ import * as yup from 'yup';
 
 import { click, fillIn, render } from '@ember/test-helpers';
 
-// Define a schema for a user object
 const userSchema = yup.object({
-  // Basic string property with required validation
   name: yup.string().required('Name is required.'),
 });
 
-// Example usage of the user schema
 const validUser = {
   name: 'John Doe',
 };
@@ -21,7 +18,7 @@ const validUser = {
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('setFocus -- Should be OK when submitting', async function (this: FormidableContext, assert) {
+  test('setFocus -- Should focus the input when triggered', async function (this: FormidableContext, assert) {
     this.updateEvents = ['onFocus'];
 
     await render(hbs`
@@ -29,7 +26,6 @@ module('Integration | Component | formidable', function (hooks) {
         <form {{on "submit" api.onSubmit}}>
           <input type="text" id="name" {{api.register "name"}} />
           <button id="focus" type="button" {{on "click" (fn api.setFocus "name")}}>FOCUS</button>
-
         </form>
       </Formidable>
     `);
@@ -38,7 +34,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#name').isFocused();
   });
 
-  test('setFocus -- Should be OK when submitting -- shouldValidate', async function (this: FormidableContext, assert) {
+  test('setFocus -- shouldValidate -- Should focus and validate the input when triggered', async function (this: FormidableContext, assert) {
     //@ts-ignore
     this.validator = yupResolver(userSchema);
     this.values = { ...validUser, name: '' };
@@ -62,7 +58,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#error').exists();
   });
 
-  test('setFocus -- Should be OK when submitting -- shouldDirty', async function (this: FormidableContext, assert) {
+  test('setFocus -- shouldDirty -- Should focus and dirty the input when triggered', async function (this: FormidableContext, assert) {
     this.updateEvents = ['onFocus'];
 
     await render(hbs`

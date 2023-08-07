@@ -8,34 +8,34 @@ import { blur, fillIn, focus, render } from '@ember/test-helpers';
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('onChange -- It should trigger the change', async function (this: FormidableContext, assert) {
+  test('onChange -- It should trigger the input onChange instead of the default behavior', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 'DEFAULT',
     };
     this.onChange = (_event, api) => {
       // @ts-ignore
-      api.setValue('foo', 'NEW');
+      api.setValue('foo', '🔆');
     };
     await render(hbs`
       <Formidable @values={{this.values}} as |values api|>
         <form>
-          <input type="text" id="foo" {{api.register "foo"  onChange=this.onChange}} />
+          <input type="text" id="foo" {{api.register "foo" onChange=this.onChange}} />
           <button id="submit"  type="submit">SUBMIT</button>
         </form>
       </Formidable>
     `);
 
-    await fillIn('#foo', 'CHANGED');
-    assert.dom('#foo').hasValue('NEW');
+    await fillIn('#foo', '⚡️');
+    assert.dom('#foo').hasValue('🔆');
   });
 
-  test('onFocus -- It should trigger the focus', async function (this: FormidableContext, assert) {
+  test('onFocus -- It should trigger the input onFocus instead of the default behavior', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 'DEFAULT',
     };
     this.onFocus = (_event, api) => {
       // @ts-ignore
-      api.setValue('foo', 'CHANGED');
+      api.setValue('foo', '❄️');
     };
     await render(hbs`
       <Formidable @values={{this.values}} as |values api|>
@@ -47,10 +47,10 @@ module('Integration | Component | formidable', function (hooks) {
     `);
 
     await focus('#foo');
-    assert.dom('#foo').hasValue('CHANGED');
+    assert.dom('#foo').hasValue('❄️');
   });
 
-  test('onBlur -- It should trigger the blur', async function (this: FormidableContext, assert) {
+  test('onBlur -- It should trigger the input onFocus instead of the default behavior', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 'DEFAULT',
     };

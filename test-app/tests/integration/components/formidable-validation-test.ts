@@ -136,7 +136,7 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   // @ts-ignore
-  test('setError -- It should set an error - string', async function (this: FormidableContext, assert) {
+  test('setError -- string -- It should set an error', async function (this: FormidableContext, assert) {
     await render(hbs`
       <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
@@ -161,7 +161,7 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   // @ts-ignore
-  test('setError -- It should set an error - FormidableError', async function (this: FormidableContext, assert) {
+  test('setError -- FormidableError -- It should set an error ', async function (this: FormidableContext, assert) {
     await render(hbs`
       <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
         <form {{on "submit" api.onSubmit}}>

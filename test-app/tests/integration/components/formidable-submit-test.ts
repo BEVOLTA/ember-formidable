@@ -119,7 +119,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#is-submitted').doesNotExist();
   });
 
-  test('submitCount -- Should increment properly', async function (this: FormidableContext, assert) {
+  test('submitCount -- Should increment when submitting', async function (this: FormidableContext, assert) {
     // @ts-ignore
     this.validator = yupResolver(userSchema);
     this.values = validUser;

@@ -21,7 +21,6 @@ module('Integration | Component | formidable', function (hooks) {
       <Formidable @serviceId="test" @values={{this.values}}  as |values api|>
         <form {{on "submit" api.onSubmit}}>
           <input type="text" id="foo" {{api.register "foo"}} />
-          <p id="isSubmitted">{{api.isSubmitted}}</p>
           <button id="submit"  type="submit">SUBMIT</button>
         </form>
       </Formidable>
@@ -60,7 +59,6 @@ module('Integration | Component | formidable', function (hooks) {
       <Formidable @serviceId="test" @values={{this.values}}  as |values api|>
         <form {{on "submit" api.onSubmit}}>
           <input type="text" id="foo" {{api.register "foo"}} />
-          <p id="isSubmitted">{{api.isSubmitted}}</p>
           <button id="submit"  type="submit">SUBMIT</button>
         </form>
       </Formidable>

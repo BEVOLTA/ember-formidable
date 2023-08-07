@@ -79,23 +79,23 @@ module('Integration | Component | formidable', function (hooks) {
     };
     await render(hbs`
     <Formidable @values={{this.values}}  as |values api|>
-        <button id="change" type="button" {{on "click" (fn api.setValue "foo" (hash bar="Surprise!"))}}>CHANGE</button>
+        <button id="change" type="button" {{on "click" (fn api.setValue "foo" (hash bar="Sunrise!"))}}>CHANGE</button>
         <p id="value">{{api.getValue "foo.bar"}}</p>
         <p id="default">{{api.defaultValues.foo.bar}}</p>
     </Formidable>
   `);
     await click('#change');
-    assert.dom('#value').hasText('Surprise!');
+    assert.dom('#value').hasText('Sunrise!');
     assert.dom('#default').hasText('Tequila');
   });
 
   test('Get/Set/Default Value -- It should update the value -- array', async function (this: FormidableContext, assert) {
     this.values = {
-      foo: ['Fish', 'Chips'],
+      foo: ['🐡', '🐟'],
     };
     await render(hbs`
     <Formidable @values={{this.values}}  as |values api|>
-        <button id="change" type="button" {{on "click" (fn api.setValue "foo" (array "Hello" "Goodbye"))}}>CHANGE</button>
+        <button id="change" type="button" {{on "click" (fn api.setValue "foo" (array "🍤" "🍣"))}}>CHANGE</button>
         <p id="value0">{{api.getValue "foo.0"}}</p>
         <p id="value1">{{api.getValue "foo.1"}}</p>
         <p id="default0">{{get api.defaultValues "foo.0"}}</p>
@@ -103,10 +103,10 @@ module('Integration | Component | formidable', function (hooks) {
     </Formidable>
   `);
     await click('#change');
-    assert.dom('#value0').hasText('Hello');
-    assert.dom('#value1').hasText('Goodbye');
-    assert.dom('#default0').hasText('Fish');
-    assert.dom('#default1').hasText('Chips');
+    assert.dom('#value0').hasText('🍤');
+    assert.dom('#value1').hasText('🍣');
+    assert.dom('#default0').hasText('🐡');
+    assert.dom('#default1').hasText('🐟');
   });
 
   test('Get Values -- It should get all the values', async function (this: FormidableContext & {
@@ -133,7 +133,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#Buzz').hasText('Buzz');
   });
 
-  test('SetValue - it should dirty the field with shouldDirty', async function (this: FormidableContext, assert) {
+  test('SetValue -- shouldDirty -- It should update and dirty the field', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 'BAR',
     };
@@ -151,7 +151,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#df-foo').exists();
   });
 
-  test('SetValue - it should validate the field with shouldValidate', async function (this: FormidableContext, assert) {
+  test('SetValue -- shouldValidate -- It should update and validate the field', async function (this: FormidableContext, assert) {
     //@ts-ignore
     this.validator = yupResolver(userSchema);
     this.values = validUser;

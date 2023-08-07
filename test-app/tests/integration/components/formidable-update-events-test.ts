@@ -9,7 +9,7 @@ import { click, fillIn, render } from '@ember/test-helpers';
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('UpdateEvents -- It should be triggred on specified updated events - onSubmit', async function (this: FormidableContext & {
+  test('UpdateEvents -- onSubmit -- It should be triggred on specified updated events', async function (this: FormidableContext & {
     counter: number;
   }, assert) {
     this.updateEvents = ['onSubmit'];
@@ -34,7 +34,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.strictEqual(this.counter, 1);
   });
 
-  test('UpdateEvents -- It should be triggred on specified updated events - onChange', async function (this: FormidableContext & {
+  test('UpdateEvents -- onChange -- It should be triggred on specified updated events ', async function (this: FormidableContext & {
     counter: number;
   }, assert) {
     this.counter = 0;
@@ -59,7 +59,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.strictEqual(this.counter, 2);
   });
 
-  test('UpdateEvents -- It should be triggred on specified updated events - onChange + onSubmit', async function (this: FormidableContext & {
+  test('UpdateEvents -- onChange + onSubmit -- It should be triggred on specified updated events ', async function (this: FormidableContext & {
     counter: number;
   }, assert) {
     this.counter = 0;
@@ -84,7 +84,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.strictEqual(this.counter, 4);
   });
 
-  test('UpdateEvents -- It should be triggred on specified updated events - onBlur', async function (this: FormidableContext & {
+  test('UpdateEvents -- onBlur -- It should be triggred on specified updated events ', async function (this: FormidableContext & {
     counter: number;
   }, assert) {
     this.counter = 0;

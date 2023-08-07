@@ -62,7 +62,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#dirty').exists();
   });
 
-  test('Dirty -- It should be rollbacked', async function (this: FormidableContext, assert) {
+  test('dirtyFields -- Fields should be pristine when rollbacked', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 'DEFAULT',
     };
@@ -92,7 +92,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#df').doesNotExist();
   });
 
-  test('keepDirty -- It should be not rollbacked - All', async function (this: FormidableContext, assert) {
+  test('keepDirty -- Every field should stay dirty when rollbacked', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 'DEFAULT',
     };
@@ -122,7 +122,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#df').exists();
   });
 
-  test('Dirty Field -- It should be rollbacked', async function (this: FormidableContext, assert) {
+  test('dirtyFields -- The rollbacked field should be pristine when rollbacked', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 'DEFAULT',
     };
@@ -160,7 +160,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#df-bar').exists();
   });
 
-  test('keepDirty -- It should be not rollbacked - Field', async function (this: FormidableContext, assert) {
+  test('keepDirty -- The rollbacked field should stay dirty', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 'DEFAULT',
     };
@@ -198,7 +198,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#df-bar').exists();
   });
 
-  test('getFieldState -- It should have the correct dirty and pristine values', async function (this: FormidableContext, assert) {
+  test('getFieldState -- It should have the appropriate dirty and pristine values when updated', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 'DEFAULT',
     };

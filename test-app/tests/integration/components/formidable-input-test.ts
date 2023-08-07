@@ -11,7 +11,7 @@ import { click, fillIn, render, select } from '@ember/test-helpers';
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('Values -- It should update the value -- text', async function (this: FormidableContext, assert) {
+  test('Values -- text -- It should update the value', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 'DEFAULT',
     };
@@ -31,7 +31,7 @@ module('Integration | Component | formidable', function (hooks) {
     await click('#submit');
   });
 
-  test('Values -- It should update the value -- textarea', async function (this: FormidableContext, assert) {
+  test('Values -- textarea -- It should update the value ', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 'DEFAULT',
     };
@@ -51,32 +51,32 @@ module('Integration | Component | formidable', function (hooks) {
     await click('#submit');
   });
 
-  test('Values -- It should update the value -- select', async function (this: FormidableContext, assert) {
+  test('Values -- select -- It should update the value ', async function (this: FormidableContext, assert) {
     this.values = {
-      pet: 'dog',
+      pet: '🐶',
     };
     this.onUpdate = (data: { pet: string }) => {
-      assert.strictEqual(data.pet, 'cat');
+      assert.strictEqual(data.pet, '🐱');
     };
     await render(hbs`
       <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
         <form {{on "submit" api.onSubmit}}>
         <select id="pet" {{api.register "pet"}} >
-          <option value="dog" id="dog">Dog</option>
-          <option value="cat" id="cat">Cat</option>
+          <option value="🐶" id="dog">Dog</option>
+          <option value="🐱" id="cat">Cat</option>
           <option value="hamster" id="hamster">Hamster</option>
         </select>
           <button id="submit"  type="submit">SUBMIT</button>
         </form>
       </Formidable>
     `);
-    assert.dom('#pet').hasValue('dog');
-    await select('#pet', 'cat');
+    assert.dom('#pet').hasValue('🐶');
+    await select('#pet', '🐱');
     await click('#submit');
-    assert.dom('#pet').hasValue('cat');
+    assert.dom('#pet').hasValue('🐱');
   });
 
-  test('Values -- It should update the value -- radio', async function (this: FormidableContext, assert) {
+  test('Values -- radio -- It should update the value', async function (this: FormidableContext, assert) {
     this.values = {
       drone: 'huey',
     };
@@ -113,7 +113,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#dewey').isChecked();
   });
 
-  test('Values -- It should update the value -- checkbox', async function (this: FormidableContext, assert) {
+  test('Values -- checkbox -- It should update the value ', async function (this: FormidableContext, assert) {
     this.values = {
       foo: '🐍',
     };
@@ -140,7 +140,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#bar').isChecked();
   });
 
-  test('Values -- It should update the value -- number', async function (this: FormidableContext, assert) {
+  test('Values -- number -- It should update the value ', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 3,
     };
@@ -160,7 +160,7 @@ module('Integration | Component | formidable', function (hooks) {
     await click('#submit');
   });
 
-  test('Values -- It should update the value -- date', async function (this: FormidableContext, assert) {
+  test('Values -- date -- It should update the value ', async function (this: FormidableContext, assert) {
     this.values = {
       foo: new Date('2000-05-05'),
     };
@@ -184,7 +184,7 @@ module('Integration | Component | formidable', function (hooks) {
     await click('#submit');
   });
 
-  test('Values -- It should update the value -- object', async function (this: FormidableContext, assert) {
+  test('Values -- object -- It should update the value ', async function (this: FormidableContext, assert) {
     this.values = {
       foo: { bar: 'DEFAULT' },
     };
@@ -206,9 +206,9 @@ module('Integration | Component | formidable', function (hooks) {
     await click('#submit');
   });
 
-  test('Values -- It should update the value -- array', async function (this: FormidableContext, assert) {
+  test('Values -- array -- It should update the value ', async function (this: FormidableContext, assert) {
     this.values = {
-      foo: ['A', 'B'],
+      foo: ['💞', '💝'],
     };
     this.onUpdate = (data: { foo: string[] }) => {
       assert.deepEqual(data.foo, ['*', '**']);
@@ -222,8 +222,8 @@ module('Integration | Component | formidable', function (hooks) {
         </form>
       </Formidable>
     `);
-    assert.dom('#foo0').hasValue('A');
-    assert.dom('#foo1').hasValue('B');
+    assert.dom('#foo0').hasValue('💞');
+    assert.dom('#foo1').hasValue('💝');
 
     await fillIn('#foo0', '*');
 
@@ -231,7 +231,7 @@ module('Integration | Component | formidable', function (hooks) {
     await click('#submit');
   });
 
-  test('Values -- It should update the value -- model', async function (this: FormidableContext, assert) {
+  test('Values -- model -- It should update the value ', async function (this: FormidableContext, assert) {
     const store = this.owner.lookup('service:store');
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
