@@ -118,6 +118,7 @@
     "type": "addon",
     "main": "addon-main.cjs",
     "app-js": {
+      "./components/formidable/-private.js": "./dist/_app_/components/formidable/-private.js",
       "./components/formidable/index.js": "./dist/_app_/components/formidable/index.js",
       "./services/formidable.js": "./dist/_app_/services/formidable.js"
     }

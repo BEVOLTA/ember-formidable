@@ -105,7 +105,6 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#error').hasText('Name is required.');
   });
 
-  // @ts-ignore
   test('clearError -- It should clean an error', async function (this: FormidableContext, assert) {
     await render(hbs`
       <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
@@ -135,7 +134,6 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#error-email').exists();
   });
 
-  // @ts-ignore
   test('setError -- string -- It should set an error', async function (this: FormidableContext, assert) {
     await render(hbs`
       <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
@@ -160,7 +158,6 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#error-1').hasText("This shouldn't exist! What the hell!");
   });
 
-  // @ts-ignore
   test('setError -- FormidableError -- It should set an error ', async function (this: FormidableContext, assert) {
     await render(hbs`
       <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
