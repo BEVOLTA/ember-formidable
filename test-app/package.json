@@ -22,7 +22,7 @@
     "lint:js:fix": "eslint . --fix",
     "start": "ember serve",
     "test": "concurrently \"npm:lint\" \"npm:test:*\" --names \"lint,test:\"",
-    "test:ember": "ember test"
+    "test:ember": "ember test --server"
   },
   "devDependencies": {
     "@babel/core": "7.21.8",
@@ -40,6 +40,11 @@
     "@glint/environment-ember-loose": "1.0.2",
     "@glint/template": "1.0.2",
     "@types/ember__application": "4.0.5",
+    "@types/ember-data": "4.4.0",
+    "@types/ember-data__adapter": "4.0.0",
+    "@types/ember-data__model": "4.0.0",
+    "@types/ember-data__serializer": "4.0.0",
+    "@types/ember-data__store": "4.0.0",
     "@types/ember__array": "4.0.3",
     "@types/ember__component": "4.0.13",
     "@types/ember__controller": "4.0.4",
@@ -100,6 +105,7 @@
     "stylelint-prettier": "^3.0.0",
     "tracked-built-ins": "^3.1.1",
     "typescript": "5.0.4",
+    "yup": "1.2.0",
     "webpack": "^5.78.0"
   },
   "engines": {
