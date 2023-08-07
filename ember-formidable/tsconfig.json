@@ -6,6 +6,6 @@
     "../test-app/tests/utils/resolvers"
   ],
   "glint": {
-    "environment": "ember-loose"
+    "environment": ["ember-loose", "ember-template-imports"]
   }
 }

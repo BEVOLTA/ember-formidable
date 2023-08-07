@@ -96,6 +96,9 @@ importers:
       '@glint/environment-ember-loose':
         specifier: 1.0.2
         version: 1.0.2(@glimmer/component@1.1.2)(@glint/template@1.0.2)(@types/ember__array@4.0.3)(@types/ember__component@4.0.13)(@types/ember__controller@4.0.4)(@types/ember__object@4.0.5)(@types/ember__routing@4.0.12)(ember-modifier@4.1.0)
+      '@glint/environment-ember-template-imports':
+        specifier: ^1.0.2
+        version: 1.0.2(@glint/environment-ember-loose@1.0.2)(@glint/template@1.0.2)(@types/ember__component@4.0.13)(@types/ember__routing@4.0.12)(ember-template-imports@3.4.2)
       '@glint/template':
         specifier: 1.0.2
         version: 1.0.2
@@ -222,6 +225,9 @@ importers:
       rollup-plugin-copy:
         specifier: 3.4.0
         version: 3.4.0
+      rollup-plugin-glimmer-template-tag:
+        specifier: 0.4.1
+        version: 0.4.1(@babel/core@7.22.8)(ember-source@4.12.3)(ember-template-imports@3.4.2)
       rollup-plugin-ts:
         specifier: 3.2.0
         version: 3.2.0(@babel/core@7.22.8)(@babel/preset-typescript@7.22.5)(@babel/runtime@7.22.6)(rollup@3.26.2)(typescript@5.1.6)
@@ -3084,6 +3090,33 @@ packages:
       '@types/ember__object': 4.0.5(@babel/core@7.22.8)
       '@types/ember__routing': 4.0.12(@babel/core@7.22.8)
       ember-modifier: 4.1.0(ember-source@4.12.3)
+    dev: true
+
+  /@glint/environment-ember-template-imports@1.0.2(@glint/environment-ember-loose@1.0.2)(@glint/template@1.0.2)(@types/ember__component@4.0.13)(@types/ember__routing@4.0.12)(ember-template-imports@3.4.2):
+    resolution: {integrity: sha512-PAH7obVGXPFU7gLb04JVlqiNtz/j7Q29BBTAyhS7EVy99Hc6CPe+nV6+xhUPKu/S5GOVn3MWehVt/6gXPJ+cnA==}
+    peerDependencies:
+      '@glint/environment-ember-loose': ^1.0.2
+      '@glint/template': ^1.0.2
+      '@types/ember__component': ^4.0.10
+      '@types/ember__helper': ^4.0.1
+      '@types/ember__modifier': ^4.0.3
+      '@types/ember__routing': ^4.0.12
+      ember-template-imports: ^3.0.0
+    peerDependenciesMeta:
+      '@types/ember__component':
+        optional: true
+      '@types/ember__helper':
+        optional: true
+      '@types/ember__modifier':
+        optional: true
+      '@types/ember__routing':
+        optional: true
+    dependencies:
+      '@glint/environment-ember-loose': 1.0.2(@glimmer/component@1.1.2)(@glint/template@1.0.2)(@types/ember__array@4.0.3)(@types/ember__component@4.0.13)(@types/ember__controller@4.0.4)(@types/ember__object@4.0.5)(@types/ember__routing@4.0.12)(ember-modifier@4.1.0)
+      '@glint/template': 1.0.2
+      '@types/ember__component': 4.0.13(@babel/core@7.22.8)
+      '@types/ember__routing': 4.0.12(@babel/core@7.22.8)
+      ember-template-imports: 3.4.2
     dev: true
 
   /@glint/template@1.0.2:
@@ -8425,7 +8458,7 @@ packages:
       ember-cli-version-checker: 5.1.2
       ember-router-generator: 2.0.0
       inflection: 1.13.4
-      resolve: 1.22.2
+      resolve: 1.22.3
       semver: 7.5.4
       silent-error: 1.1.1
     transitivePeerDependencies:
@@ -14130,7 +14163,6 @@ packages:
       is-core-module: 2.12.1
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
-    dev: true
 
   /resolve@2.0.0-next.4:
     resolution: {integrity: sha512-iMDbmAWtfU+MHpxt/I5iWI7cY6YVEZUQ3MBgPQ++XD1PELuJHIl82xBmObyP2KyQmkNB2dsqF7seoQQiAn5yDQ==}
@@ -14242,6 +14274,19 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       del: 5.1.0
+    dev: true
+
+  /rollup-plugin-glimmer-template-tag@0.4.1(@babel/core@7.22.8)(ember-source@4.12.3)(ember-template-imports@3.4.2):
+    resolution: {integrity: sha512-hz/xbxlcif0zCuapZ8YvZpZrag+KCHPnyf7b0lCJvNNapvTdHV6fvOFYZxcxTUOVuOxQLmmemy82jDSlpQ9ZVg==}
+    engines: {node: ^16.0.0 || ^18.0.0 || ^20.0.0}
+    peerDependencies:
+      '@babel/core': ^7.21.3
+      ember-source: ^4.0.0 || ^5.0.0
+      ember-template-imports: ^3.4.1
+    dependencies:
+      '@babel/core': 7.22.8
+      ember-source: 4.12.3(@babel/core@7.22.8)(@glimmer/component@1.1.2)(@glint/template@1.0.2)(webpack@5.88.2)
+      ember-template-imports: 3.4.2
     dev: true
 
   /rollup-plugin-ts@3.2.0(@babel/core@7.22.8)(@babel/preset-typescript@7.22.5)(@babel/runtime@7.22.6)(rollup@3.26.2)(typescript@5.1.6):

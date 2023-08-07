@@ -1,6 +1,6 @@
 import { restartableTask, TaskGenerator } from 'ember-concurrency';
 import { taskFor } from 'ember-concurrency-ts';
-import { FunctionBasedModifier, modifier } from 'ember-modifier';
+import { modifier } from 'ember-modifier';
 import _cloneDeep from 'lodash/cloneDeep';
 import _isEmpty from 'lodash/isEmpty';
 import _isNil from 'lodash/isNil';
@@ -13,15 +13,27 @@ import { inject as service } from '@ember/service';
 import {
   dependencySatisfies,
   importSync,
-  macroCondition,
+  macroCondition
 } from '@embroider/macros';
 import Component from '@glimmer/component';
 
 import FormidableService from '../../services/formidable';
-
-type UpdateEvents = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
-
-type GenericObject = Record<string, any>;
+import type {
+  UpdateEvents,
+  GenericObject,
+  FormidableErrors,
+  DirtyFields,
+  InvalidFields,
+  FormatOptions,
+  Parser,
+  FormidableError,
+  RollbackContext,
+  SetContext,
+  FieldState,
+  FormidableApi,
+  FormidableArgs,
+  RegisterOptions,
+} from '../../index';
 
 let Model: Function | undefined;
 
@@ -52,7 +64,7 @@ const inputUtils = (input: HTMLInputElement) => {
   };
 };
 
-const formatValue = <Values extends GenericObject = GenericObject>(
+const formatValue = (
   value: any,
   formatOptions: FormatOptions | undefined,
 ) => {
@@ -77,124 +89,19 @@ const formatValue = <Values extends GenericObject = GenericObject>(
   return value;
 };
 
-type FormidableErrors<
-  T extends string | number | symbol = string | number | symbol,
-> = Record<T, FormidableError[]>;
-
-type DirtyFields<Values extends GenericObject = GenericObject> = Record<
-  keyof Values,
-  boolean
->;
-
-type InvalidFields<Values extends GenericObject = GenericObject> = Record<
-  keyof Values,
-  boolean
->;
-
-type FormatOptions = Pick<
-  RegisterOptions,
-  'valueAsDate' | 'valueAsNumber' | 'valueFormat' | 'valueAsBoolean'
->;
-
-type Parser<Values extends GenericObject = GenericObject> = Record<
-  keyof Values,
-  FormatOptions
->;
-interface FormidableError {
-  type: string;
-  message: string;
-  value: unknown;
+export interface FormidableSignature<
+  Values extends GenericObject = GenericObject
+> {
+  Element: HTMLFormElement;
+  Args: FormidableArgs<Values>;
+  Blocks: {
+    default: [
+     parsedValues: Values,
+     api: FormidableApi<Values>
+    ];
+  };
 }
 
-interface RollbackContext {
-  keepError?: boolean;
-  keepDirty?: boolean;
-  defaultValue?: boolean;
-}
-
-interface SetContext {
-  shouldValidate?: boolean;
-  shouldDirty?: boolean;
-}
-interface FieldState {
-  isDirty: boolean;
-  isPristine: boolean;
-  isInvalid: boolean;
-  error?: object;
-}
-
-interface FormidableApi<Values extends GenericObject = GenericObject> {
-  values: Values;
-  setValue: (
-    key: keyof Values,
-    value: string | boolean,
-    context?: SetContext,
-  ) => void;
-  getValue: (key: keyof Values) => unknown;
-  getValues: () => Values;
-  getFieldState: (name: keyof Values) => FieldState;
-  register: FunctionBasedModifier<{
-    Args: {
-      Positional: [keyof Values];
-      Named: RegisterOptions;
-    };
-    Element: HTMLInputElement;
-  }>;
-  onSubmit: (e: SubmitEvent) => void;
-  validate: () => void;
-  errors: FormidableErrors<keyof Values>;
-  errorMessages: string[];
-  setError: (key: keyof Values, value: string | FormidableError) => void;
-  clearError: (key: keyof Values) => void;
-  clearErrors: () => void;
-  rollback: (name?: keyof Values, context?: RollbackContext) => void;
-  setFocus: (name: keyof Values) => void;
-  defaultValues: Values;
-  isSubmitted: boolean;
-  isSubmitting: boolean;
-  isSubmitSuccessful: boolean | undefined;
-  submitCount: number;
-  isValid: boolean;
-  isInvalid: boolean;
-  isValidating: boolean;
-  invalidFields: Record<keyof Values, boolean>;
-  isDirty: boolean;
-  dirtyFields: Record<keyof Values, boolean>;
-  isPristine: boolean;
-}
-interface FormidableArgs<Values extends GenericObject = GenericObject> {
-  serviceId?: string;
-  values?: Values;
-  validator?: Function;
-  validatorOptions?: any;
-  onValuesChanged?: (data: Values, api: FormidableApi<Values>) => void;
-  onChange?: (event: Event, api: FormidableApi<Values>) => void;
-  onSubmit?: (event: SubmitEvent, api: FormidableApi<Values>) => void;
-  updateEvents?: UpdateEvents[];
-  shouldUseNativeValidation?: boolean;
-}
-
-interface RegisterOptions<Values extends GenericObject = GenericObject> {
-  // HTML Input attributes
-  disabled?: boolean;
-  required?: boolean;
-  maxLength?: number;
-  minLength?: number;
-  max?: number;
-  min?: number;
-  pattern?: RegExp | string;
-
-  // Format
-  valueAsBoolean?: boolean;
-  valueAsNumber?: boolean;
-  valueAsDate?: boolean;
-  valueFormat: (value: unknown) => any;
-
-  // Handlers
-  onChange?: (event: Event, api: FormidableApi<Values>) => void;
-  onBlur?: (event: Event, api: FormidableApi<Values>) => void;
-  onFocus?: (event: Event, api: FormidableApi<Values>) => void;
-}
 
 export default class Formidable<
   Values extends GenericObject = GenericObject,
@@ -281,7 +188,7 @@ export default class Formidable<
     return _isEmpty(this.dirtyFields);
   }
 
-  get updateEvents() {
+  get updateEvents(): UpdateEvents[] {
     return this.args.updateEvents ?? ['onSubmit'];
   }
 
@@ -762,4 +669,9 @@ export default class Formidable<
       this.args.onValuesChanged(this.parsedValues, this.api);
     }
   }
+
+
+  <template>
+    {{yield this.parsedValues this.api}}
+  </template>
 }

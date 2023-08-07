@@ -1,7 +1,7 @@
 import typescript from 'rollup-plugin-ts';
 import copy from 'rollup-plugin-copy';
 import { Addon } from '@embroider/addon-dev/rollup';
-
+import { glimmerTemplateTag } from 'rollup-plugin-glimmer-template-tag';
 const addon = new Addon({
   srcDir: 'src',
   destDir: 'dist',
@@ -16,9 +16,9 @@ export default {
     // These are the modules that users should be able to import from your
     // addon. Anything not listed here may get optimized away.
     addon.publicEntrypoints([
-      'components/**/*.js',
-      'services/**/*.js',
-      'registry.js',
+      // For our own build we treat all JS modules as entry points, to not cause rollup-plugin-ts to mess things up badly when trying to tree-shake TS declarations
+      // but the actual importable modules are further restricted by the package.json entry points!
+      '**/*.js',
     ]),
 
     // These are the modules that should get reexported into the traditional
@@ -27,11 +27,19 @@ export default {
 
     addon.appReexports(['components/**/*.js', 'services/**/*.js']),
 
+    // Follow the V2 Addon rules about dependencies. Your code can import from
+    // `dependencies` and `peerDependencies` as well as standard Ember-provided
+    // package names.
+    addon.dependencies(),
+
+    // compile <template> tag into plain JS
+    glimmerTemplateTag({ preprocessOnly: true }),
+
     // compile TypeScript
     typescript({
       transpiler: 'babel',
       browserslist: false,
-      transpileOnly: false,
+      transpileOnly: true,
     }),
 
     // This babel config should *not* apply presets or compile away ES modules.
