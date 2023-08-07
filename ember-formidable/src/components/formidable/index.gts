@@ -92,7 +92,7 @@ const formatValue = (
 export interface FormidableSignature<
   Values extends GenericObject = GenericObject
 > {
-  Element: HTMLFormElement;
+  Element: unknown;
   Args: FormidableArgs<Values>;
   Blocks: {
     default: [
@@ -105,7 +105,7 @@ export interface FormidableSignature<
 
 export default class Formidable<
   Values extends GenericObject = GenericObject,
-> extends Component<FormidableArgs<Values>> {
+> extends Component<FormidableSignature<Values>> {
   @service formidable!: FormidableService;
 
   // --- VALUES
