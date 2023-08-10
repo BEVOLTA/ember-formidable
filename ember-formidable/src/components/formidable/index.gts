@@ -6,18 +6,22 @@ import _isEmpty from 'lodash/isEmpty';
 import _isNil from 'lodash/isNil';
 import _isObject from 'lodash/isObject';
 import _set from 'lodash/set';
+import _unset from 'lodash/unset';
 import { tracked, TrackedObject } from 'tracked-built-ins';
 
+import { assert } from '@ember/debug';
 import { action, get } from '@ember/object';
 import { inject as service } from '@ember/service';
 import {
   dependencySatisfies,
   importSync,
-  macroCondition
+  macroCondition,
 } from '@embroider/macros';
 import Component from '@glimmer/component';
 
+import { UnregisterContext } from '../../-private/types';
 import FormidableService from '../../services/formidable';
+
 import type {
   UpdateEvents,
   GenericObject,
@@ -34,7 +38,6 @@ import type {
   FormidableArgs,
   RegisterOptions,
 } from '../../index';
-
 let Model: Function | undefined;
 
 if (macroCondition(dependencySatisfies('ember-data', '*'))) {
@@ -42,6 +45,7 @@ if (macroCondition(dependencySatisfies('ember-data', '*'))) {
 }
 
 const DATA_NAME = 'data-formidable-name';
+const UNREGISTERED_ATTRIBUTE = 'data-formidable-unregistered';
 
 const inputUtils = (input: HTMLInputElement) => {
   return {
@@ -64,10 +68,7 @@ const inputUtils = (input: HTMLInputElement) => {
   };
 };
 
-const formatValue = (
-  value: any,
-  formatOptions: FormatOptions | undefined,
-) => {
+const formatValue = (value: any, formatOptions: FormatOptions | undefined) => {
   if (!formatOptions) {
     return value;
   }
@@ -90,18 +91,14 @@ const formatValue = (
 };
 
 export interface FormidableSignature<
-  Values extends GenericObject = GenericObject
+  Values extends GenericObject = GenericObject,
 > {
   Element: unknown;
   Args: FormidableArgs<Values>;
   Blocks: {
-    default: [
-     parsedValues: Values,
-     api: FormidableApi<Values>
-    ];
+    default: [parsedValues: Values, api: FormidableApi<Values>];
   };
 }
-
 
 export default class Formidable<
   Values extends GenericObject = GenericObject,
@@ -119,9 +116,10 @@ export default class Formidable<
   @tracked submitCount = 0;
 
   // --- VALIDATION
-  validations: Record<keyof Values, object> = new TrackedObject(
-    {},
-  ) as Record<keyof Values, object>;
+  validations: Record<keyof Values, object> = new TrackedObject({}) as Record<
+    keyof Values,
+    object
+  >;
 
   // --- ERRORS
   errors: FormidableErrors = new TrackedObject({});
@@ -213,6 +211,7 @@ export default class Formidable<
       getValues: this.getValues,
       getFieldState: this.getFieldState,
       register: this.register,
+      unregister: this.unregister,
       onSubmit: (e: SubmitEvent) => taskFor(this.submit).perform(e),
       validate: () => taskFor(this.validate).perform(),
       errors: this.errors,
@@ -251,9 +250,9 @@ export default class Formidable<
           rollbackValues[key] = value;
         }
       });
-      this.rollbackValues = rollbackValues;
+      this.rollbackValues = new TrackedObject(rollbackValues);
     } else {
-      this.rollbackValues = _cloneDeep(this.args.values ?? {}) as Values;
+      this.rollbackValues =  new TrackedObject(_cloneDeep(this.args.values ?? {}) as Values);
     }
     if (this.args.serviceId) {
       this.formidable._register(this.args.serviceId, () => this.api);
@@ -364,6 +363,41 @@ export default class Formidable<
     this.errors = new TrackedObject({});
   }
 
+  @action
+  unregister(
+    name: keyof Values,
+    {
+      keepError,
+      keepDirty,
+      keepValue,
+      keepDefaultValue,
+    }: UnregisterContext = {},
+  ) {
+    const element = this.getDOMElement(name as string);
+
+    assert('FORMIDABLE - No input element found to unregister', !!element);
+
+    const { setAttribute } = inputUtils(element);
+    setAttribute(UNREGISTERED_ATTRIBUTE, true);
+
+    if (!keepError) {
+      _unset(this.errors, name);
+    }
+
+    if (!keepDirty) {
+      _unset(this.dirtyFields, name);
+    }
+
+    if (!keepValue) {
+      _unset(this.values, name);
+    }
+
+    if (!keepDefaultValue) {
+      _unset(this.rollbackValues, name);
+    }
+
+  }
+
   @restartableTask
   *setValue(
     key: keyof Values,
@@ -388,14 +422,7 @@ export default class Formidable<
     name: keyof Values,
     { shouldValidate, shouldDirty }: SetContext = {},
   ) {
-    (
-      (document.querySelector(
-        `[name="${name as string}"]`,
-      ) as HTMLInputElement | null) ??
-      (document.querySelector(
-        `[${DATA_NAME}="${name as string}"]`,
-      ) as HTMLInputElement | null)
-    )?.focus();
+    this.getDOMElement(name as string)?.focus();
 
     if (shouldDirty) {
       this.dirtyFields[name] = true;
@@ -595,11 +622,10 @@ export default class Formidable<
     event: Event,
     onChange?: (event: Event, api: FormidableApi<GenericObject>) => void,
   ) {
-    if (!event.target) {
-      throw new Error(
-        'FORMIDABLE - No input element found when value got set.',
-      );
-    }
+    assert(
+      'FORMIDABLE - No input element found when value got set.',
+      !!event.target,
+    );
 
     yield taskFor(this.setValue).perform(
       name,
@@ -624,11 +650,10 @@ export default class Formidable<
     event: Event,
     onBlur?: (event: Event, api: FormidableApi<GenericObject>) => void,
   ) {
-    if (!event.target) {
-      throw new Error(
-        'FORMIDABLE - No input element found when value got set.',
-      );
-    }
+    assert(
+      'FORMIDABLE - No input element found when value got set.',
+      !!event.target,
+    );
 
     yield taskFor(this.setValue).perform(
       name,
@@ -649,11 +674,10 @@ export default class Formidable<
     event: Event,
     onFocus?: (event: Event, api: FormidableApi<GenericObject>) => void,
   ) {
-    if (!event.target) {
-      throw new Error(
-        'FORMIDABLE - No input element found when value got set.',
-      );
-    }
+    assert(
+      'FORMIDABLE - No input element found when value got set.',
+      !!event.target,
+    );
 
     yield taskFor(this.setValue).perform(
       name,
@@ -669,6 +693,16 @@ export default class Formidable<
     }
   }
 
+  private getDOMElement(name: string) {
+    return (
+      (document.querySelector(
+        `[name="${name as string}"]`,
+      ) as HTMLInputElement | null) ??
+      (document.querySelector(
+        `[${DATA_NAME}="${name as string}"]`,
+      ) as HTMLInputElement | null)
+    );
+  }
 
   <template>
     {{yield this.parsedValues this.api}}

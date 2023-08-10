@@ -7,23 +7,16 @@ import * as yup from 'yup';
 
 import { click, fillIn, render } from '@ember/test-helpers';
 
-// Define a schema for a user object
 const userSchema = yup.object({
-  // Basic string property with required validation
   name: yup.string().required('Name is required.'),
 });
 
-// Example usage of the user schema
 const validUser = {
   name: 'John Doe',
 };
 
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
-
-  hooks.beforeEach(function (this: FormidableContext) {
-    this.updateEvents = ['onSubmit'];
-  });
 
   test('isSubmitSuccessful -- Should be OK when submitting', async function (this: FormidableContext, assert) {
     //@ts-ignore

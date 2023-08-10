@@ -41,6 +41,13 @@ export interface SetContext {
   shouldValidate?: boolean;
   shouldDirty?: boolean;
 }
+
+export interface UnregisterContext {
+  keepError?: boolean;
+  keepDirty?: boolean;
+  keepValue?: boolean;
+  keepDefaultValue?: boolean;
+}
 export interface FieldState {
   isDirty: boolean;
   isPristine: boolean;
@@ -65,6 +72,7 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
     };
     Element: HTMLInputElement;
   }>;
+  unregister: (name: keyof Values, ontext?: UnregisterContext) => void;
   onSubmit: (e: SubmitEvent) => void;
   validate: () => void;
   errors: FormidableErrors<keyof Values>;
