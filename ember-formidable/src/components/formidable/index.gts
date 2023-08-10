@@ -250,9 +250,9 @@ export default class Formidable<
           rollbackValues[key] = value;
         }
       });
-      this.rollbackValues = rollbackValues;
+      this.rollbackValues = new TrackedObject(rollbackValues);
     } else {
-      this.rollbackValues = _cloneDeep(this.args.values ?? {}) as Values;
+      this.rollbackValues =  new TrackedObject(_cloneDeep(this.args.values ?? {}) as Values);
     }
     if (this.args.serviceId) {
       this.formidable._register(this.args.serviceId, () => this.api);
