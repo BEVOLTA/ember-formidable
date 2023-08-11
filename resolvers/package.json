@@ -22,8 +22,7 @@
   },
   "jest": {
     "moduleFileExtensions": [
-      "ts",
-      "js"
+      "ts"
     ],
     "transform": {
       "^.+\\.ts$": "ts-jest"
