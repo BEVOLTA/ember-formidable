@@ -32,18 +32,18 @@ module('Integration | Component | formidable', function (hooks) {
     assert.strictEqual(
       // @ts-ignore
       formidable.getFormidableApi('test').values.foo,
-      'CHANGED'
+      'CHANGED',
     );
     assert.strictEqual(
       // @ts-ignore
       formidable.getValue('test', 'foo'),
-      'CHANGED'
+      'CHANGED',
     );
 
     assert.deepEqual(
       // @ts-ignore
       formidable.getValues('test', ['foo', 'bar']),
-      { foo: 'CHANGED', bar: 'BAZ' }
+      { foo: 'CHANGED', bar: 'BAZ' },
     );
   });
 
@@ -66,7 +66,7 @@ module('Integration | Component | formidable', function (hooks) {
 
     assert.ok(
       // @ts-ignore
-      formidable.getFormidableApi('test')
+      formidable.getFormidableApi('test'),
     );
 
     await render(hbs`
@@ -75,7 +75,7 @@ module('Integration | Component | formidable', function (hooks) {
 
     assert.throws(
       // @ts-ignore
-      () => formidable.getFormidableApi('test')
+      () => formidable.getFormidableApi('test'),
     );
   });
 });
