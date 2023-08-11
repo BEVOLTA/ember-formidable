@@ -252,7 +252,9 @@ export default class Formidable<
       });
       this.rollbackValues = new TrackedObject(rollbackValues);
     } else {
-      this.rollbackValues =  new TrackedObject(_cloneDeep(this.args.values ?? {}) as Values);
+      this.rollbackValues = new TrackedObject(
+        _cloneDeep(this.args.values ?? {}) as Values,
+      );
     }
     if (this.args.serviceId) {
       this.formidable._register(this.args.serviceId, () => this.api);
@@ -395,7 +397,6 @@ export default class Formidable<
     if (!keepDefaultValue) {
       _unset(this.rollbackValues, name);
     }
-
   }
 
   @restartableTask

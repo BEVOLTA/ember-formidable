@@ -98,7 +98,7 @@ module.exports = {
 
     // all TypeScript files
     {
-      files: ['**/*.ts'],
+      files: ['**/*.ts', '**/*.gts'],
       parser: '@typescript-eslint/parser',
       parserOptions: {
         ecmaVersion: 'latest',
