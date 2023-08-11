@@ -1,6 +1,22 @@
-import * as Yup from 'yup';
+import * as yup from 'yup';
 
-const formatYupError = (errors: Array<Yup.ValidationError>) => {
+interface ResolverOptions {
+  /**
+   * @default async
+   */
+  mode?: 'async' | 'sync';
+  /**
+   * Return the raw input values rather than the parsed values.
+   * @default false
+   */
+  raw?: boolean;
+  /**
+   * @default false
+   */
+  shouldUseNativeValidation?: boolean;
+}
+
+const formatYupError = (errors: Array<yup.ValidationError>) => {
   return errors.reduce((acc: Record<string, any[]>, err) => {
     const { type, path, errors, value } = err;
 
@@ -16,36 +32,26 @@ const formatYupError = (errors: Array<Yup.ValidationError>) => {
 };
 
 export function yupResolver<TFieldValues extends object = {}>(
-  schema: Yup.ObjectSchema<TFieldValues>,
-  schemaOptions: Parameters<(typeof schema)['validate']>[1] = {},
-  resolverOptions: {
-    /**
-     * @default async
-     */
-    mode?: 'async' | 'sync';
-    /**
-     * Return the raw input values rather than the parsed values.
-     * @default false
-     */
-    raw?: boolean;
-  } = {}
+  schema: yup.ObjectSchema<TFieldValues>,
+  options: Parameters<(typeof schema)['validate']>[1] & ResolverOptions = {},
 ) {
+  const { mode = 'async', raw = false, ...schemaOptions } = options;
+
   return async (values: object, context: object) => {
     try {
-      await schema[
-        resolverOptions.mode === 'sync' ? 'validateSync' : 'validate'
-      ](
+      await schema[mode === 'sync' ? 'validateSync' : 'validate'](
         values,
-        Object.assign({ abortEarly: false }, schemaOptions, { context })
+        Object.assign({ abortEarly: false }, schemaOptions, { context }),
       );
 
       return {};
-    } catch (e: any) {
-      if (!e.inner) {
-        throw e;
+    } catch (e) {
+      const error = e as yup.ValidationError;
+      if (!error.inner) {
+        throw error;
       }
 
-      return formatYupError(e.inner);
+      return formatYupError(error.inner);
     }
   };
 }

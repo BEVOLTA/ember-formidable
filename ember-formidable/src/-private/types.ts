@@ -111,10 +111,10 @@ export interface RegisterOptions<Values extends GenericObject = GenericObject> {
   // HTML Input attributes
   disabled?: boolean;
   required?: boolean;
-  maxLength?: number;
-  minLength?: number;
-  max?: number;
-  min?: number;
+  maxLength?: number | string;
+  minLength?: number | string;
+  max?: number | string;
+  min?: number | string;
   pattern?: RegExp | string;
 
   // Format
