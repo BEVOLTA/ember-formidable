@@ -115,12 +115,6 @@ export default class Formidable<
   @tracked isSubmitted = false;
   @tracked submitCount = 0;
 
-  // --- VALIDATION
-  validations: Record<keyof Values, object> = new TrackedObject({}) as Record<
-    keyof Values,
-    object
-  >;
-
   // --- ERRORS
   errors: FormidableErrors = new TrackedObject({});
 
@@ -443,11 +437,9 @@ export default class Formidable<
     const validation: FormidableErrors = yield this.validator(
       this.parsedValues,
       {
-        validations: this.validations,
         ...this.args.validatorOptions,
       },
     );
-
     if (field) {
       this.errors = _set(this.errors, field, get(validation, field));
     } else {
@@ -552,18 +544,6 @@ export default class Formidable<
           input.value = value ?? '';
         }
       }
-
-      // VALIDATIONS
-      if (this.args.shouldUseNativeValidation) {
-        this.validations[name] = {
-          min,
-          max,
-          minLength,
-          maxLength,
-          disabled,
-          required,
-        };
-      } // USEFUL?
 
       // HANDLERS
       const handleChange = (event: Event) => {

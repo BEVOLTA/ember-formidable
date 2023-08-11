@@ -72,7 +72,6 @@ module('Integration | Component | formidable', function (hooks) {
               <p id="dirty-name">DIRTY</p>
           {{/if}}
           {{#if (get api.defaultValues 'name')}}
-          {{log (get api.defaultValues 'name')}}
             <p id="default-name">{{get api.defaultValues 'name'}}</p>
           {{/if}}
         </form>

@@ -240,7 +240,6 @@ module('Integration | Component | formidable', function (hooks) {
            <p id="error">{{error}}</p>
           {{/each}}
         </form>
-        {{log api.errorMessages}}
       </Formidable>
     `);
 

@@ -1,0 +1,40 @@
+{
+  "name": "ember-formidable-resolvers",
+  "version": "0.0.0",
+  "description": "Resolvers for ember-formidable",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint --fix 'src/**/*.ts'",
+    "test": "jest"
+  },
+  "author": "shishouille",
+  "license": "ISC",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "yup": "1.2.0"
+  },
+  "devDependencies": {
+    "jest": "^29.6.2",
+    "ts-jest": "^29.1.1",
+    "tslib": "^2.6.1",
+    "typescript": "^5.1.6"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "tsconfig.json"
+      }
+    },
+    "testMatch": [
+      "**/test/**/*.test.ts"
+    ]
+  }
+}

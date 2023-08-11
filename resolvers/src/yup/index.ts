@@ -1,21 +1,5 @@
 import * as yup from 'yup';
 
-interface ResolverOptions {
-  /**
-   * @default async
-   */
-  mode?: 'async' | 'sync';
-  /**
-   * Return the raw input values rather than the parsed values.
-   * @default false
-   */
-  raw?: boolean;
-  /**
-   * @default false
-   */
-  shouldUseNativeValidation?: boolean;
-}
-
 const formatYupError = (errors: Array<yup.ValidationError>) => {
   return errors.reduce((acc: Record<string, any[]>, err) => {
     const { type, path, errors, value } = err;
@@ -31,7 +15,7 @@ const formatYupError = (errors: Array<yup.ValidationError>) => {
   }, {});
 };
 
-export function yupResolver<TFieldValues extends object = {}>(
+export default function yupResolver<TFieldValues extends object = {}>(
   schema: yup.ObjectSchema<TFieldValues>,
   options: Parameters<(typeof schema)['validate']>[1] & ResolverOptions = {},
 ) {
