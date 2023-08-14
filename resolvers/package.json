@@ -4,8 +4,9 @@
   "description": "Resolvers for ember-formidable",
   "scripts": {
     "build": "tsc",
+    "build:yup": "microbundle --cwd yup",
     "lint": "eslint --fix 'src/**/*.ts'",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "author": "shishouille",
   "license": "MIT",
@@ -14,26 +15,34 @@
   "dependencies": {
     "yup": "1.2.0"
   },
+  "files": [
+    "dist",
+    "yup/package.json",
+    "yup/src",
+    "yup/dist"
+  ],
   "devDependencies": {
-    "jest": "^29.6.2",
-    "ts-jest": "^29.1.1",
+    "vite-tsconfig-paths": "^4.2.0",
+    "vitest": "^0.34.1",
     "tslib": "^2.6.1",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "microbundle": "^0.15.1"
   },
-  "jest": {
-    "moduleFileExtensions": [
-      "ts"
-    ],
-    "transform": {
-      "^.+\\.ts$": "ts-jest"
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "umd": "./dist/resolvers.umd.js",
+      "import": "./dist/resolvers.mjs",
+      "require": "./dist/resolvers.js"
     },
-    "globals": {
-      "ts-jest": {
-        "tsconfig": "tsconfig.json"
-      }
-    },
-    "testMatch": [
-      "**/test/**/*.test.ts"
-    ]
+    "./yup": {
+      "types": "./yup/dist/index.d.ts",
+      "umd": "./yup/dist/yup.umd.js",
+      "import": "./yup/dist/yup.mjs",
+      "require": "./yup/dist/yup.js"
+    }
+  },
+  "peerDependencies": {
+    "ember-formidable": "workspace:*"
   }
 }

@@ -1,0 +1,15 @@
+<DocsViewer as |viewer|>
+  <viewer.nav as |nav|>
+
+    <nav.item @label="Installation" @route="docs.installation" />
+  </viewer.nav>
+
+  <viewer.main>
+    <div class="docs-container">
+      <div class="docs-section">
+        {{outlet}}
+      </div>
+    </div>
+  </viewer.main>
+
+</DocsViewer>

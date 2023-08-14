@@ -7,7 +7,6 @@ module.exports = function (defaults) {
     // Add options here
     'ember-cli-addon-docs': {
       documentingAddonAt: '../ember-formidable',
-      addonSrcFolder: 'source',
     },
   });
 
