@@ -54,7 +54,20 @@ const DATA_DISABLED = 'data-formidable-disabled';
 
 const UNREGISTERED_ATTRIBUTE = 'data-formidable-unregistered';
 
-const inputUtils = (input: HTMLInputElement) => {
+const inputUtils = (
+  input: HTMLInputElement,
+): {
+  setAttribute: (
+    attribute: string,
+    value: string | number | undefined | boolean,
+  ) => void;
+  isFormInput: boolean;
+  isInput: boolean;
+  isTextarea: boolean;
+  isSelect: boolean;
+  isCheckbox: boolean;
+  isRadio: boolean;
+} => {
   return {
     setAttribute: (
       attribute: string,
