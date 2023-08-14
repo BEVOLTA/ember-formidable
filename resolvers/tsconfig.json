@@ -1,15 +1,25 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "commonjs",
-    "lib": ["es2017", "es7", "es6", "dom"],
-    "outDir": "dist",
+    "sourceMap": true,
+    "module": "ESNext",
+    "target": "ES2017",
+    "moduleResolution": "node",
+    "skipLibCheck": true,
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "NodeNext",
-    "declaration": true
-  },
-  "exclude": ["node_modules", "dist"]
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "strictNullChecks": true,
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
+    "types": ["vitest/globals"],
+    "paths": {
+      "ember-formidable-resolvers": ["."]
+    }
+  }
 }

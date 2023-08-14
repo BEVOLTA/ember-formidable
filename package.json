@@ -13,6 +13,7 @@
     "start": "concurrently 'npm:start:*' --restart-after 5000 --prefix-colors cyan,white,yellow",
     "start:addon": "pnpm --filter ember-formidable start --no-watch.clearScreen",
     "start:test-app": "pnpm --filter test-app start",
+    "start:docs": "pnpm --filter docs start",
     "test": "pnpm --filter '*' test"
   },
   "devDependencies": {

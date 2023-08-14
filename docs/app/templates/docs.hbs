@@ -1,0 +1,43 @@
+<DocsViewer as |viewer|>
+  <viewer.nav as |nav|>
+    <nav.section>Introduction</nav.section>
+    <nav.item @label="Quick start" @route="docs.quick-start" />
+    <nav.item @label="Usage" @route="docs.usage" />
+    <nav.item @label="Register inputs" @route="docs.register-inputs" />
+
+    <nav.section>Formidable</nav.section>
+    <nav.item @label="Formidable API" @route="docs.formidable" />
+    <nav.item @label="Update events" @route="docs.update-events" />
+    <nav.item @label="Reset" @route="docs.reset" />
+    <nav.item @label="Get and set values" @route="docs.get-set" />
+    <nav.item @label="Form and Field states" @route="docs.states" />
+    <nav.item @label="Dealing with validation" @route="docs.validation" />
+
+    <nav.section>Examples</nav.section>
+    <nav.subnav as |nav|>
+      <nav.section>Form</nav.section>
+      <nav.item @label="Basic form" @route="docs.examples.basic-example" />
+      <nav.item @label="Model form" @route="docs.examples.model" />
+    </nav.subnav>
+    <nav.subnav as |nav|>
+      <nav.section>Inputs</nav.section>
+      <nav.item @label="Custom inputs" @route="docs.examples.custom-inputs" />
+    </nav.subnav>
+    <nav.subnav as |nav|>
+      <nav.section>Validation</nav.section>
+      <nav.item
+        @label="Custom validation"
+        @route="docs.examples.custom-validation"
+      />
+      <nav.item
+        @label="Native validation"
+        @route="docs.examples.native-validation"
+      />
+    </nav.subnav>
+  </viewer.nav>
+
+  <viewer.main>
+    {{outlet}}
+  </viewer.main>
+
+</DocsViewer>
