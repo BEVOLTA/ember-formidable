@@ -6,6 +6,6 @@ export default class ApplicationRoute extends Route {
   @service router!: RouterService;
 
   beforeModel() {
-    this.router.replaceWith('docs.installation');
+    this.router.replaceWith('docs.quick-start');
   }
 }
