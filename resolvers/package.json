@@ -6,7 +6,7 @@
     "build": "tsc",
     "build:yup": "microbundle --cwd yup",
     "lint": "eslint --fix 'src/**/*.ts'",
-    "test": "jest --passWithNoTests"
+    "test": "vitest --passWithNoTests"
   },
   "author": "shishouille",
   "license": "MIT",
