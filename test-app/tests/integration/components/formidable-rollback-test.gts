@@ -37,6 +37,35 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#is-submitted').doesNotExist();
   });
 
+  test('Rollback -- defaultValue -- The default value should be reset', async function (this: FormidableContext, assert) {
+    this.values = {
+      foo: 'DEFAULT',
+    };
+
+    await render(hbs`
+      <Formidable @values={{this.values}} as |values api|>
+        <form {{on "submit" api.onSubmit}}>
+          <input type="text" id="foo" {{api.register "foo"}} />
+          <input type="text" id="bar" {{api.register "bar"}} />
+          <button
+            id="rollback"
+            type="button"
+            {{on "click" (fn api.rollback "foo" (hash defaultValue="Shiny and new!"))}}
+          >
+            ROLLBACK
+          </button>
+          <p id="df-foo">{{get api.defaultValues 'foo'}}</p>
+        </form>
+      </Formidable>
+    `);
+
+    assert.dom('#df-foo').hasText('DEFAULT');
+    await fillIn('#foo', 'UPDATED');
+    await click('#rollback');
+    assert.dom('#df-foo').hasText('Shiny and new!');
+    assert.dom('#foo').hasValue('Shiny and new!');
+  });
+
   test('Rollback -- number -- no options -- It should rollback the value ', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 404,
