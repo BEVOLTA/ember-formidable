@@ -39,9 +39,12 @@ import type {
   FormidableArgs,
   RegisterOptions,
 } from '../../index';
+
+// eslint-disable-next-line @typescript-eslint/ban-types
 let Model: Function | undefined;
 
 if (macroCondition(dependencySatisfies('ember-data', '*'))) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
   Model = (importSync('@ember-data/model') as { default: Function }).default;
 }
 
@@ -56,7 +59,7 @@ const inputUtils = (input: HTMLInputElement) => {
     setAttribute: (
       attribute: string,
       value: string | number | undefined | boolean,
-    ) => {
+    ): void => {
       if (_isNil(value) || !`${value}`.trim()) {
         input.removeAttribute(attribute);
       } else {
@@ -72,7 +75,10 @@ const inputUtils = (input: HTMLInputElement) => {
   };
 };
 
-const formatValue = (value: any, formatOptions: FormatOptions | undefined) => {
+const formatValue = (
+  value: any,
+  formatOptions: FormatOptions | undefined,
+): any => {
   if (!formatOptions) {
     return value;
   }
@@ -138,7 +144,7 @@ export default class Formidable<
   rollbackValues: Values;
 
   // --- UTILS
-  get isModel() {
+  get isModel(): boolean {
     if (!Model) {
       return false;
     }
@@ -150,15 +156,15 @@ export default class Formidable<
     return taskFor(this.submit).isRunning;
   }
 
-  get isValidating() {
+  get isValidating(): boolean {
     return taskFor(this.validate).isRunning;
   }
 
-  get isValid() {
+  get isValid(): boolean {
     return _isEmpty(this.errors);
   }
 
-  get isInvalid() {
+  get isInvalid(): boolean {
     return !this.isValid;
   }
 
@@ -171,17 +177,17 @@ export default class Formidable<
     ) as InvalidFields<Values>;
   }
 
-  get errorMessages() {
+  get errorMessages(): string[] {
     return Object.values(this.errors)
       .flat()
       .map((err) => err.message);
   }
 
-  get isDirty() {
+  get isDirty(): boolean {
     return !this.isPristine;
   }
 
-  get isPristine() {
+  get isPristine(): boolean {
     return _isEmpty(this.dirtyFields);
   }
 
@@ -237,7 +243,7 @@ export default class Formidable<
     };
   }
 
-  constructor(owner: any, args: FormidableArgs<Values, ValidatorOptions>) {
+  constructor(owner: unknown, args: FormidableArgs<Values, ValidatorOptions>) {
     super(owner, args);
     if (this.isModel) {
       const { values = {} as Values } = this.args;
@@ -261,6 +267,7 @@ export default class Formidable<
     }
   }
 
+  // eslint-disable-next-line ember/require-super-in-lifecycle-hooks
   willDestroy(): void {
     if (this.args.serviceId) {
       this.formidable._unregister(this.args.serviceId);
@@ -273,7 +280,7 @@ export default class Formidable<
   rollback(
     field?: keyof Values,
     { keepError, keepDirty, defaultValue }: RollbackContext = {},
-  ) {
+  ): void {
     if (field) {
       this.values[field] = (defaultValue ??
         this.rollbackValues[field] ??
@@ -319,7 +326,7 @@ export default class Formidable<
   }
 
   @action
-  getValue(field: keyof Values) {
+  getValue(field: keyof Values): unknown {
     if (
       this.isModel &&
       this.parsedValues['relationshipFor']?.(field)?.meta?.kind == 'belongsTo'
@@ -331,12 +338,12 @@ export default class Formidable<
   }
 
   @action
-  getValues() {
+  getValues(): Values {
     return this.parsedValues;
   }
 
   @action
-  setError(field: keyof Values, error: string | FormidableError) {
+  setError(field: keyof Values, error: string | FormidableError): void {
     if (typeof error === 'string') {
       this.errors[field] = [
         ...(this.errors[field] ?? []),
@@ -359,14 +366,14 @@ export default class Formidable<
   }
 
   @action
-  clearError(field: keyof Values) {
+  clearError(field: keyof Values): void {
     if (this.errors[field]) {
       delete this.errors[field];
     }
   }
 
   @action
-  clearErrors() {
+  clearErrors(): void {
     this.errors = new TrackedObject({});
   }
 
@@ -379,7 +386,7 @@ export default class Formidable<
       keepValue,
       keepDefaultValue,
     }: UnregisterContext = {},
-  ) {
+  ): void {
     const element = this.getDOMElement(field as string);
 
     assert('FORMIDABLE - No input element found to unregister', !!element);
@@ -409,7 +416,7 @@ export default class Formidable<
     field: keyof Values,
     value: string | boolean | undefined,
     { shouldValidate, shouldDirty }: SetContext = {},
-  ) {
+  ): TaskGenerator<void> {
     if (this.isModel) {
       this.values['set'](field, formatValue(value, this.parsers[field]));
     } else {
@@ -427,7 +434,7 @@ export default class Formidable<
   *setFocus(
     field: keyof Values,
     { shouldValidate, shouldDirty }: SetContext = {},
-  ) {
+  ): TaskGenerator<void> {
     this.getDOMElement(field as string)?.focus();
 
     if (shouldDirty) {
@@ -554,24 +561,24 @@ export default class Formidable<
         if (isRadio || isCheckbox) {
           input.checked = input.value === value;
         } else if (isInput || isTextarea) {
-          input.value = value ?? '';
+          input.value = (value as string) ?? '';
         }
       }
 
       // HANDLERS
-      const handleChange = (event: Event) => {
+      const handleChange = (event: Event): void => {
         taskFor(this.onChange).perform(name, event, onChange);
       };
 
-      const handleBlur = async (event: Event) => {
+      const handleBlur = async (event: Event): Promise<void> => {
         taskFor(this.onBlur).perform(name, event, onBlur);
       };
 
-      const handleFocus = async (event: Event) => {
+      const handleFocus = async (event: Event): Promise<void> => {
         taskFor(this.onFocus).perform(name, event, onFocus);
       };
 
-      const preventDefault = (e: Event) => {
+      const preventDefault = (e: Event): void => {
         if (!this.args.shouldUseNativeValidation) {
           e.preventDefault();
         }
@@ -593,7 +600,7 @@ export default class Formidable<
         input.addEventListener('focusin', handleFocus);
       }
 
-      return () => {
+      return (): void => {
         input.removeEventListener(
           isInput || isSelect || isTextarea ? 'input' : 'change',
           handleChange,
@@ -615,7 +622,7 @@ export default class Formidable<
     field: keyof Values,
     event: Event,
     onChange?: (event: Event, api: FormidableApi<GenericObject>) => void,
-  ) {
+  ): TaskGenerator<void> {
     assert(
       'FORMIDABLE - No input element found when value got set.',
       !!event.target,
@@ -643,7 +650,7 @@ export default class Formidable<
     field: keyof Values,
     event: Event,
     onBlur?: (event: Event, api: FormidableApi<GenericObject>) => void,
-  ) {
+  ): TaskGenerator<void> {
     assert(
       'FORMIDABLE - No input element found when value got set.',
       !!event.target,
@@ -667,7 +674,7 @@ export default class Formidable<
     field: keyof Values,
     event: Event,
     onFocus?: (event: Event, api: FormidableApi<GenericObject>) => void,
-  ) {
+  ): TaskGenerator<void> {
     assert(
       'FORMIDABLE - No input element found when value got set.',
       !!event.target,
@@ -688,14 +695,14 @@ export default class Formidable<
   }
 
   @action
-  dirtyField(field: keyof Values) {
+  dirtyField(field: keyof Values): void {
     this.dirtyFields[field] = !_isEqual(
       get(this.rollbackValues, field),
       get(this.parsedValues, field),
     );
   }
 
-  private getDOMElement(name: string) {
+  private getDOMElement(name: string): HTMLInputElement | null {
     return (
       (document.querySelector(
         `[name="${name as string}"]`,
