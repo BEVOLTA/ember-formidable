@@ -20,7 +20,6 @@ module('Integration | Component | formidable', function (hooks) {
 
   hooks.beforeEach(function (this: FormidableContext) {
     this.updateEvents = ['onChange'];
-    //@ts-ignore
     this.validator = yupResolver(userSchema);
     this.values = validUser;
   });

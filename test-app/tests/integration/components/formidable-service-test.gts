@@ -30,21 +30,15 @@ module('Integration | Component | formidable', function (hooks) {
 
     await click('#submit');
     assert.strictEqual(
-      // @ts-ignore
       formidable.getFormidableApi('test').values.foo,
       'CHANGED',
     );
-    assert.strictEqual(
-      // @ts-ignore
-      formidable.getValue('test', 'foo'),
-      'CHANGED',
-    );
+    assert.strictEqual(formidable.getValue('test', 'foo'), 'CHANGED');
 
-    assert.deepEqual(
-      // @ts-ignore
-      formidable.getValues('test', ['foo', 'bar']),
-      { foo: 'CHANGED', bar: 'BAZ' },
-    );
+    assert.deepEqual(formidable.getValues('test', ['foo', 'bar']), {
+      foo: 'CHANGED',
+      bar: 'BAZ',
+    });
   });
 
   test('Service -- It should unregister', async function (this: FormidableContext, assert) {
@@ -64,18 +58,12 @@ module('Integration | Component | formidable', function (hooks) {
       </Formidable>
     `);
 
-    assert.ok(
-      // @ts-ignore
-      formidable.getFormidableApi('test'),
-    );
+    assert.ok(formidable.getFormidableApi('test'));
 
     await render(hbs`
       <div>EMPTY</div>
   `);
 
-    assert.throws(
-      // @ts-ignore
-      () => formidable.getFormidableApi('test'),
-    );
+    assert.throws(() => formidable.getFormidableApi('test'));
   });
 });

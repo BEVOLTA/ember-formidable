@@ -180,8 +180,6 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('Values -- It should rollback the value -- model', async function (this: FormidableContext, assert) {
     const store = this.owner.lookup('service:store');
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     this.values = store.createRecord('child', {
       str: 'Child',
       bool: false,

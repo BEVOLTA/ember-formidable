@@ -35,7 +35,6 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('setFocus -- shouldValidate -- Should focus and validate the input when triggered', async function (this: FormidableContext, assert) {
-    //@ts-ignore
     this.validator = yupResolver(userSchema);
     this.values = { ...validUser, name: '' };
     this.updateEvents = ['onFocus'];

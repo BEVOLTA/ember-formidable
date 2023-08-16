@@ -178,7 +178,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert
       .dom('#foo')
       .hasValue(
-        'Fri May 05 2000 02:00:00 GMT+0200 (Central European Summer Time)'
+        'Fri May 05 2000 02:00:00 GMT+0200 (Central European Summer Time)',
       );
     await fillIn('#foo', '2001-05-05');
     await click('#submit');
@@ -233,8 +233,6 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('Values -- model -- It should update the value ', async function (this: FormidableContext, assert) {
     const store = this.owner.lookup('service:store');
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     this.values = store.createRecord('child', {
       str: 'Child',
       bool: false,

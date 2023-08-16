@@ -31,7 +31,7 @@ const formatYupError = (errors: Array<yup.ValidationError>) => {
   }, {});
 };
 
-export function yupResolver<TFieldValues extends object = {}>(
+export function yupResolver<TFieldValues extends object = object>(
   schema: yup.ObjectSchema<TFieldValues>,
   options: Parameters<(typeof schema)['validate']>[1] & ResolverOptions = {},
 ) {

@@ -44,7 +44,6 @@ const userSchema = yup.object({
   // Custom validation method to check if the user is at least 18 years old
   adult: yup
     .boolean()
-    //@ts-ignore
     .test('is-adult', 'User must be at least 18 years old.', (value) => {
       const age = yup.number().integer().positive().validateSync(value);
       return age ?? 0 >= 18;
@@ -82,7 +81,7 @@ module('Integration | Component | formidable', function (hooks) {
 
   hooks.beforeEach(function (this: FormidableContext) {
     this.updateEvents = ['onSubmit'];
-    //@ts-ignore
+
     this.validator = yupResolver(userSchema);
     this.values = validUser;
   });

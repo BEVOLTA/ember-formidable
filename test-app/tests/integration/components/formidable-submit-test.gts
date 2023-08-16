@@ -19,7 +19,6 @@ module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
   test('isSubmitSuccessful -- Should be OK when submitting', async function (this: FormidableContext, assert) {
-    //@ts-ignore
     this.validator = yupResolver(userSchema);
     this.values = validUser;
 
@@ -41,7 +40,6 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('isSubmitSuccessful -- Should not be true if there are errors', async function (this: FormidableContext, assert) {
-    //@ts-ignore
     this.validator = yupResolver(userSchema);
     this.values = validUser;
 
@@ -65,7 +63,6 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('isSubmitted -- Should not be true even with errors', async function (this: FormidableContext, assert) {
-    //@ts-ignore
     this.validator = yupResolver(userSchema);
     this.values = validUser;
 
@@ -113,7 +110,6 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('submitCount -- Should increment when submitting', async function (this: FormidableContext, assert) {
-    // @ts-ignore
     this.validator = yupResolver(userSchema);
     this.values = validUser;
 
@@ -141,7 +137,6 @@ module('Integration | Component | formidable', function (hooks) {
   test('onSubmit -- Should have a custom onSubmit', async function (this: FormidableContext & {
     submitMessage?: string;
   }, assert) {
-    // @ts-ignore
     this.validator = yupResolver(userSchema);
     this.values = validUser;
 

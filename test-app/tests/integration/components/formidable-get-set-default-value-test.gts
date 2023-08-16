@@ -152,7 +152,6 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('SetValue -- shouldValidate -- It should update and validate the field', async function (this: FormidableContext, assert) {
-    //@ts-ignore
     this.validator = yupResolver(userSchema);
     this.values = validUser;
 

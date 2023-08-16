@@ -13,7 +13,6 @@ module('Integration | Component | formidable', function (hooks) {
       foo: 'DEFAULT',
     };
     this.onChange = (_event, api) => {
-      // @ts-ignore
       api.setValue('foo', '🔆');
     };
     await render(hbs`
@@ -34,7 +33,6 @@ module('Integration | Component | formidable', function (hooks) {
       foo: 'DEFAULT',
     };
     this.onFocus = (_event, api) => {
-      // @ts-ignore
       api.setValue('foo', '❄️');
     };
     await render(hbs`
@@ -55,7 +53,6 @@ module('Integration | Component | formidable', function (hooks) {
       foo: 'DEFAULT',
     };
     this.onBlur = (_event, api) => {
-      // @ts-ignore
       api.setValue('foo', 'CHANGED');
     };
     await render(hbs`
