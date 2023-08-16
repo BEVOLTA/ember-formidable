@@ -67,6 +67,7 @@ const inputUtils = (
   isSelect: boolean;
   isCheckbox: boolean;
   isRadio: boolean;
+  name: string | null;
 } => {
   return {
     setAttribute: (
@@ -85,6 +86,7 @@ const inputUtils = (
     isSelect: input.tagName === 'SELECT',
     isCheckbox: input.type === 'checkbox',
     isRadio: input.type === 'radio',
+    name: input.getAttribute('name'),
   };
 };
 
@@ -507,7 +509,7 @@ export default class Formidable<
   register = modifier(
     (
       input: HTMLInputElement,
-      [name]: [keyof Values],
+      [_name]: [keyof Values | undefined],
       {
         disabled,
         required,
@@ -533,7 +535,20 @@ export default class Formidable<
         isRadio,
         isTextarea,
         isSelect,
+        name: attrName,
       } = inputUtils(input);
+
+      const name = _name ?? attrName;
+
+      assert(
+        `FORMIDABLE - Your element must have a name ; either specify it in the register parameters, or assign it directly to the element.
+        Examples:
+        <input name="foo" {{api.register}} />
+        OR
+        <input {{api.register "foo"}} />
+      `,
+        !!name,
+      );
 
       // PARSERS
       this.parsers[name] = {

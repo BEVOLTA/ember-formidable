@@ -31,6 +31,26 @@ module('Integration | Component | formidable', function (hooks) {
     await click('#submit');
   });
 
+  test('Values -- no name positionnal -- It should update the value', async function (this: FormidableContext, assert) {
+    this.values = {
+      foo: 'DEFAULT',
+    };
+    this.onUpdate = (data: { foo: string }) => {
+      assert.strictEqual(data.foo, 'CHANGED');
+    };
+    await render(hbs`
+      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
+        <form {{on "submit" api.onSubmit}}>
+          <input type="text" id="foo" name="foo" {{api.register}} />
+          <button id="submit"  type="submit">SUBMIT</button>
+        </form>
+      </Formidable>
+    `);
+    assert.dom('#foo').hasValue('DEFAULT');
+    await fillIn('#foo', 'CHANGED');
+    await click('#submit');
+  });
+
   test('Values -- textarea -- It should update the value ', async function (this: FormidableContext, assert) {
     this.values = {
       foo: 'DEFAULT',
@@ -175,11 +195,7 @@ module('Integration | Component | formidable', function (hooks) {
         </form>
       </Formidable>
     `);
-    assert
-      .dom('#foo')
-      .hasValue(
-        'Fri May 05 2000 02:00:00 GMT+0200 (Central European Summer Time)',
-      );
+    assert.dom('#foo').hasValue(new Date('2000-05-05').toString());
     await fillIn('#foo', '2001-05-05');
     await click('#submit');
   });

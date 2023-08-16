@@ -187,7 +187,7 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
    */
   register: FunctionBasedModifier<{
     Args: {
-      Positional: [keyof Values];
+      Positional: [keyof Values | undefined];
       Named: RegisterOptions;
     };
     Element: HTMLInputElement;
