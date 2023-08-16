@@ -3,7 +3,6 @@ import { taskFor } from 'ember-concurrency-ts';
 import { modifier } from 'ember-modifier';
 import _cloneDeep from 'lodash/cloneDeep';
 import _isEmpty from 'lodash/isEmpty';
-import _isNil from 'lodash/isNil';
 import _isObject from 'lodash/isObject';
 import _set from 'lodash/set';
 import _unset from 'lodash/unset';
@@ -20,6 +19,7 @@ import {
 } from '@embroider/macros';
 import Component from '@glimmer/component';
 
+import { inputUtils } from '../../-private/utils';
 import { UnregisterContext } from '../../-private/types';
 import FormidableService from '../../services/formidable';
 
@@ -53,42 +53,6 @@ const DATA_REQUIRED = 'data-formidable-required';
 const DATA_DISABLED = 'data-formidable-disabled';
 
 const UNREGISTERED_ATTRIBUTE = 'data-formidable-unregistered';
-
-const inputUtils = (
-  input: HTMLInputElement,
-): {
-  setAttribute: (
-    attribute: string,
-    value: string | number | undefined | boolean,
-  ) => void;
-  isFormInput: boolean;
-  isInput: boolean;
-  isTextarea: boolean;
-  isSelect: boolean;
-  isCheckbox: boolean;
-  isRadio: boolean;
-  name: string | null;
-} => {
-  return {
-    setAttribute: (
-      attribute: string,
-      value: string | number | undefined | boolean,
-    ): void => {
-      if (_isNil(value) || !`${value}`.trim()) {
-        input.removeAttribute(attribute);
-      } else {
-        input.setAttribute(attribute, `${value}`);
-      }
-    },
-    isFormInput: ['INPUT', 'SELECT', 'TEXTAREA'].includes(input.tagName),
-    isInput: input.tagName === 'INPUT',
-    isTextarea: input.tagName === 'TEXTAREA',
-    isSelect: input.tagName === 'SELECT',
-    isCheckbox: input.type === 'checkbox',
-    isRadio: input.type === 'radio',
-    name: input.getAttribute('name'),
-  };
-};
 
 const formatValue = (
   value: any,
