@@ -33,8 +33,7 @@
     "ember-concurrency": "2.3.7",
     "ember-concurrency-ts": "0.3.1",
     "tracked-built-ins": "3.1.1",
-    "lodash": "4.17.21",
-    "ember-data": "4.12.3"
+    "lodash": "4.17.21"
   },
   "devDependencies": {
     "@babel/core": "7.22.8",
@@ -93,6 +92,7 @@
     "@rollup/plugin-node-resolve": "^15.1.0",
     "concurrently": "^8.0.1",
     "ember-template-lint": "5.11.0",
+    "ember-data": "4.12.3",
     "prettier": "3.0.0",
     "rollup": "3.26.2",
     "rollup-plugin-copy": "3.4.0",
