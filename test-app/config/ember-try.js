@@ -58,35 +58,35 @@ module.exports = async function () {
         },
       },
       embroiderSafe({
-        name: 'embroider-safe 4.8.0',
+        name: 'embroider-safe-4.8.0',
         npm: {
           devDependencies: {
             'ember-source': '~4.8.0',
-            '@embroider/core': '2.1.2-unstable.3a9d8ad',
-            '@embroider/compat': '2.1.2-unstable.3a9d8ad',
-            '@embroider/webpack': '2.1.2-unstable.3a9d8ad',
+            '@embroider/core': '3.0.0',
+            '@embroider/compat': '3.0.0',
+            '@embroider/webpack': '3.0.0',
           },
         },
       }),
       embroiderOptimized({
-        name: 'embroider-optimized 4.8.0',
+        name: 'embroider-optimized-4.8.0',
         npm: {
           devDependencies: {
             'ember-source': '~4.8.0',
-            '@embroider/core': '2.1.2-unstable.3a9d8ad',
-            '@embroider/compat': '2.1.2-unstable.3a9d8ad',
-            '@embroider/webpack': '2.1.2-unstable.3a9d8ad',
+            '@embroider/core': '3.0.0',
+            '@embroider/compat': '3.0.0',
+            '@embroider/webpack': '3.0.0',
           },
         },
       }),
       embroiderOptimized({
-        name: 'embroider-optimized release',
+        name: 'embroider-optimized-release',
         npm: {
           devDependencies: {
             'ember-source': await getChannelURL('release'),
-            '@embroider/core': '2.1.2-unstable.3a9d8ad',
-            '@embroider/compat': '2.1.2-unstable.3a9d8ad',
-            '@embroider/webpack': '2.1.2-unstable.3a9d8ad',
+            '@embroider/core': '3.0.0',
+            '@embroider/compat': '3.0.0',
+            '@embroider/webpack': '3.0.0',
           },
         },
       }),

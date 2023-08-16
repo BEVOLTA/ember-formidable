@@ -66,9 +66,9 @@ jobs:
           - ember-beta
           - ember-canary
           - ember-classic
-          - "'embroider-safe 4.8.0'"
-          - "'embroider-optimized 4.8.0'"
-          - "'embroider-optimized release'"
+          - "'embroider-safe-4.8.0'"
+          - "'embroider-optimized-4.8.0'"
+          - "'embroider-optimized-release'"
 
     steps:
       - uses: actions/checkout@v3
