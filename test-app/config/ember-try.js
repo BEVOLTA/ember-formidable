@@ -58,7 +58,7 @@ module.exports = async function () {
         },
       },
       embroiderSafe({
-        name: 'ember-lts-4.8 + embroider-safe',
+        name: 'embroider-safe 4.8.0',
         npm: {
           devDependencies: {
             'ember-source': '~4.8.0',
@@ -69,7 +69,7 @@ module.exports = async function () {
         },
       }),
       embroiderOptimized({
-        name: 'ember-lts-4.8 + embroider-optimized',
+        name: 'embroider-optimized 4.8.0',
         npm: {
           devDependencies: {
             'ember-source': '~4.8.0',
@@ -80,7 +80,7 @@ module.exports = async function () {
         },
       }),
       embroiderOptimized({
-        name: 'ember-release + embroider-optimized',
+        name: 'embroider-optimized release',
         npm: {
           devDependencies: {
             'ember-source': await getChannelURL('release'),
