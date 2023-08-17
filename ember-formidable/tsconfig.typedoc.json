@@ -4,7 +4,11 @@
     "baseUrl": "./"
   },
   "typedocOptions": {
-    "entryPoints": ["dist-types/*.d.ts", "dist-types/components/**.d.ts"]
+    "entryPoints": [
+      "dist-types/*.d.ts",
+      "dist-types/components/**.d.ts",
+      "dist-types/services/**.d.ts"
+    ]
   },
   "include": ["dist-types/*.d.ts", "dist-types/**/*.d.ts"]
 }

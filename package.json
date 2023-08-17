@@ -31,5 +31,35 @@
   "volta": {
     "node": "18.17.1",
     "pnpm": "8.6.12"
+  },
+  "pnpm": {
+    "overrides": {
+      "@glimmer/validator": "^0.84.3",
+      "ember-async-data": "1.0.1",
+      "ember-cli-babel": "^7.26.11"
+    },
+    "packageExtensions": {
+      "ember-qunit": {
+        "peerDependencies": {
+          "@ember/test-helpers": "^2.7.0 || >= 3.0.0"
+        }
+      },
+      "ember-headless-form": {
+        "dependencies": {
+          "ember-cached-decorator-polyfill": "*",
+          "ember-async-data": "^1.0.1"
+        }
+      }
+    },
+    "peerDependencyRules": {
+      "allowAny": [
+        "typescript",
+        "ember-source"
+      ],
+      "ignoreMissing": [
+        "webpack",
+        "rsvp"
+      ]
+    }
   }
 }

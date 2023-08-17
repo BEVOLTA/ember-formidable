@@ -1,44 +1,41 @@
-import { restartableTask, TaskGenerator } from 'ember-concurrency';
+import Component from '@glimmer/component';
+import { assert } from '@ember/debug';
+import { action, get } from '@ember/object';
+import { inject as service } from '@ember/service';
+import { dependencySatisfies, importSync, macroCondition } from '@embroider/macros';
+
+import { restartableTask } from 'ember-concurrency';
 import { taskFor } from 'ember-concurrency-ts';
 import { modifier } from 'ember-modifier';
 import _cloneDeep from 'lodash/cloneDeep';
 import _isEmpty from 'lodash/isEmpty';
+import _isEqual from 'lodash/isEqual';
 import _isObject from 'lodash/isObject';
 import _set from 'lodash/set';
 import _unset from 'lodash/unset';
-import _isEqual from 'lodash/isEqual';
 import { tracked, TrackedObject } from 'tracked-built-ins';
 
-import { assert } from '@ember/debug';
-import { action, get } from '@ember/object';
-import { inject as service } from '@ember/service';
-import {
-  dependencySatisfies,
-  importSync,
-  macroCondition,
-} from '@embroider/macros';
-import Component from '@glimmer/component';
-
-import { inputUtils } from '../../-private/utils';
-import { UnregisterContext } from '../../-private/types';
-import FormidableService from '../../services/formidable';
+import { inputUtils } from '../-private/utils';
 
 import type {
-  UpdateEvents,
-  GenericObject,
-  FormidableErrors,
   DirtyFields,
-  InvalidFields,
-  FormatOptions,
-  Parser,
-  FormidableError,
-  RollbackContext,
-  SetContext,
   FieldState,
+  FormatOptions,
   FormidableApi,
   FormidableArgs,
+  FormidableError,
+  FormidableErrors,
+  GenericObject,
+  InvalidFields,
+  Parser,
   RegisterOptions,
-} from '../../index';
+  RollbackContext,
+  SetContext,
+  UnregisterContext,
+  UpdateEvents,
+} from '../index';
+import type FormidableService from '../services/formidable';
+import type { TaskGenerator } from 'ember-concurrency';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 let Model: Function | undefined;
@@ -54,28 +51,29 @@ const DATA_DISABLED = 'data-formidable-disabled';
 
 const UNREGISTERED_ATTRIBUTE = 'data-formidable-unregistered';
 
-const formatValue = (
-  value: any,
-  formatOptions: FormatOptions | undefined,
-): any => {
+const formatValue = (value: any, formatOptions: FormatOptions | undefined): any => {
   if (!formatOptions) {
     return value;
   }
-  const { valueAsNumber, valueAsDate, valueFormat, valueAsBoolean } =
-    formatOptions;
+
+  const { valueAsNumber, valueAsDate, valueFormat, valueAsBoolean } = formatOptions;
 
   if (valueFormat) {
     return valueFormat(value);
   }
+
   if (valueAsNumber) {
     return +value;
   }
+
   if (valueAsDate) {
     return new Date(value);
   }
+
   if (valueAsBoolean) {
     return Boolean(value);
   }
+
   return value;
 };
 
@@ -110,9 +108,7 @@ export default class Formidable<
   errors: FormidableErrors = new TrackedObject({});
 
   // --- DIRTY FIELDS
-  dirtyFields: DirtyFields<Values> = new TrackedObject(
-    {},
-  ) as DirtyFields<Values>;
+  dirtyFields: DirtyFields<Values> = new TrackedObject({}) as DirtyFields<Values>;
 
   // --- PARSER
   parsers: Parser<Values> = {} as Parser<Values>;
@@ -127,6 +123,7 @@ export default class Formidable<
     if (!Model) {
       return false;
     }
+
     return this.args.values instanceof Model;
   }
 
@@ -148,12 +145,9 @@ export default class Formidable<
   }
 
   get invalidFields(): InvalidFields<Values> {
-    return Object.keys(this.errors).reduce(
-      (invalid: Record<string, boolean>, key) => {
-        return _set(invalid, key, true);
-      },
-      {},
-    ) as InvalidFields<Values>;
+    return Object.keys(this.errors).reduce((invalid: Record<string, boolean>, key) => {
+      return _set(invalid, key, true);
+    }, {}) as InvalidFields<Values>;
   }
 
   get errorMessages(): string[] {
@@ -187,11 +181,8 @@ export default class Formidable<
   get api(): FormidableApi<Values> {
     return {
       values: this.parsedValues,
-      setValue: (
-        field: keyof Values,
-        value: string | boolean | undefined,
-        context?: SetContext,
-      ) => taskFor(this.setValue).perform(field, value, context),
+      setValue: (field: keyof Values, value: string | boolean | undefined, context?: SetContext) =>
+        taskFor(this.setValue).perform(field, value, context),
       getValue: this.getValue,
       getValues: this.getValues,
       getFieldState: this.getFieldState,
@@ -224,11 +215,14 @@ export default class Formidable<
 
   constructor(owner: unknown, args: FormidableArgs<Values, ValidatorOptions>) {
     super(owner, args);
+
     if (this.isModel) {
       const { values = {} as Values } = this.args;
       const rollbackValues: Values = {} as Values;
+
       (values as Values)['eachAttribute']((key: keyof Values) => {
         const value = get(values, key);
+
         if (_isObject(value)) {
           rollbackValues[key] = _cloneDeep(value);
         } else {
@@ -237,10 +231,9 @@ export default class Formidable<
       });
       this.rollbackValues = new TrackedObject(rollbackValues);
     } else {
-      this.rollbackValues = new TrackedObject(
-        _cloneDeep(this.args.values ?? {}) as Values,
-      );
+      this.rollbackValues = new TrackedObject(_cloneDeep(this.args.values ?? {}) as Values);
     }
+
     if (this.args.serviceId) {
       this.formidable._register(this.args.serviceId, () => this.api);
     }
@@ -272,6 +265,7 @@ export default class Formidable<
       if (!keepError) {
         delete this.errors[field];
       }
+
       if (!keepDirty) {
         delete this.dirtyFields[field as keyof Values];
       }
@@ -287,9 +281,11 @@ export default class Formidable<
       if (!keepError) {
         this.errors = new TrackedObject({});
       }
+
       if (!keepDirty) {
         this.dirtyFields = new TrackedObject({}) as DirtyFields<Values>;
       }
+
       this.isSubmitted = false;
     }
   }
@@ -306,10 +302,7 @@ export default class Formidable<
 
   @action
   getValue(field: keyof Values): unknown {
-    if (
-      this.isModel &&
-      this.parsedValues['relationshipFor']?.(field)?.meta?.kind == 'belongsTo'
-    ) {
+    if (this.isModel && this.parsedValues['relationshipFor']?.(field)?.meta?.kind == 'belongsTo') {
       return this.parsedValues['belongsTo'](field).value();
     }
 
@@ -359,18 +352,14 @@ export default class Formidable<
   @action
   unregister(
     field: keyof Values,
-    {
-      keepError,
-      keepDirty,
-      keepValue,
-      keepDefaultValue,
-    }: UnregisterContext = {},
+    { keepError, keepDirty, keepValue, keepDefaultValue }: UnregisterContext = {},
   ): void {
     const element = this.getDOMElement(field as string);
 
     assert('FORMIDABLE - No input element found to unregister', !!element);
 
     const { setAttribute } = inputUtils(element);
+
     setAttribute(UNREGISTERED_ATTRIBUTE, true);
 
     if (!keepError) {
@@ -401,9 +390,11 @@ export default class Formidable<
     } else {
       this.values[field] = value as Values[keyof Values];
     }
+
     if (shouldDirty) {
       this.dirtyField(field);
     }
+
     if (shouldValidate) {
       yield taskFor(this.validate).perform(field);
     }
@@ -431,12 +422,11 @@ export default class Formidable<
     if (!this.validator) {
       return;
     }
-    const validation: FormidableErrors = yield this.validator(
-      this.parsedValues,
-      {
-        ...this.args.validatorOptions,
-      } as ValidatorOptions,
-    );
+
+    const validation: FormidableErrors = yield this.validator(this.parsedValues, {
+      ...this.args.validatorOptions,
+    } as ValidatorOptions);
+
     if (field) {
       this.errors = _set(this.errors, field, get(validation, field));
     } else {
@@ -526,6 +516,7 @@ export default class Formidable<
         setAttribute(DATA_NAME, name as string);
         setAttribute(DATA_DISABLED, disabled);
         setAttribute(DATA_REQUIRED, required);
+
         return;
       }
 
@@ -539,8 +530,8 @@ export default class Formidable<
         setAttribute('maxlength', maxLength);
 
         if (isInput) {
-          const strPattern =
-            typeof pattern === 'string' ? pattern : pattern?.toString();
+          const strPattern = typeof pattern === 'string' ? pattern : pattern?.toString();
+
           setAttribute('pattern', strPattern);
         }
       }
@@ -549,7 +540,9 @@ export default class Formidable<
         setAttribute('disabled', disabled);
         setAttribute('required', required);
         setAttribute('name', name as string);
+
         const value = this.getValue(name);
+
         if (isRadio || isCheckbox) {
           input.checked = input.value === value;
         } else if (isInput || isTextarea) {
@@ -578,10 +571,7 @@ export default class Formidable<
 
       // EVENTS
 
-      input.addEventListener(
-        isInput || isSelect || isTextarea ? 'input' : 'change',
-        handleChange,
-      );
+      input.addEventListener(isInput || isSelect || isTextarea ? 'input' : 'change', handleChange);
       input.addEventListener('invalid', preventDefault);
 
       if (onBlur || this.updateEvents.includes('onBlur')) {
@@ -602,6 +592,7 @@ export default class Formidable<
         if (onBlur || this.updateEvents.includes('onBlur')) {
           input.removeEventListener('blur', handleBlur);
         }
+
         if (onFocus || this.updateEvents.includes('onFocus')) {
           input.removeEventListener('focus', handleFocus);
         }
@@ -615,23 +606,17 @@ export default class Formidable<
     event: Event,
     onChange?: (event: Event, api: FormidableApi<GenericObject>) => void,
   ): TaskGenerator<void> {
-    assert(
-      'FORMIDABLE - No input element found when value got set.',
-      !!event.target,
-    );
+    assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
-    yield taskFor(this.setValue).perform(
-      field,
-      (event.target as HTMLInputElement).value,
-      {
-        shouldValidate: this.updateEvents.includes('onChange'),
-        shouldDirty: true,
-      },
-    );
+    yield taskFor(this.setValue).perform(field, (event.target as HTMLInputElement).value, {
+      shouldValidate: this.updateEvents.includes('onChange'),
+      shouldDirty: true,
+    });
 
     if (onChange) {
       return onChange(event, this.api as FormidableApi<GenericObject>);
     }
+
     if (this.updateEvents.includes('onChange') && this.args.onValuesChanged) {
       this.args.onValuesChanged(this.parsedValues, this.api);
     }
@@ -643,19 +628,16 @@ export default class Formidable<
     event: Event,
     onBlur?: (event: Event, api: FormidableApi<GenericObject>) => void,
   ): TaskGenerator<void> {
-    assert(
-      'FORMIDABLE - No input element found when value got set.',
-      !!event.target,
-    );
+    assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
-    yield taskFor(this.setValue).perform(
-      field,
-      (event.target as HTMLInputElement).value,
-      { shouldValidate: this.updateEvents.includes('onBlur') },
-    );
+    yield taskFor(this.setValue).perform(field, (event.target as HTMLInputElement).value, {
+      shouldValidate: this.updateEvents.includes('onBlur'),
+    });
+
     if (onBlur) {
       return onBlur(event, this.api as FormidableApi<GenericObject>);
     }
+
     if (this.updateEvents.includes('onBlur') && this.args.onValuesChanged) {
       this.args.onValuesChanged(this.parsedValues, this.api);
     }
@@ -667,16 +649,12 @@ export default class Formidable<
     event: Event,
     onFocus?: (event: Event, api: FormidableApi<GenericObject>) => void,
   ): TaskGenerator<void> {
-    assert(
-      'FORMIDABLE - No input element found when value got set.',
-      !!event.target,
-    );
+    assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
-    yield taskFor(this.setValue).perform(
-      field,
-      (event.target as HTMLInputElement).value,
-      { shouldValidate: this.updateEvents.includes('onFocus') },
-    );
+    yield taskFor(this.setValue).perform(field, (event.target as HTMLInputElement).value, {
+      shouldValidate: this.updateEvents.includes('onFocus'),
+    });
+
     if (onFocus) {
       return onFocus(event, this.api as FormidableApi<GenericObject>);
     }
@@ -696,12 +674,8 @@ export default class Formidable<
 
   private getDOMElement(name: string): HTMLInputElement | null {
     return (
-      (document.querySelector(
-        `[name="${name as string}"]`,
-      ) as HTMLInputElement | null) ??
-      (document.querySelector(
-        `[${DATA_NAME}="${name as string}"]`,
-      ) as HTMLInputElement | null)
+      (document.querySelector(`[name="${name as string}"]`) as HTMLInputElement | null) ??
+      (document.querySelector(`[${DATA_NAME}="${name as string}"]`) as HTMLInputElement | null)
     );
   }
 

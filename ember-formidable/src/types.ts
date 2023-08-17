@@ -4,17 +4,18 @@ export type UpdateEvents = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
 
 export type GenericObject = Record<string, any>;
 
-export type FormidableErrors<
-  T extends string | number | symbol = string | number | symbol,
-> = Record<T, FormidableError[]>;
+export type FormidableErrors<T extends string | number | symbol = string | number | symbol> =
+  Record<T, FormidableError[]>;
 
 export type DirtyFields<Values extends GenericObject = GenericObject> = Record<
   keyof Values,
   boolean
 >;
 
-export type InvalidFields<Values extends GenericObject = GenericObject> =
-  Record<keyof Values, boolean>;
+export type InvalidFields<Values extends GenericObject = GenericObject> = Record<
+  keyof Values,
+  boolean
+>;
 
 export type FormatOptions = Pick<
   RegisterOptions,
@@ -159,11 +160,7 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
   /**
    * This function set the value in a controlled fashion.
    */
-  setValue: (
-    field: keyof Values,
-    value: string | boolean,
-    context?: SetContext,
-  ) => void;
+  setValue: (field: keyof Values, value: string | boolean, context?: SetContext) => void;
 
   /**
    * This function get the field's value.
@@ -340,10 +337,7 @@ export interface FormidableArgs<
   /**
    * This function validates the field to return a formatted error.
    */
-  validator?: (
-    values: Values,
-    options: ResolverOptions<Options>,
-  ) => FormidableErrors<keyof Values>;
+  validator?: (values: Values, options: ResolverOptions<Options>) => FormidableErrors<keyof Values>;
 
   /**
    * If you need a context for your validator to work, you can pass it via this property.

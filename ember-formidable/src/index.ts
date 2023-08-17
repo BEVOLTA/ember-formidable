@@ -15,6 +15,7 @@ export type {
   FormidableApi,
   FormidableArgs,
   RegisterOptions,
-} from './-private/types';
+} from './types';
+
 export { default as Formidable } from './components/formidable';
 export { default as FormidableService } from './services/formidable';
