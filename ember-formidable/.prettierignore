@@ -2,8 +2,10 @@
 /blueprints/*/files/
 
 # compiled output
-/dist/
-/declarations/
+dist/
+dist-types/
 
 # misc
 /coverage/
+node_modules/
+*.md

@@ -1,4 +1,6 @@
 packages:
   - 'ember-formidable'
   - 'test-app'
+  - 'docs'
   - 'resolvers'
+  - 'dev'

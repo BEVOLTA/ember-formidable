@@ -1,50 +1,19 @@
 'use strict';
 
+const { configs } = require('@nullvoxpopuli/eslint-configs');
+
+// accommodates: JS, TS, App, Addon, and V2 Addon
+const config = configs.ember();
+
 module.exports = {
-  root: true,
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    ecmaVersion: 'latest',
-  },
-  plugins: ['ember'],
-  extends: ['eslint:recommended', 'plugin:ember/recommended', 'prettier'],
-  env: {
-    browser: true,
-  },
-  rules: {},
+  ...config,
   overrides: [
-    // ts files
+    ...config.overrides,
     {
       files: ['**/*.ts', '**/*.gts'],
-      extends: [
-        'plugin:@typescript-eslint/eslint-recommended',
-        'plugin:@typescript-eslint/recommended',
-      ],
       rules: {
-        '@typescript-eslint/explicit-module-boundary-types': 'error',
-        '@typescript-eslint/explicit-function-return-type': 'error',
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          { argsIgnorePattern: '^_' },
-        ],
+        '@typescript-eslint/prefer-optional-chain': 'off',
       },
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
-    },
-    // node files
-    {
-      files: ['./.eslintrc.cjs', './.template-lintrc.js', './addon-main.js'],
-      parserOptions: {
-        sourceType: 'script',
-      },
-      env: {
-        browser: false,
-        node: true,
-      },
-      plugins: ['node'],
-      extends: ['plugin:node/recommended'],
     },
   ],
 };
