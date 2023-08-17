@@ -19,12 +19,12 @@ import {
 } from '@embroider/macros';
 import Component from '@glimmer/component';
 
-import { inputUtils } from '../../-private/utils';
-import { UnregisterContext } from '../../-private/types';
-import FormidableService from '../../services/formidable';
+import { inputUtils } from '../-private/utils';
+import FormidableService from '../services/formidable';
 
 import type {
   UpdateEvents,
+  UnregisterContext,
   GenericObject,
   FormidableErrors,
   DirtyFields,
@@ -38,7 +38,7 @@ import type {
   FormidableApi,
   FormidableArgs,
   RegisterOptions,
-} from '../../index';
+} from '../index';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 let Model: Function | undefined;

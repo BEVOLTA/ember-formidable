@@ -13,7 +13,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "rollup --config",
+    "build": "concurrently 'npm:build:*'",
+    "build:js": "rollup --config",
+    "build:types": "glint --declaration",
     "lint": "concurrently 'npm:lint:*(!fix)' --names 'lint:'",
     "lint:fix": "concurrently 'npm:lint:*:fix' --names 'fix:'",
     "lint:hbs": "ember-template-lint . --no-error-on-unmatched-pattern",
@@ -119,20 +121,25 @@
     "type": "addon",
     "main": "addon-main.cjs",
     "app-js": {
-      "./components/formidable/index.js": "./dist/_app_/components/formidable/index.js",
+      "./components/formidable.js": "./dist/_app_/components/formidable.js",
       "./services/formidable.js": "./dist/_app_/services/formidable.js"
     }
   },
   "exports": {
-    ".": "./dist/index.js",
-    "./*": "./dist/*.js",
-    "./addon-main.js": "./addon-main.cjs",
-    "./-private/*": null
+    ".": {
+      "types": "./declarations/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./declarations/*.d.ts",
+      "default": "./dist/*.js"
+    },
+    "./addon-main.js": "./addon-main.cjs"
   },
   "typesVersions": {
     "*": {
       "*": [
-        "dist/*"
+        "declarations/*"
       ]
     }
   }
