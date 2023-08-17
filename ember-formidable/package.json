@@ -16,7 +16,7 @@
   "scripts": {
     "build": "concurrently 'npm:build:*'",
     "build:js": "rollup --config ./rollup.config.mjs",
-    "build:types": "glint --build",
+    "build:types": "glint --declaration",
     "lint": "pnpm -w exec lint",
     "lint:fix": "pnpm -w exec lint fix",
     "lint:js": "pnpm -w exec lint js",
