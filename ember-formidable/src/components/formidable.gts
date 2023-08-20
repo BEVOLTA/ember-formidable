@@ -2,14 +2,11 @@ import Component from '@glimmer/component';
 import { assert } from '@ember/debug';
 import { action, get } from '@ember/object';
 import { inject as service } from '@ember/service';
-import { dependencySatisfies, importSync, macroCondition } from '@embroider/macros';
 
-import { TrackedAsyncData } from 'ember-async-data';
 import { modifier } from 'ember-modifier';
 import _cloneDeep from 'lodash/cloneDeep';
 import _isEmpty from 'lodash/isEmpty';
 import _isEqual from 'lodash/isEqual';
-import _isObject from 'lodash/isObject';
 import _set from 'lodash/set';
 import _unset from 'lodash/unset';
 import { tracked, TrackedObject } from 'tracked-built-ins';
@@ -34,14 +31,6 @@ import type {
   UpdateEvents,
 } from '../index';
 import type FormidableService from '../services/formidable';
-
-// eslint-disable-next-line @typescript-eslint/ban-types
-let Model: Function | undefined;
-
-if (macroCondition(dependencySatisfies('ember-data', '*'))) {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  Model = (importSync('ember-data/model') as { default: Function }).default;
-}
 
 const DATA_NAME = 'data-formidable-name';
 const DATA_REQUIRED = 'data-formidable-required';
@@ -93,14 +82,13 @@ export default class Formidable<
   @service formidable!: FormidableService;
 
   // --- VALUES
-  values: Values = this.isModel
-    ? this.args.values ?? ({} as Values)
-    : (new TrackedObject(_cloneDeep(this.args.values ?? {})) as Values);
+  values: Values = new TrackedObject(_cloneDeep(this.args.values ?? {})) as Values;
 
   // --- SUBMIT
   @tracked isSubmitSuccessful: boolean | undefined = undefined;
   @tracked isSubmitted = false;
   @tracked isSubmitting = false;
+  @tracked isValidating = false;
 
   @tracked submitCount = 0;
 
@@ -116,24 +104,9 @@ export default class Formidable<
   validator = this.args.validator;
 
   // --- ROLLBACK
-  rollbackValues: Values;
-
-  @tracked validationState?: TrackedAsyncData<void>;
-
-  // --- UTILS
-  get isModel(): boolean {
-    if (!Model) {
-      return false;
-    }
-
-    return this.args.values instanceof Model;
-  }
+  rollbackValues: Values = new TrackedObject(_cloneDeep(this.args.values ?? {}) as Values);
 
   // --- STATES
-
-  get isValidating(): boolean {
-    return this.validationState?.isPending ?? false;
-  }
 
   get isValid(): boolean {
     return _isEmpty(this.errors);
@@ -168,13 +141,9 @@ export default class Formidable<
   }
 
   get parsedValues(): Values {
-    if (this.isModel) {
-      return this.values;
-    } else {
-      return Object.entries(this.values).reduce((obj, [key, value]) => {
-        return _set(obj, key, formatValue(value, this.parsers[key]));
-      }, {}) as Values;
-    }
+    return Object.entries(this.values).reduce((obj, [key, value]) => {
+      return _set(obj, key, formatValue(value, this.parsers[key]));
+    }, {}) as Values;
   }
 
   get api(): FormidableApi<Values> {
@@ -191,7 +160,7 @@ export default class Formidable<
       register: this.register,
       unregister: this.unregister,
       onSubmit: async (e: SubmitEvent) => await this.submit(e),
-      validate: async () => await this.validate(),
+      validate: async (field?: keyof Values) => await this.validate(field),
       errors: this.errors,
       errorMessages: this.errorMessages,
       setError: this.setError,
@@ -217,24 +186,6 @@ export default class Formidable<
 
   constructor(owner: unknown, args: FormidableArgs<Values, ValidatorOptions>) {
     super(owner, args);
-
-    if (this.isModel) {
-      const { values = {} as Values } = this.args;
-      const rollbackValues: Values = {} as Values;
-
-      (values as Values)['eachAttribute']((key: keyof Values) => {
-        const value = get(values, key);
-
-        if (_isObject(value)) {
-          rollbackValues[key] = _cloneDeep(value);
-        } else {
-          rollbackValues[key] = value;
-        }
-      });
-      this.rollbackValues = new TrackedObject(rollbackValues);
-    } else {
-      this.rollbackValues = new TrackedObject(_cloneDeep(this.args.values ?? {}) as Values);
-    }
 
     if (this.args.serviceId) {
       this.formidable._register(this.args.serviceId, () => this.api);
@@ -272,13 +223,7 @@ export default class Formidable<
         delete this.dirtyFields[field as keyof Values];
       }
     } else {
-      if (this.isModel) {
-        Object.entries(this.rollbackValues).forEach(([key, value]) => {
-          this.values['set'](key, value);
-        });
-      } else {
-        this.values = new TrackedObject(_cloneDeep(this.rollbackValues));
-      }
+      this.values = new TrackedObject(_cloneDeep(this.rollbackValues));
 
       if (!keepError) {
         this.errors = new TrackedObject({});
@@ -304,10 +249,6 @@ export default class Formidable<
 
   @action
   getValue(field: keyof Values): unknown {
-    if (this.isModel && this.parsedValues['relationshipFor']?.(field)?.meta?.kind == 'belongsTo') {
-      return this.parsedValues['belongsTo'](field).value();
-    }
-
     return get(this.parsedValues, field);
   }
 
@@ -387,18 +328,14 @@ export default class Formidable<
     value: string | boolean | undefined,
     { shouldValidate, shouldDirty }: SetContext = {},
   ): Promise<void> {
-    if (this.isModel) {
-      this.values['set'](field, formatValue(value, this.parsers[field]));
-    } else {
-      this.values[field] = value as Values[keyof Values];
-    }
+    this.values[field] = value as Values[keyof Values];
 
     if (shouldDirty) {
       this.dirtyField(field);
     }
 
     if (shouldValidate) {
-      this.validationState = new TrackedAsyncData(this.validate(field));
+      await this.validate(field);
     }
   }
 
@@ -414,25 +351,31 @@ export default class Formidable<
     }
 
     if (shouldValidate) {
-      this.validationState = new TrackedAsyncData(this.validate(field));
+      await this.validate(field);
     }
   }
 
   // --- TASKS
   @action
   async validate(field?: keyof Values): Promise<void> {
-    if (!this.validator) {
-      return;
-    }
+    try {
+      this.isValidating = true;
 
-    const validation: FormidableErrors = await this.validator(this.parsedValues, {
-      ...this.args.validatorOptions,
-    } as ValidatorOptions);
+      if (!this.validator) {
+        return;
+      }
 
-    if (field) {
-      this.errors = _set(this.errors, field, get(validation, field));
-    } else {
-      this.errors = new TrackedObject(validation);
+      const validation: FormidableErrors = await this.validator(this.parsedValues, {
+        ...this.args.validatorOptions,
+      } as ValidatorOptions);
+
+      if (field) {
+        this.errors = _set(this.errors, field, get(validation, field));
+      } else {
+        this.errors = new TrackedObject(validation);
+      }
+    } finally {
+      this.isValidating = false;
     }
   }
 
@@ -446,7 +389,7 @@ export default class Formidable<
       event.preventDefault();
 
       if (this.updateEvents.includes('onSubmit')) {
-        this.validationState = new TrackedAsyncData(this.validate());
+        await this.validate();
       }
 
       this.isSubmitSuccessful = this.isValid;
