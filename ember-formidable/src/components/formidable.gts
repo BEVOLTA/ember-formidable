@@ -4,8 +4,7 @@ import { action, get } from '@ember/object';
 import { inject as service } from '@ember/service';
 import { dependencySatisfies, importSync, macroCondition } from '@embroider/macros';
 
-import { restartableTask } from 'ember-concurrency';
-import { taskFor } from 'ember-concurrency-ts';
+import { TrackedAsyncData } from 'ember-async-data';
 import { modifier } from 'ember-modifier';
 import _cloneDeep from 'lodash/cloneDeep';
 import _isEmpty from 'lodash/isEmpty';
@@ -35,14 +34,13 @@ import type {
   UpdateEvents,
 } from '../index';
 import type FormidableService from '../services/formidable';
-import type { TaskGenerator } from 'ember-concurrency';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 let Model: Function | undefined;
 
 if (macroCondition(dependencySatisfies('ember-data', '*'))) {
   // eslint-disable-next-line @typescript-eslint/ban-types
-  Model = (importSync('@ember-data/model') as { default: Function }).default;
+  Model = (importSync('ember-data/model') as { default: Function }).default;
 }
 
 const DATA_NAME = 'data-formidable-name';
@@ -102,6 +100,8 @@ export default class Formidable<
   // --- SUBMIT
   @tracked isSubmitSuccessful: boolean | undefined = undefined;
   @tracked isSubmitted = false;
+  @tracked isSubmitting = false;
+
   @tracked submitCount = 0;
 
   // --- ERRORS
@@ -118,6 +118,8 @@ export default class Formidable<
   // --- ROLLBACK
   rollbackValues: Values;
 
+  @tracked validationState?: TrackedAsyncData<void>;
+
   // --- UTILS
   get isModel(): boolean {
     if (!Model) {
@@ -128,12 +130,9 @@ export default class Formidable<
   }
 
   // --- STATES
-  get isSubmitting(): boolean {
-    return taskFor(this.submit).isRunning;
-  }
 
   get isValidating(): boolean {
-    return taskFor(this.validate).isRunning;
+    return this.validationState?.isPending ?? false;
   }
 
   get isValid(): boolean {
@@ -181,23 +180,26 @@ export default class Formidable<
   get api(): FormidableApi<Values> {
     return {
       values: this.parsedValues,
-      setValue: (field: keyof Values, value: string | boolean | undefined, context?: SetContext) =>
-        taskFor(this.setValue).perform(field, value, context),
+      setValue: async (
+        field: keyof Values,
+        value: string | boolean | undefined,
+        context?: SetContext,
+      ) => await this.setValue(field, value, context),
       getValue: this.getValue,
       getValues: this.getValues,
       getFieldState: this.getFieldState,
       register: this.register,
       unregister: this.unregister,
-      onSubmit: (e: SubmitEvent) => taskFor(this.submit).perform(e),
-      validate: () => taskFor(this.validate).perform(),
+      onSubmit: async (e: SubmitEvent) => await this.submit(e),
+      validate: async () => await this.validate(),
       errors: this.errors,
       errorMessages: this.errorMessages,
       setError: this.setError,
       clearError: this.clearError,
       clearErrors: this.clearErrors,
       rollback: this.rollback,
-      setFocus: (name: keyof Values, context?: SetContext) =>
-        taskFor(this.setFocus).perform(name, context),
+      setFocus: async (name: keyof Values, context?: SetContext) =>
+        await this.setFocus(name, context),
       defaultValues: this.rollbackValues,
       isSubmitted: this.isSubmitted,
       isSubmitting: this.isSubmitting,
@@ -379,12 +381,12 @@ export default class Formidable<
     }
   }
 
-  @restartableTask
-  *setValue(
+  @action
+  async setValue(
     field: keyof Values,
     value: string | boolean | undefined,
     { shouldValidate, shouldDirty }: SetContext = {},
-  ): TaskGenerator<void> {
+  ): Promise<void> {
     if (this.isModel) {
       this.values['set'](field, formatValue(value, this.parsers[field]));
     } else {
@@ -396,15 +398,15 @@ export default class Formidable<
     }
 
     if (shouldValidate) {
-      yield taskFor(this.validate).perform(field);
+      this.validationState = new TrackedAsyncData(this.validate(field));
     }
   }
 
-  @restartableTask
-  *setFocus(
+  @action
+  async setFocus(
     field: keyof Values,
     { shouldValidate, shouldDirty }: SetContext = {},
-  ): TaskGenerator<void> {
+  ): Promise<void> {
     this.getDOMElement(field as string)?.focus();
 
     if (shouldDirty) {
@@ -412,18 +414,18 @@ export default class Formidable<
     }
 
     if (shouldValidate) {
-      yield taskFor(this.validate).perform(field);
+      this.validationState = new TrackedAsyncData(this.validate(field));
     }
   }
 
   // --- TASKS
-  @restartableTask
-  *validate(field?: keyof Values): TaskGenerator<void> {
+  @action
+  async validate(field?: keyof Values): Promise<void> {
     if (!this.validator) {
       return;
     }
 
-    const validation: FormidableErrors = yield this.validator(this.parsedValues, {
+    const validation: FormidableErrors = await this.validator(this.parsedValues, {
       ...this.args.validatorOptions,
     } as ValidatorOptions);
 
@@ -434,29 +436,34 @@ export default class Formidable<
     }
   }
 
-  @restartableTask
-  *submit(event: SubmitEvent): TaskGenerator<void> {
-    this.isSubmitted = true;
-    this.submitCount += 1;
+  @action
+  async submit(event: SubmitEvent): Promise<void> {
+    try {
+      this.isSubmitting = true;
+      this.isSubmitted = true;
+      this.submitCount += 1;
 
-    event.preventDefault();
+      event.preventDefault();
 
-    if (this.updateEvents.includes('onSubmit')) {
-      yield taskFor(this.validate).perform();
-    }
+      if (this.updateEvents.includes('onSubmit')) {
+        this.validationState = new TrackedAsyncData(this.validate());
+      }
 
-    this.isSubmitSuccessful = this.isValid;
+      this.isSubmitSuccessful = this.isValid;
 
-    if (!this.isSubmitSuccessful) {
-      return;
-    }
+      if (!this.isSubmitSuccessful) {
+        return;
+      }
 
-    if (this.args.onSubmit) {
-      return this.args.onSubmit(event, this.api);
-    }
+      if (this.args.onSubmit) {
+        return this.args.onSubmit(event, this.api);
+      }
 
-    if (this.updateEvents.includes('onSubmit') && this.args.onValuesChanged) {
-      this.args.onValuesChanged(this.parsedValues, this.api);
+      if (this.updateEvents.includes('onSubmit') && this.args.onValuesChanged) {
+        this.args.onValuesChanged(this.parsedValues, this.api);
+      }
+    } finally {
+      this.isSubmitting = false;
     }
   }
 
@@ -551,16 +558,16 @@ export default class Formidable<
       }
 
       // HANDLERS
-      const handleChange = (event: Event): void => {
-        taskFor(this.onChange).perform(name, event, onChange);
+      const handleChange = async (event: Event): Promise<void> => {
+        await this.onChange(name, event, onChange);
       };
 
       const handleBlur = async (event: Event): Promise<void> => {
-        taskFor(this.onBlur).perform(name, event, onBlur);
+        await this.onBlur(name, event, onBlur);
       };
 
       const handleFocus = async (event: Event): Promise<void> => {
-        taskFor(this.onFocus).perform(name, event, onFocus);
+        await this.onFocus(name, event, onFocus);
       };
 
       const preventDefault = (e: Event): void => {
@@ -600,15 +607,15 @@ export default class Formidable<
     },
   );
 
-  @restartableTask
-  *onChange(
+  @action
+  async onChange(
     field: keyof Values,
     event: Event,
     onChange?: (event: Event, api: FormidableApi<GenericObject>) => void,
-  ): TaskGenerator<void> {
+  ): Promise<void> {
     assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
-    yield taskFor(this.setValue).perform(field, (event.target as HTMLInputElement).value, {
+    await this.setValue(field, (event.target as HTMLInputElement).value, {
       shouldValidate: this.updateEvents.includes('onChange'),
       shouldDirty: true,
     });
@@ -622,15 +629,15 @@ export default class Formidable<
     }
   }
 
-  @restartableTask
-  *onBlur(
+  @action
+  async onBlur(
     field: keyof Values,
     event: Event,
     onBlur?: (event: Event, api: FormidableApi<GenericObject>) => void,
-  ): TaskGenerator<void> {
+  ): Promise<void> {
     assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
-    yield taskFor(this.setValue).perform(field, (event.target as HTMLInputElement).value, {
+    await this.setValue(field, (event.target as HTMLInputElement).value, {
       shouldValidate: this.updateEvents.includes('onBlur'),
     });
 
@@ -643,15 +650,15 @@ export default class Formidable<
     }
   }
 
-  @restartableTask
-  *onFocus(
+  @action
+  async onFocus(
     field: keyof Values,
     event: Event,
     onFocus?: (event: Event, api: FormidableApi<GenericObject>) => void,
-  ): TaskGenerator<void> {
+  ): Promise<void> {
     assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
-    yield taskFor(this.setValue).perform(field, (event.target as HTMLInputElement).value, {
+    await this.setValue(field, (event.target as HTMLInputElement).value, {
       shouldValidate: this.updateEvents.includes('onFocus'),
     });
 

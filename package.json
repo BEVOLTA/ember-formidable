@@ -8,6 +8,7 @@
     "release": "changeset publish",
     "build": "turbo run build --output-logs errors-only",
     "start": "pnpm build; concurrently 'npm:_start:*' --prefix ' ' --restart-after 5000 --restart-tries -1",
+    "reset": "rm -rf node_modules ember-formidable/node_modules ember-formidable/dist ember-formidable/dist-types ember-formidable/.turbo test-app/.turbo test-app/node_modules && rm -f pnpm-lock.json && pnpm it",
     "_start:docs": "pnpm --filter docs start",
     "_start:tests": "pnpm --filter test-app start",
     "_start:package": "pnpm --filter 'ember-formidable' start --no-watch.clearScreen",

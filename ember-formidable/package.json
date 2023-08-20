@@ -41,9 +41,8 @@
     "@embroider/macros": "1.13.1",
     "@ember/render-modifiers": "^2.1.0",
     "@glimmer/component": "^1.1.2",
-    "ember-concurrency": "3.1.0",
-    "ember-concurrency-ts": "0.3.1",
     "tracked-built-ins": "3.1.1",
+    "ember-async-data": "^1.0.1",
     "lodash": "4.17.21"
   },
   "devDependencies": {
@@ -79,6 +78,8 @@
     "babel-plugin-ember-template-compilation": "^2.2.0",
     "concurrently": "^8.2.0",
     "ember-source": "~5.1.2",
+    "ember-data": "^4.12.3",
+    "ember-async-data": "1.0.1",
     "ember-modifier": "^4.1.0",
     "ember-template-imports": "^3.4.2",
     "ember-template-lint": "^5.11.2",
@@ -145,8 +146,11 @@
     "@glimmer/component": ">= 1.1.2",
     "ember-modifier": ">= 4.1.0",
     "ember-source": ">= 5.1.2",
-    "ember-data": "~4.12.3",
-    "ember-concurrency": ">= 3.1.0",
-    "ember-concurrency-ts": ">= 0.3.1"
+    "ember-data": "^4.12.3"
+  },
+  "peerDependenciesMeta": {
+    "ember-data": {
+      "optional": true
+    }
   }
 }
