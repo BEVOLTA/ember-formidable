@@ -1,8 +1,8 @@
-import { FunctionBasedModifier } from 'ember-modifier';
+import type { FunctionBasedModifier } from 'ember-modifier';
 
 export type UpdateEvents = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
 
-export type GenericObject = Record<string, any>;
+export type GenericObject = Record<string, unknown>;
 
 export type FormidableErrors<T extends string | number | symbol = string | number | symbol> =
   Record<T, FormidableError[]>;
@@ -455,7 +455,7 @@ export interface RegisterOptions<Values extends GenericObject = GenericObject> {
   /**
    * This function allows you to apply any parsing to the input if specified.
    */
-  valueFormat: (value: unknown) => any;
+  valueFormat: (value: unknown) => unknown;
 
   // Handlers
 

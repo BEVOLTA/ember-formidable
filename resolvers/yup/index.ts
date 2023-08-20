@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 
 const formatYupError = (errors: Array<yup.ValidationError>) => {
-  return errors.reduce((acc: Record<string, any[]>, err) => {
+  return errors.reduce((acc: Record<string, unknown[]>, err) => {
     const { type, path, errors, value } = err;
 
     const formattedError = { type, message: errors.join('\n'), value };
@@ -15,11 +15,11 @@ const formatYupError = (errors: Array<yup.ValidationError>) => {
   }, {});
 };
 
-export default function yupResolver<TFieldValues extends object = {}>(
+export default function yupResolver<TFieldValues extends object = object>(
   schema: yup.ObjectSchema<TFieldValues>,
   options: Parameters<(typeof schema)['validate']>[1] & ResolverOptions = {},
 ) {
-  const { mode = 'async', raw = false, ...schemaOptions } = options;
+  const { mode = 'async', ...schemaOptions } = options;
 
   return async (values: object, context: object) => {
     try {

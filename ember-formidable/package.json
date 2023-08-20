@@ -75,10 +75,9 @@
     "@typescript-eslint/parser": "^6.4.0",
     "babel-plugin-ember-template-compilation": "^2.2.0",
     "concurrently": "^8.2.0",
-    "ember-source": "~5.1.2",
-    "ember-data": "^4.12.3",
     "ember-async-data": "1.0.1",
     "ember-modifier": "^4.1.0",
+    "ember-source": "~5.1.2",
     "ember-template-imports": "^3.4.2",
     "ember-template-lint": "^5.11.2",
     "eslint": "^8.47.0",
@@ -91,6 +90,7 @@
     "eslint-plugin-qunit": "7.3.4",
     "prettier": "^3.0.2",
     "prettier-plugin-ember-template-tag": "^1.0.2",
+    "publint": "^0.2.1",
     "rollup": "~3.28.0",
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-glimmer-template-tag": "^0.4.1",
@@ -121,17 +121,10 @@
       "types": "./dist-types/*.d.ts",
       "default": "./dist/*.js"
     },
-    "./test-support": {
-      "types": "./dist-types/test-support/index.d.ts",
-      "default": "./dist/test-support/index.js"
-    },
     "./addon-main": "./addon-main.cjs"
   },
   "typesVersions": {
     "*": {
-      "test-support": [
-        "dist-types/test-support/index.d.ts"
-      ],
       "*": [
         "dist-types/*"
       ]

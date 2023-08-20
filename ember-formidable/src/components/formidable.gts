@@ -38,7 +38,7 @@ const DATA_DISABLED = 'data-formidable-disabled';
 
 const UNREGISTERED_ATTRIBUTE = 'data-formidable-unregistered';
 
-const formatValue = (value: any, formatOptions: FormatOptions | undefined): any => {
+const formatValue = (value: unknown, formatOptions: FormatOptions | undefined): unknown => {
   if (!formatOptions) {
     return value;
   }
@@ -50,11 +50,11 @@ const formatValue = (value: any, formatOptions: FormatOptions | undefined): any 
   }
 
   if (valueAsNumber) {
-    return +value;
+    return +(value as string | number);
   }
 
   if (valueAsDate) {
-    return new Date(value);
+    return new Date(value as string | number);
   }
 
   if (valueAsBoolean) {
@@ -188,7 +188,7 @@ export default class Formidable<
     super(owner, args);
 
     if (this.args.serviceId) {
-      this.formidable._register(this.args.serviceId, () => this.api);
+      this.formidable._register(this.args.serviceId, () => this.api as FormidableApi);
     }
   }
 

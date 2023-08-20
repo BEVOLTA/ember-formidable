@@ -3,10 +3,7 @@ import _isNil from 'lodash/isNil';
 export const inputUtils = (
   input: HTMLInputElement,
 ): {
-  setAttribute: (
-    attribute: string,
-    value: string | number | undefined | boolean,
-  ) => void;
+  setAttribute: (attribute: string, value: string | number | undefined | boolean) => void;
   isFormInput: boolean;
   isInput: boolean;
   isTextarea: boolean;
@@ -16,10 +13,7 @@ export const inputUtils = (
   name: string | null;
 } => {
   return {
-    setAttribute: (
-      attribute: string,
-      value: string | number | undefined | boolean,
-    ): void => {
+    setAttribute: (attribute: string, value: string | number | undefined | boolean): void => {
       if (_isNil(value) || !`${value}`.trim()) {
         input.removeAttribute(attribute);
       } else {

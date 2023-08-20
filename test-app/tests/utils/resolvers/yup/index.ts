@@ -1,4 +1,4 @@
-import * as yup from 'yup';
+import type * as yup from 'yup';
 
 interface ResolverOptions {
   /**
@@ -6,18 +6,13 @@ interface ResolverOptions {
    */
   mode?: 'async' | 'sync';
   /**
-   * Return the raw input values rather than the parsed values.
-   * @default false
-   */
-  raw?: boolean;
-  /**
    * @default false
    */
   shouldUseNativeValidation?: boolean;
 }
 
 const formatYupError = (errors: Array<yup.ValidationError>) => {
-  return errors.reduce((acc: Record<string, any[]>, err) => {
+  return errors.reduce((acc: Record<string, unknown[]>, err) => {
     const { type, path, errors, value } = err;
 
     const formattedError = { type, message: errors.join('\n'), value };
@@ -27,6 +22,7 @@ const formatYupError = (errors: Array<yup.ValidationError>) => {
     } else {
       acc[path ?? 'formidable__error'] = [formattedError];
     }
+
     return acc;
   }, {});
 };
@@ -35,7 +31,7 @@ export function yupResolver<TFieldValues extends object = object>(
   schema: yup.ObjectSchema<TFieldValues>,
   options: Parameters<(typeof schema)['validate']>[1] & ResolverOptions = {},
 ) {
-  const { mode = 'async', raw = false, ...schemaOptions } = options;
+  const { mode = 'async', ...schemaOptions } = options;
 
   return async (values: object, context: object) => {
     try {
@@ -47,6 +43,7 @@ export function yupResolver<TFieldValues extends object = object>(
       return {};
     } catch (e) {
       const error = e as yup.ValidationError;
+
       if (!error.inner) {
         throw error;
       }
