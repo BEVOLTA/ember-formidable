@@ -1,68 +1,73 @@
-import { hbs } from 'ember-cli-htmlbars';
-import { module, test } from 'qunit';
-import { setupRenderingTest } from 'test-app/tests/helpers';
-import { FormidableContext } from 'test-app/tests/types';
-
 import { blur, fillIn, focus, render } from '@ember/test-helpers';
+import { module, test } from 'qunit';
+
+import { Formidable } from 'ember-formidable';
+import { setupRenderingTest } from 'test-app/tests/helpers';
 
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('onChange -- It should trigger the input onChange instead of the default behavior', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('onChange -- It should trigger the input onChange instead of the default behavior', async function (assert) {
+    const data = {
       foo: 'DEFAULT',
     };
-    this.onChange = (_event, api) => {
+
+    const onChange = (_event, api) => {
       api.setValue('foo', '🔆');
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} as |values api|>
+
+    await render(<template>
+      <Formidable @values={{data}} as |values api|>
         <form>
-          <input type="text" id="foo" {{api.register "foo" onChange=this.onChange}} />
-          <button id="submit"  type="submit">SUBMIT</button>
+          <input type='text' id='foo' {{api.register 'foo' onChange=onChange}} />
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
 
     await fillIn('#foo', '⚡️');
     assert.dom('#foo').hasValue('🔆');
   });
 
-  test('onFocus -- It should trigger the input onFocus instead of the default behavior', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('onFocus -- It should trigger the input onFocus instead of the default behavior', async function (assert) {
+    const data = {
       foo: 'DEFAULT',
     };
-    this.onFocus = (_event, api) => {
+
+    const onFocus = (_event, api) => {
       api.setValue('foo', '❄️');
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} as |values api|>
+
+    await render(<template>
+      <Formidable @values={{data}} as |values api|>
         <form>
-          <input type="text" id="foo" {{api.register "foo"  onFocus=this.onFocus}} />
-          <button id="submit"  type="submit">SUBMIT</button>
+          <input type='text' id='foo' {{api.register 'foo' onFocus=onFocus}} />
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
 
     await focus('#foo');
     assert.dom('#foo').hasValue('❄️');
   });
 
-  test('onBlur -- It should trigger the input onFocus instead of the default behavior', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('onBlur -- It should trigger the input onFocus instead of the default behavior', async function (assert) {
+    const data = {
       foo: 'DEFAULT',
     };
-    this.onBlur = (_event, api) => {
+
+    const onBlur = (_event, api) => {
       api.setValue('foo', 'CHANGED');
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} as |values api|>
+
+    await render(<template>
+      <Formidable @values={{data}} as |values api|>
         <form>
-          <input type="text" id="foo" {{api.register "foo"  onBlur=this.onBlur}} />
-          <button id="submit"  type="submit">SUBMIT</button>
+          <input type='text' id='foo' {{api.register 'foo' onBlur=onBlur}} />
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
 
     await focus('#foo');
     await blur('#foo');

@@ -1,11 +1,13 @@
-import { hbs } from 'ember-cli-htmlbars';
+import { on } from '@ember/modifier';
+import { get } from '@ember/object';
+import { click, fillIn, render } from '@ember/test-helpers';
 import { module, test } from 'qunit';
+
+import { Formidable } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
-import { FormidableContext } from 'test-app/tests/types';
+import { fn } from 'test-app/tests/utils/helpers';
 import { yupResolver } from 'test-app/tests/utils/resolvers/yup';
 import * as yup from 'yup';
-
-import { click, fillIn, render } from '@ember/test-helpers';
 
 const userSchema = yup.object({
   name: yup.string().required('Name is required.'),
@@ -18,33 +20,40 @@ const validUser = {
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  hooks.beforeEach(function (this: FormidableContext) {
-    this.updateEvents = ['onChange'];
-    this.validator = yupResolver(userSchema);
-    this.values = validUser;
-  });
+  const updateEvents = ['onChange'];
+  const validator = yupResolver(userSchema);
+  const data = validUser;
 
-  test('unregister -- It should unregister the input', async function (this: FormidableContext, assert) {
-    await render(hbs`
-      <Formidable @values={{this.values}} @validator={{this.validator}} @updateEvents={{this.updateEvents}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="name" {{api.register "name"}} />
-          <button id="unregister" type="button" {{on "click" (fn api.unregister "name")}}>UNREGISTER</button>
-          {{#if (api.getValue "name")}}
-            <p id="value-name">{{api.getValue "name"}}</p>
+  test('unregister -- It should unregister the input', async function (assert) {
+    await render(<template>
+      <Formidable
+        @values={{data}}
+        @validator={{validator}}
+        @updateEvents={{updateEvents}}
+        as |values api|
+      >
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='name' {{api.register 'name'}} />
+          <button
+            id='unregister'
+            type='button'
+            {{on 'click' (fn api.unregister 'name')}}
+          >UNREGISTER</button>
+          {{#if (api.getValue 'name')}}
+            <p id='value-name'>{{api.getValue 'name'}}</p>
           {{/if}}
           {{#each api.errors.name as |error|}}
-           <p id="error-name">{{error.message}}</p>
+            <p id='error-name'>{{error.message}}</p>
           {{/each}}
           {{#if (get api.dirtyFields 'name')}}
-              <p id="dirty-name">DIRTY</p>
+            <p id='dirty-name'>DIRTY</p>
           {{/if}}
           {{#if (get api.defaultValues 'name')}}
-            <p id="default-name">{{get api.defaultValues 'name'}}</p>
+            <p id='default-name'>{{get api.defaultValues 'name'}}</p>
           {{/if}}
         </form>
       </Formidable>
-    `);
+    </template>);
 
     await fillIn('#name', '');
     await click('#unregister');
@@ -55,27 +64,38 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#default-name').doesNotExist();
   });
 
-  test('unregister -- keepValue -- It should unregister the input and keep the value', async function (this: FormidableContext, assert) {
-    await render(hbs`
-      <Formidable @values={{this.values}} @validator={{this.validator}} @updateEvents={{this.updateEvents}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="name" {{api.register "name"}} />
-          <button id="unregister" type="button" {{on "click" (fn api.unregister "name" (hash keepValue=true))}}>UNREGISTER</button>
-          {{#if (api.getValue "name")}}
-            <p id="value-name">{{api.getValue "name"}}</p>
+  test('unregister -- keepValue -- It should unregister the input and keep the value', async function (assert) {
+    const options = { keepValue: true };
+
+    await render(<template>
+      <Formidable
+        @values={{data}}
+        @validator={{validator}}
+        @updateEvents={{updateEvents}}
+        as |values api|
+      >
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='name' {{api.register 'name'}} />
+          <button
+            id='unregister'
+            type='button'
+            {{on 'click' (fn api.unregister 'name' options)}}
+          >UNREGISTER</button>
+          {{#if (api.getValue 'name')}}
+            <p id='value-name'>{{api.getValue 'name'}}</p>
           {{/if}}
           {{#each api.errors.name as |error|}}
-           <p id="error-name">{{error.message}}</p>
+            <p id='error-name'>{{error.message}}</p>
           {{/each}}
           {{#if (get api.dirtyFields 'name')}}
-              <p id="dirty-name">DIRTY</p>
+            <p id='dirty-name'>DIRTY</p>
           {{/if}}
           {{#if (get api.defaultValues 'name')}}
-            <p id="default-name">{{get api.defaultValues 'name'}}</p>
+            <p id='default-name'>{{get api.defaultValues 'name'}}</p>
           {{/if}}
         </form>
       </Formidable>
-    `);
+    </template>);
 
     await click('#unregister');
     assert.dom('#name').hasAttribute('data-formidable-unregistered');
@@ -85,27 +105,38 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#default-name').doesNotExist();
   });
 
-  test('unregister -- keepError -- It should unregister the input and keep the error', async function (this: FormidableContext, assert) {
-    await render(hbs`
-      <Formidable @values={{this.values}} @validator={{this.validator}} @updateEvents={{this.updateEvents}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="name" {{api.register "name"}} />
-          <button id="unregister" type="button" {{on "click" (fn api.unregister "name" (hash keepError=true))}}>UNREGISTER</button>
-          {{#if (api.getValue "name")}}
-            <p id="value-name">{{api.getValue "name"}}</p>
+  test('unregister -- keepError -- It should unregister the input and keep the error', async function (assert) {
+    const options = { keepError: true };
+
+    await render(<template>
+      <Formidable
+        @values={{data}}
+        @validator={{validator}}
+        @updateEvents={{updateEvents}}
+        as |values api|
+      >
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='name' {{api.register 'name'}} />
+          <button
+            id='unregister'
+            type='button'
+            {{on 'click' (fn api.unregister 'name' options)}}
+          >UNREGISTER</button>
+          {{#if (api.getValue 'name')}}
+            <p id='value-name'>{{api.getValue 'name'}}</p>
           {{/if}}
           {{#each api.errors.name as |error|}}
-           <p id="error-name">{{error.message}}</p>
+            <p id='error-name'>{{error.message}}</p>
           {{/each}}
           {{#if (get api.dirtyFields 'name')}}
-              <p id="dirty-name">DIRTY</p>
+            <p id='dirty-name'>DIRTY</p>
           {{/if}}
           {{#if (get api.defaultValues 'name')}}
-            <p id="default-name">{{get api.defaultValues 'name'}}</p>
+            <p id='default-name'>{{get api.defaultValues 'name'}}</p>
           {{/if}}
         </form>
       </Formidable>
-    `);
+    </template>);
 
     await fillIn('#name', '');
     await click('#unregister');
@@ -116,27 +147,38 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#default-name').doesNotExist();
   });
 
-  test('unregister -- keepDirty -- It should unregister the input and keep the dirty field', async function (this: FormidableContext, assert) {
-    await render(hbs`
-      <Formidable @values={{this.values}} @validator={{this.validator}} @updateEvents={{this.updateEvents}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="name" {{api.register "name"}} />
-          <button id="unregister" type="button" {{on "click" (fn api.unregister "name" (hash keepDirty=true))}}>UNREGISTER</button>
-          {{#if (api.getValue "name")}}
-            <p id="value-name">{{api.getValue "name"}}</p>
+  test('unregister -- keepDirty -- It should unregister the input and keep the dirty field', async function (assert) {
+    const options = { keepDirty: true };
+
+    await render(<template>
+      <Formidable
+        @values={{data}}
+        @validator={{validator}}
+        @updateEvents={{updateEvents}}
+        as |values api|
+      >
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='name' {{api.register 'name'}} />
+          <button
+            id='unregister'
+            type='button'
+            {{on 'click' (fn api.unregister 'name' options)}}
+          >UNREGISTER</button>
+          {{#if (api.getValue 'name')}}
+            <p id='value-name'>{{api.getValue 'name'}}</p>
           {{/if}}
           {{#each api.errors.name as |error|}}
-           <p id="error-name">{{error.message}}</p>
+            <p id='error-name'>{{error.message}}</p>
           {{/each}}
           {{#if (get api.dirtyFields 'name')}}
-              <p id="dirty-name">DIRTY</p>
+            <p id='dirty-name'>DIRTY</p>
           {{/if}}
           {{#if (get api.defaultValues 'name')}}
-            <p id="default-name">{{get api.defaultValues 'name'}}</p>
+            <p id='default-name'>{{get api.defaultValues 'name'}}</p>
           {{/if}}
         </form>
       </Formidable>
-    `);
+    </template>);
 
     await fillIn('#name', '');
     await click('#unregister');
@@ -147,27 +189,38 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#default-name').doesNotExist();
   });
 
-  test('unregister -- keepDefaultValue -- It should unregister the input and keep the default value', async function (this: FormidableContext, assert) {
-    await render(hbs`
-      <Formidable @values={{this.values}} @validator={{this.validator}} @updateEvents={{this.updateEvents}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="name" {{api.register "name"}} />
-          <button id="unregister" type="button" {{on "click" (fn api.unregister "name" (hash keepDefaultValue=true))}}>UNREGISTER</button>
-          {{#if (api.getValue "name")}}
-            <p id="value-name">{{api.getValue "name"}}</p>
+  test('unregister -- keepDefaultValue -- It should unregister the input and keep the default value', async function (assert) {
+    const options = { keepDefaultValue: true };
+
+    await render(<template>
+      <Formidable
+        @values={{data}}
+        @validator={{validator}}
+        @updateEvents={{updateEvents}}
+        as |values api|
+      >
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='name' {{api.register 'name'}} />
+          <button
+            id='unregister'
+            type='button'
+            {{on 'click' (fn api.unregister 'name' options)}}
+          >UNREGISTER</button>
+          {{#if (api.getValue 'name')}}
+            <p id='value-name'>{{api.getValue 'name'}}</p>
           {{/if}}
           {{#each api.errors.name as |error|}}
-           <p id="error-name">{{error.message}}</p>
+            <p id='error-name'>{{error.message}}</p>
           {{/each}}
           {{#if (get api.dirtyFields 'name')}}
-              <p id="dirty-name">DIRTY</p>
+            <p id='dirty-name'>DIRTY</p>
           {{/if}}
           {{#if (get api.defaultValues 'name')}}
-            <p id="default-name">{{get api.defaultValues 'name'}}</p>
+            <p id='default-name'>{{get api.defaultValues 'name'}}</p>
           {{/if}}
         </form>
       </Formidable>
-    `);
+    </template>);
 
     await fillIn('#name', '');
     await click('#unregister');

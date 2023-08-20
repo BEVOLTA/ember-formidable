@@ -1,12 +1,14 @@
 /* eslint-disable qunit/require-expect */
-import { hbs } from 'ember-cli-htmlbars';
+import { on } from '@ember/modifier';
+import { get } from '@ember/object';
+import { click, render } from '@ember/test-helpers';
 import { module, test } from 'qunit';
+
+import { Formidable } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
-import { FormidableContext } from 'test-app/tests/types';
+import { fn } from 'test-app/tests/utils/helpers';
 import { yupResolver } from 'test-app/tests/utils/resolvers/yup';
 import * as yup from 'yup';
-
-import { click, render } from '@ember/test-helpers';
 
 // Define a schema for a user object
 const userSchema = yup.object({
@@ -22,86 +24,104 @@ const validUser = {
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('Get/Set/Default Value -- It should update the value -- text', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Get/Set/Default Value -- It should update the value -- text', async function (assert) {
+    const data = {
       foo: 'BAR',
     };
-    await render(hbs`
-      <Formidable @values={{this.values}}  as |values api|>
-          <button id="change" type="button" {{on "click" (fn api.setValue "foo" "CHANGED")}}>CHANGE</button>
-          <p id="value">{{api.getValue "foo"}}</p>
-          <p id="default">{{api.defaultValues.foo}}</p>
+
+    await render(<template>
+      <Formidable @values={{data}} as |values api|>
+        <button
+          id='change'
+          type='button'
+          {{on 'click' (fn api.setValue 'foo' 'CHANGED')}}
+        >CHANGE</button>
+        <p id='value'>{{api.getValue 'foo'}}</p>
+        <p id='default'>{{api.defaultValues.foo}}</p>
       </Formidable>
-    `);
+    </template>);
     await click('#change');
     assert.dom('#value').hasText('CHANGED');
     assert.dom('#default').hasText('BAR');
   });
 
-  test('Get/Set/Default Value -- It should update the value -- number', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Get/Set/Default Value -- It should update the value -- number', async function (assert) {
+    const data = {
       foo: 202,
     };
-    await render(hbs`
-    <Formidable @values={{this.values}}  as |values api|>
-        <button id="change" type="button" {{on "click" (fn api.setValue "foo" 505)}}>CHANGE</button>
-        <p id="value">{{api.getValue "foo"}}</p>
-        <p id="default">{{api.defaultValues.foo}}</p>
-    </Formidable>
-  `);
+
+    await render(<template>
+      <Formidable @values={{data}} as |values api|>
+        <button id='change' type='button' {{on 'click' (fn api.setValue 'foo' 505)}}>CHANGE</button>
+        <p id='value'>{{api.getValue 'foo'}}</p>
+        <p id='default'>{{api.defaultValues.foo}}</p>
+      </Formidable>
+    </template>);
     await click('#change');
     assert.dom('#value').hasText('505');
     assert.dom('#default').hasText('202');
   });
 
-  test('Get/Set/Default Value -- It should update the value -- date', async function (this: FormidableContext & {
-    date: Date;
-  }, assert) {
-    this.date = new Date('1996-12-02');
-    this.values = {
+  test('Get/Set/Default Value -- It should update the value -- date', async function (assert) {
+    const date = new Date('1996-12-02');
+
+    const data = {
       foo: new Date('1990-04-10'),
     };
-    await render(hbs`
-    <Formidable @values={{this.values}}  as |values api|>
-        <button id="change" type="button" {{on "click" (fn api.setValue "foo" this.date)}}>CHANGE</button>
-        <p id="value">{{api.getValue "foo"}}</p>
-        <p id="default">{{api.defaultValues.foo}}</p>
-    </Formidable>
-  `);
+
+    await render(<template>
+      <Formidable @values={{data}} as |values api|>
+        <button
+          id='change'
+          type='button'
+          {{on 'click' (fn api.setValue 'foo' date)}}
+        >CHANGE</button>
+        <p id='value'>{{api.getValue 'foo'}}</p>
+        <p id='default'>{{api.defaultValues.foo}}</p>
+      </Formidable>
+    </template>);
     await click('#change');
     assert.dom('#value').hasText(new Date('1996-12-02').toString());
     assert.dom('#default').hasText(new Date('1990-04-10').toString());
   });
 
-  test('Get/Set/Default Value -- It should update the value -- object', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Get/Set/Default Value -- It should update the value -- object', async function (assert) {
+    const data = {
       foo: { bar: 'Tequila' },
     };
-    await render(hbs`
-    <Formidable @values={{this.values}}  as |values api|>
-        <button id="change" type="button" {{on "click" (fn api.setValue "foo" (hash bar="Sunrise!"))}}>CHANGE</button>
-        <p id="value">{{api.getValue "foo.bar"}}</p>
-        <p id="default">{{api.defaultValues.foo.bar}}</p>
-    </Formidable>
-  `);
+    const bar = { bar: 'Sunrise!' };
+
+    await render(<template>
+      <Formidable @values={{data}} as |values api|>
+        <button id='change' type='button' {{on 'click' (fn api.setValue 'foo' bar)}}>CHANGE</button>
+        <p id='value'>{{api.getValue 'foo.bar'}}</p>
+        <p id='default'>{{api.defaultValues.foo.bar}}</p>
+      </Formidable>
+    </template>);
     await click('#change');
     assert.dom('#value').hasText('Sunrise!');
     assert.dom('#default').hasText('Tequila');
   });
 
-  test('Get/Set/Default Value -- It should update the value -- array', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Get/Set/Default Value -- It should update the value -- array', async function (assert) {
+    const data = {
       foo: ['🐡', '🐟'],
     };
-    await render(hbs`
-    <Formidable @values={{this.values}}  as |values api|>
-        <button id="change" type="button" {{on "click" (fn api.setValue "foo" (array "🍤" "🍣"))}}>CHANGE</button>
-        <p id="value0">{{api.getValue "foo.0"}}</p>
-        <p id="value1">{{api.getValue "foo.1"}}</p>
-        <p id="default0">{{get api.defaultValues "foo.0"}}</p>
-        <p id="default1">{{get api.defaultValues "foo.1"}}</p>
-    </Formidable>
-  `);
+    const fishes = ['🍤', '🍣'];
+
+    await render(<template>
+      <Formidable @values={{data}} as |values api|>
+        <button
+          id='change'
+          type='button'
+          {{on 'click' (fn api.setValue 'foo' fishes)}}
+        >CHANGE</button>
+        <p id='value0'>{{api.getValue 'foo.0'}}</p>
+        <p id='value1'>{{api.getValue 'foo.1'}}</p>
+        <p id='default0'>{{get api.defaultValues 'foo.0'}}</p>
+        <p id='default1'>{{get api.defaultValues 'foo.1'}}</p>
+      </Formidable>
+    </template>);
     await click('#change');
     assert.dom('#value0').hasText('🍤');
     assert.dom('#value1').hasText('🍣');
@@ -109,61 +129,71 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#default1').hasText('🐟');
   });
 
-  test('Get Values -- It should get all the values', async function (this: FormidableContext & {
-    renderValues: (values: object) => void;
-  }, assert) {
-    this.values = {
+  test('Get Values -- It should get all the values', async function (assert) {
+    const data = {
       foo: 'BAR',
       bizz: 'Buzz',
     };
 
-    this.renderValues = (values: object) => {
+    const renderValues = (values: object) => {
       return Object.values(values);
     };
 
-    await render(hbs`
-    <Formidable @values={{this.values}}  as |values api|>
-      {{#each (this.renderValues (api.getValues)) as |value|}}
-        <p id={{value}}>{{value}}</p>
-      {{/each}}
-    </Formidable>
-  `);
+    await render(<template>
+      <Formidable @values={{data}} as |values api|>
+        {{#each (renderValues (api.getValues)) as |value|}}
+          <p id={{value}}>{{value}}</p>
+        {{/each}}
+      </Formidable>
+    </template>);
 
     assert.dom('#BAR').hasText('BAR');
     assert.dom('#Buzz').hasText('Buzz');
   });
 
-  test('SetValue -- shouldDirty -- It should update and dirty the field', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('SetValue -- shouldDirty -- It should update and dirty the field', async function (assert) {
+    const data = {
       foo: 'BAR',
     };
-    await render(hbs`
-      <Formidable @values={{this.values}}  as |values api|>
-          <button id="change" type="button" {{on "click" (fn api.setValue "foo" "CHANGED" (hash shouldDirty=true))}}>CHANGE</button>
-          <p id="value">{{api.getValue "foo"}}</p>
-          {{#if (get api.dirtyFields 'foo')}}
-              <p id="df-foo">DIRTY</p>
-          {{/if}}
+    const options = { shouldDirty: true };
+
+    await render(<template>
+      <Formidable @values={{data}} as |values api|>
+        <button
+          id='change'
+          type='button'
+          {{on 'click' (fn api.setValue 'foo' 'CHANGED' options)}}
+        >CHANGE</button>
+        <p id='value'>{{api.getValue 'foo'}}</p>
+        {{#if (get api.dirtyFields 'foo')}}
+          <p id='df-foo'>DIRTY</p>
+        {{/if}}
       </Formidable>
-    `);
+    </template>);
 
     await click('#change');
     assert.dom('#df-foo').exists();
   });
 
-  test('SetValue -- shouldValidate -- It should update and validate the field', async function (this: FormidableContext, assert) {
-    this.validator = yupResolver(userSchema);
-    this.values = validUser;
+  test('SetValue -- shouldValidate -- It should update and validate the field', async function (assert) {
+    const validator = yupResolver(userSchema);
 
-    await render(hbs`
-      <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
-          <button id="change" type="button" {{on "click" (fn api.setValue "name" "" (hash shouldValidate=true))}}>CHANGE</button>
-          <p id="value">{{api.getValue "name"}}</p>
-          {{#each api.errorMessages as |error|}}
-           <p id="error">{{error}}</p>
-          {{/each}}
+    const data = validUser;
+    const options = { shouldValidate: true };
+
+    await render(<template>
+      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+        <button
+          id='change'
+          type='button'
+          {{on 'click' (fn api.setValue 'name' '' options)}}
+        >CHANGE</button>
+        <p id='value'>{{api.getValue 'name'}}</p>
+        {{#each api.errorMessages as |error|}}
+          <p id='error'>{{error}}</p>
+        {{/each}}
       </Formidable>
-    `);
+    </template>);
 
     await click('#change');
     assert.dom('#error').exists();

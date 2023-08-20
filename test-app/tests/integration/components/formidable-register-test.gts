@@ -1,154 +1,165 @@
 /* eslint-disable qunit/no-only */
 /* eslint-disable qunit/require-expect */
-import { hbs } from 'ember-cli-htmlbars';
-import { module, test } from 'qunit';
-import ChildModel from 'test-app/models/child';
-import { setupRenderingTest } from 'test-app/tests/helpers';
-import { FormidableContext } from 'test-app/tests/types';
-
+import { on } from '@ember/modifier';
 import { click, fillIn, render, select } from '@ember/test-helpers';
+import { module, test } from 'qunit';
+
+import { Formidable } from 'ember-formidable';
+import { setupRenderingTest } from 'test-app/tests/helpers';
 
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('Values -- text -- It should update the value', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Values -- text -- It should update the value', async function (assert) {
+    const data = {
       foo: 'DEFAULT',
     };
-    this.onUpdate = (data: { foo: string }) => {
+
+    const onUpdate = (data: { foo: string }) => {
       assert.strictEqual(data.foo, 'CHANGED');
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
+
+    await render(<template>
+      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo' {{api.register 'foo'}} />
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
     assert.dom('#foo').hasValue('DEFAULT');
     await fillIn('#foo', 'CHANGED');
     await click('#submit');
   });
 
-  test('Values -- no name positionnal -- It should update the value', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Values -- no name positionnal -- It should update the value', async function (assert) {
+    const data = {
       foo: 'DEFAULT',
     };
-    this.onUpdate = (data: { foo: string }) => {
+
+    const onUpdate = (data: { foo: string }) => {
       assert.strictEqual(data.foo, 'CHANGED');
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" name="foo" {{api.register}} />
-          <button id="submit"  type="submit">SUBMIT</button>
+
+    await render(<template>
+      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo' name='foo' {{api.register}} />
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
     assert.dom('#foo').hasValue('DEFAULT');
     await fillIn('#foo', 'CHANGED');
     await click('#submit');
   });
 
-  test('Values -- textarea -- It should update the value ', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Values -- textarea -- It should update the value ', async function (assert) {
+    const data = {
       foo: 'DEFAULT',
     };
-    this.onUpdate = (data: { foo: string }) => {
+
+    const onUpdate = (data: { foo: string }) => {
       assert.strictEqual(data.foo, 'CHANGED');
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <textarea id="foo" {{api.register "foo"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
+
+    await render(<template>
+      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <textarea id='foo' {{api.register 'foo'}} />
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
     assert.dom('#foo').hasValue('DEFAULT');
     await fillIn('#foo', 'CHANGED');
     await click('#submit');
   });
 
-  test('Values -- select -- It should update the value ', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Values -- select -- It should update the value ', async function (assert) {
+    const data = {
       pet: '🐶',
     };
-    this.onUpdate = (data: { pet: string }) => {
+
+    const onUpdate = (data: { pet: string }) => {
       assert.strictEqual(data.pet, '🐱');
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-        <select id="pet" {{api.register "pet"}} >
-          <option value="🐶" id="dog">Dog</option>
-          <option value="🐱" id="cat">Cat</option>
-          <option value="hamster" id="hamster">Hamster</option>
-        </select>
-          <button id="submit"  type="submit">SUBMIT</button>
+
+    await render(<template>
+      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <select id='pet' {{api.register 'pet'}}>
+            <option value='🐶' id='dog'>Dog</option>
+            <option value='🐱' id='cat'>Cat</option>
+            <option value='hamster' id='hamster'>Hamster</option>
+          </select>
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
     assert.dom('#pet').hasValue('🐶');
     await select('#pet', '🐱');
     await click('#submit');
     assert.dom('#pet').hasValue('🐱');
   });
 
-  test('Values -- radio -- It should update the value', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Values -- radio -- It should update the value', async function (assert) {
+    const data = {
       drone: 'huey',
     };
-    this.onUpdate = (data: { drone: string }) => {
+
+    const onUpdate = (data: { drone: string }) => {
       assert.strictEqual(data.drone, 'dewey');
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
+
+    await render(<template>
+      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
           <fieldset>
             <legend>Select a maintenance drone:</legend>
             <div>
-              <input type="radio" id="huey" value="huey" {{api.register "drone"}}>
-              <label for="huey">Huey</label>
+              <input type='radio' id='huey' value='huey' {{api.register 'drone'}} />
+              <label for='huey'>Huey</label>
             </div>
 
             <div>
-              <input type="radio" id="dewey" {{api.register "drone"}} value="dewey">
-              <label for="dewey">Dewey</label>
+              <input type='radio' id='dewey' {{api.register 'drone'}} value='dewey' />
+              <label for='dewey'>Dewey</label>
             </div>
 
             <div>
-              <input type="radio" id="louie" {{api.register "drone"}} value="louie">
-              <label for="louie">Louie</label>
+              <input type='radio' id='louie' {{api.register 'drone'}} value='louie' />
+              <label for='louie'>Louie</label>
             </div>
           </fieldset>
-          <button id="submit"  type="submit">SUBMIT</button>
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
     assert.dom('#huey').isChecked();
     await click('#dewey');
     await click('#submit');
     assert.dom('#dewey').isChecked();
   });
 
-  test('Values -- checkbox -- It should update the value ', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Values -- checkbox -- It should update the value ', async function (assert) {
+    const data = {
       foo: '🐍',
     };
-    this.onUpdate = (data: { foo: string }) => {
+
+    const onUpdate = (data: { foo: string }) => {
       assert.strictEqual(data.foo, '🦎');
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="checkbox" id="foo" {{api.register "foo"}} value="🐍" />
-          <input type="checkbox" id="bar" {{api.register "foo"}} value="🦎" />
-          <button id="submit"  type="submit">SUBMIT</button>
+
+    await render(<template>
+      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='checkbox' id='foo' {{api.register 'foo'}} value='🐍' />
+          <input type='checkbox' id='bar' {{api.register 'foo'}} value='🦎' />
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
     assert.dom('#foo').isChecked();
     assert.dom('#bar').isNotChecked();
 
@@ -160,84 +171,91 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#bar').isChecked();
   });
 
-  test('Values -- number -- It should update the value ', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Values -- number -- It should update the value ', async function (assert) {
+    const data = {
       foo: 3,
     };
-    this.onUpdate = (data: { foo: number }) => {
+
+    const onUpdate = (data: { foo: number }) => {
       assert.strictEqual(data.foo, 5);
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo" valueAsNumber=true}} />
-          <button id="submit"  type="submit">SUBMIT</button>
+
+    await render(<template>
+      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo' {{api.register 'foo' valueAsNumber=true}} />
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
     assert.dom('#foo').hasValue('3');
     await fillIn('#foo', '5');
     await click('#submit');
   });
 
-  test('Values -- date -- It should update the value ', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Values -- date -- It should update the value ', async function (assert) {
+    const data = {
       foo: new Date('2000-05-05'),
     };
-    this.onUpdate = (data: { foo: Date }) => {
+
+    const onUpdate = (data: { foo: Date }) => {
       assert.deepEqual(data.foo, new Date('2001-05-05'));
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo" valueAsDate=true}} />
-          <button id="submit"  type="submit">SUBMIT</button>
+
+    await render(<template>
+      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo' {{api.register 'foo' valueAsDate=true}} />
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
     assert.dom('#foo').hasValue(new Date('2000-05-05').toString());
     await fillIn('#foo', '2001-05-05');
     await click('#submit');
   });
 
-  test('Values -- object -- It should update the value ', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Values -- object -- It should update the value ', async function (assert) {
+    const data = {
       foo: { bar: 'DEFAULT' },
     };
-    this.onUpdate = (data: { foo: { bar: string } }) => {
+
+    const onUpdate = (data: { foo: { bar: string } }) => {
       assert.strictEqual(data.foo.bar, 'CHANGED');
     };
 
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo.bar"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
+    await render(<template>
+      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo' {{api.register 'foo.bar'}} />
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
 
     assert.dom('#foo').hasValue('DEFAULT');
     await fillIn('#foo', 'CHANGED');
     await click('#submit');
   });
 
-  test('Values -- array -- It should update the value ', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Values -- array -- It should update the value ', async function (assert) {
+    const data = {
       foo: ['💞', '💝'],
     };
-    this.onUpdate = (data: { foo: string[] }) => {
+
+    const onUpdate = (data: { foo: string[] }) => {
       assert.deepEqual(data.foo, ['*', '**']);
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo0" {{api.register "foo.0"}} />
-          <input type="text" id="foo1" {{api.register "foo.1"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
+
+    await render(<template>
+      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo0' {{api.register 'foo.0'}} />
+          <input type='text' id='foo1' {{api.register 'foo.1'}} />
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
     assert.dom('#foo0').hasValue('💞');
     assert.dom('#foo1').hasValue('💝');
 

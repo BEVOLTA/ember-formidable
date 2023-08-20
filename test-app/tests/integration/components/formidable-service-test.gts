@@ -1,38 +1,37 @@
 /* eslint-disable qunit/require-expect */
-import { hbs } from 'ember-cli-htmlbars';
-import { module, test } from 'qunit';
-import { setupRenderingTest } from 'test-app/tests/helpers';
-import { FormidableContext } from 'test-app/tests/types';
-
+import { on } from '@ember/modifier';
 import { click, fillIn, render } from '@ember/test-helpers';
+import { module, test } from 'qunit';
+
+import { Formidable } from 'ember-formidable';
+import { setupRenderingTest } from 'test-app/tests/helpers';
 
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('Service -- Service should return updated values', async function (this: FormidableContext, assert) {
+  test('Service -- Service should return updated values', async function (assert) {
     const formidable = this.owner.lookup('service:formidable');
+
     assert.ok(formidable);
-    this.values = {
+
+    const data = {
       foo: 'DEFAULT',
       bar: 'BAZ',
     };
 
-    await render(hbs`
-      <Formidable @serviceId="test" @values={{this.values}}  as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
+    await render(<template>
+      <Formidable @serviceId='test' @values={{data}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo' {{api.register 'foo'}} />
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
 
     await fillIn('#foo', 'CHANGED');
 
     await click('#submit');
-    assert.strictEqual(
-      formidable.getFormidableApi('test').values.foo,
-      'CHANGED',
-    );
+    assert.strictEqual(formidable.getFormidableApi('test').values.foo, 'CHANGED');
     assert.strictEqual(formidable.getValue('test', 'foo'), 'CHANGED');
 
     assert.deepEqual(formidable.getValues('test', ['foo', 'bar']), {
@@ -41,28 +40,28 @@ module('Integration | Component | formidable', function (hooks) {
     });
   });
 
-  test('Service -- It should unregister', async function (this: FormidableContext, assert) {
+  test('Service -- It should unregister', async function (assert) {
     const formidable = this.owner.lookup('service:formidable');
+
     assert.ok(formidable);
-    this.values = {
+
+    const data = {
       foo: 'DEFAULT',
       bar: 'BAZ',
     };
 
-    await render(hbs`
-      <Formidable @serviceId="test" @values={{this.values}}  as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
+    await render(<template>
+      <Formidable @serviceId='test' @values={{data}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo' {{api.register 'foo'}} />
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
 
     assert.ok(formidable.getFormidableApi('test'));
 
-    await render(hbs`
-      <div>EMPTY</div>
-  `);
+    await render(<template><div>EMPTY</div></template>);
 
     assert.throws(() => formidable.getFormidableApi('test'));
   });

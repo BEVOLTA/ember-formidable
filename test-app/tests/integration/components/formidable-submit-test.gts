@@ -1,11 +1,12 @@
-import { hbs } from 'ember-cli-htmlbars';
+import { on } from '@ember/modifier';
+import { click, fillIn, render } from '@ember/test-helpers';
 import { module, test } from 'qunit';
+
+import { Formidable } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
-import { FormidableContext } from 'test-app/tests/types';
+import { fn } from 'test-app/tests/utils/helpers';
 import { yupResolver } from 'test-app/tests/utils/resolvers/yup';
 import * as yup from 'yup';
-
-import { click, fillIn, render } from '@ember/test-helpers';
 
 const userSchema = yup.object({
   name: yup.string().required('Name is required.'),
@@ -18,43 +19,40 @@ const validUser = {
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('isSubmitSuccessful -- Should be OK when submitting', async function (this: FormidableContext, assert) {
-    this.validator = yupResolver(userSchema);
-    this.values = validUser;
+  const validator = yupResolver(userSchema);
+  let data = validUser;
 
-    await render(hbs`
-      <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="name" {{api.register "name"}} />
-          <button id="submit" type="submit">SUBMIT</button>
+  test('isSubmitSuccessful -- Should be OK when submitting', async function (assert) {
+    await render(<template>
+      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='name' {{api.register 'name'}} />
+          <button id='submit' type='submit'>SUBMIT</button>
           {{#if api.isSubmitSuccessful}}
-             <p id="is-success">SUCCESSFUL</p>
-           {{/if}}
+            <p id='is-success'>SUCCESSFUL</p>
+          {{/if}}
         </form>
       </Formidable>
-    `);
+    </template>);
     assert.dom('#name').hasValue('John Doe');
     assert.dom('#is-success').doesNotExist();
     await click('#submit');
     assert.dom('#is-success').exists();
   });
 
-  test('isSubmitSuccessful -- Should not be true if there are errors', async function (this: FormidableContext, assert) {
-    this.validator = yupResolver(userSchema);
-    this.values = validUser;
-
-    await render(hbs`
-      <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="name" {{api.register "name"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
+  test('isSubmitSuccessful -- Should not be true if there are errors', async function (assert) {
+    await render(<template>
+      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='name' {{api.register 'name'}} />
+          <button id='submit' type='submit'>SUBMIT</button>
           {{#if api.isSubmitSuccessful}}
-             <p id="is-success">SUCCESSFUL</p>
+            <p id='is-success'>SUCCESSFUL</p>
           {{/if}}
 
         </form>
       </Formidable>
-    `);
+    </template>);
 
     assert.dom('#is-success').doesNotExist();
     await fillIn('#name', '');
@@ -62,21 +60,18 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#is-success').doesNotExist();
   });
 
-  test('isSubmitted -- Should not be true even with errors', async function (this: FormidableContext, assert) {
-    this.validator = yupResolver(userSchema);
-    this.values = validUser;
-
-    await render(hbs`
-      <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="name" {{api.register "name"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
+  test('isSubmitted -- Should not be true even with errors', async function (assert) {
+    await render(<template>
+      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='name' {{api.register 'name'}} />
+          <button id='submit' type='submit'>SUBMIT</button>
           {{#if api.isSubmitted}}
-             <p id="is-submitted">SUBMITTED</p>
+            <p id='is-submitted'>SUBMITTED</p>
           {{/if}}
         </form>
       </Formidable>
-    `);
+    </template>);
 
     assert.dom('#is-submitted').doesNotExist();
     await fillIn('#name', '');
@@ -84,23 +79,27 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#is-submitted').exists();
   });
 
-  test('isSubmitted -- Should be false when rollback', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('isSubmitted -- Should be false when rollback', async function (assert) {
+    data = {
       foo: 'DEFAULT',
     };
 
-    await render(hbs`
-      <Formidable @values={{this.values}}  as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo"}} />
-          <button id="rollback"  type="button" {{on "click" (fn api.rollback undefined)}}>ROLLBACK</button>
-          <button id="submit"  type="submit">SUBMIT</button>
+    await render(<template>
+      <Formidable @values={{data}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo' {{api.register 'foo'}} />
+          <button
+            id='rollback'
+            type='button'
+            {{on 'click' (fn api.rollback undefined)}}
+          >ROLLBACK</button>
+          <button id='submit' type='submit'>SUBMIT</button>
           {{#if api.isSubmitted}}
-             <p id="is-submitted">SUBMITTED</p>
+            <p id='is-submitted'>SUBMITTED</p>
           {{/if}}
         </form>
       </Formidable>
-    `);
+    </template>);
 
     assert.dom('#is-submitted').doesNotExist();
     await click('#submit');
@@ -109,19 +108,16 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#is-submitted').doesNotExist();
   });
 
-  test('submitCount -- Should increment when submitting', async function (this: FormidableContext, assert) {
-    this.validator = yupResolver(userSchema);
-    this.values = validUser;
-
-    await render(hbs`
-      <Formidable @values={{this.values}} @validator={{this.validator}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="name" {{api.register "name"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
-           <p id="submit-count">{{api.submitCount}}</p>
+  test('submitCount -- Should increment when submitting', async function (assert) {
+    await render(<template>
+      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='name' {{api.register 'name'}} />
+          <button id='submit' type='submit'>SUBMIT</button>
+          <p id='submit-count'>{{api.submitCount}}</p>
         </form>
       </Formidable>
-    `);
+    </template>);
 
     assert.dom('#submit-count').hasText('0');
     await click('#submit');
@@ -134,49 +130,50 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#submit-count').hasText('4');
   });
 
-  test('onSubmit -- Should have a custom onSubmit', async function (this: FormidableContext & {
-    submitMessage?: string;
-  }, assert) {
-    this.validator = yupResolver(userSchema);
-    this.values = validUser;
-
-    this.onSubmit = (event, api) => {
+  test('onSubmit -- Should have a custom onSubmit', async function (assert) {
+    const handleSubmit = (event, api) => {
       assert.ok(event);
       assert.ok(api);
     };
 
-    await render(hbs`
-      <Formidable @values={{this.values}} @validator={{this.validator}} @onSubmit={{this.onSubmit}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="name" {{api.register "name"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
-           {{#each api.errorMessages as |error|}}
-            <p id="error">{{error}}</p>
+    await render(<template>
+      <Formidable
+        @values={{data}}
+        @validator={{validator}}
+        @onSubmit={{handleSubmit}}
+        as |values api|
+      >
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='name' {{api.register 'name'}} />
+          <button id='submit' type='submit'>SUBMIT</button>
+          {{#each api.errorMessages as |error|}}
+            <p id='error'>{{error}}</p>
           {{/each}}
         </form>
       </Formidable>
-    `);
+    </template>);
 
     await click('#submit');
     assert.dom('#error').doesNotExist();
   });
 
-  test('isSubmitting -- Should be true when submitted', async function (this: FormidableContext, assert) {
-    this.onUpdate = async (_data, api) => {
+  test('isSubmitting -- Should be true when submitted', async function (assert) {
+    const onUpdate = async (_data, api) => {
       return await new Promise((resolve) => {
         setTimeout(resolve, 1000);
         assert.true(api.isSubmitting);
       });
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
-           <p id="is-submitting">{{api.isSubmitting}}</p>
+
+    await render(<template>
+      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo' {{api.register 'foo'}} />
+          <button id='submit' type='submit'>SUBMIT</button>
+          <p id='is-submitting'>{{api.isSubmitting}}</p>
         </form>
       </Formidable>
-    `);
+    </template>);
     assert.dom('#is-submitting').hasText('false');
     await click('#submit');
     assert.dom('#is-submitting').hasText('false');
