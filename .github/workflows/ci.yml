@@ -89,6 +89,11 @@ jobs:
           - ember-release
           - ember-beta
           - ember-canary
+          - "'ember-lts-4.12 + embroider-safe'"
+          - "'ember-lts-4.12 + embroider-optimized'"
+          - "'ember-lts-5.0 + embroider-safe'"
+          - "'ember-lts-5.0 + embroider-optimized'"
+          - "'ember-release + embroider-optimized'"
 
     steps:
       - uses: wyvox/action@v1
