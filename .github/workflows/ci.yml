@@ -133,27 +133,28 @@ jobs:
       - name: 'Type checking'
         run: pnpm turbo --filter 'test-app' lint:types
 
-  # build-docs:
-  #   name: "Build documentation"
-  #   if: github.ref == 'refs/heads/main'
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 15
-  #   needs: [setup]
+  docs-deploy:
+    name: "Deploy documentation"
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [setup]
 
-  #   permissions:
-  #     contents: read
-  #     deployments: write
+    permissions:
+      contents: read
+      deployments: write
 
-  #   steps:
-  #     - uses: wyvox/action@v1
-  #       with:
-  #         repo-token: ${{ secrets.GITHUB_TOKEN }}
-  #     - run: pnpm build
-  #     - run: pnpm i -f # sync for some reason isn't running before lint
-  #     - run: pnpm build --filter docs
-  #     - run: pnpm i -f # sync for some reason isn't running before lint
-  #     - run: pnpm ember build
-  #       working-directory: docs
+    steps:
+      - uses: wyvox/action@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - run: pnpm build
+      - run: pnpm i -f # sync for some reason isn't running before lint
+      - run: pnpm build --filter docs
+      - run: pnpm i -f # sync for some reason isn't running before lint
+      - run: pnpm deploy
+        working-directory: docs
+
 
 
 
