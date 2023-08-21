@@ -1,32 +1,38 @@
 /* eslint-disable qunit/require-expect */
-import { hbs } from 'ember-cli-htmlbars';
-import { module, test } from 'qunit';
-import { setupRenderingTest } from 'test-app/tests/helpers';
-import { FormidableContext } from 'test-app/tests/types';
-
+import { on } from '@ember/modifier';
+import { get } from '@ember/object';
 import { click, fillIn, render } from '@ember/test-helpers';
+import { module, test } from 'qunit';
+
+import { Formidable } from 'ember-formidable';
+import { setupRenderingTest } from 'test-app/tests/helpers';
+import { fn } from 'test-app/tests/utils/helpers';
+
+import type { FormidableArgs } from 'ember-formidable';
 
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('Rollback -- text -- no options -- It should rollback the value', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Rollback -- text -- no options -- It should rollback the value', async function (assert) {
+    const data = {
       foo: 'DEFAULT',
     };
-    this.onUpdate = (_data, api: { rollback: () => void }) => {
+
+    const onUpdate: FormidableArgs<typeof data>['onUpdate'] = (_data, api) => {
       api.rollback();
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo"}} />
+
+    await render(<template>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo' {{api.register 'foo'}} />
           {{#if api.isSubmitted}}
-             <p id="is-submitted">SUBMITTED</p>
+            <p id='is-submitted'>SUBMITTED</p>
           {{/if}}
-          <button id="submit"  type="submit">SUBMIT</button>
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
 
     assert.dom('#foo').hasValue('DEFAULT');
 
@@ -37,27 +43,24 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#is-submitted').doesNotExist();
   });
 
-  test('Rollback -- defaultValue -- The default value should be reset', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Rollback -- defaultValue -- The default value should be reset', async function (assert) {
+    const data: { foo: string; bar?: string } = {
       foo: 'DEFAULT',
     };
+    const options = { defaultValue: 'Shiny and new!' };
 
-    await render(hbs`
-      <Formidable @values={{this.values}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo"}} />
-          <input type="text" id="bar" {{api.register "bar"}} />
-          <button
-            id="rollback"
-            type="button"
-            {{on "click" (fn api.rollback "foo" (hash defaultValue="Shiny and new!"))}}
-          >
+    await render(<template>
+      <Formidable @values={{data}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo' {{api.register 'foo'}} />
+          <input type='text' id='bar' {{api.register 'bar'}} />
+          <button id='rollback' type='button' {{on 'click' (fn api.rollback 'foo' options)}}>
             ROLLBACK
           </button>
-          <p id="df-foo">{{get api.defaultValues 'foo'}}</p>
+          <p id='df-foo'>{{get api.defaultValues 'foo'}}</p>
         </form>
       </Formidable>
-    `);
+    </template>);
 
     assert.dom('#df-foo').hasText('DEFAULT');
     await fillIn('#foo', 'UPDATED');
@@ -66,24 +69,26 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#foo').hasValue('Shiny and new!');
   });
 
-  test('Rollback -- number -- no options -- It should rollback the value ', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Rollback -- number -- no options -- It should rollback the value ', async function (assert) {
+    const data = {
       foo: 404,
     };
-    this.onUpdate = (_data, api: { rollback: () => void }) => {
+
+    const onUpdate: FormidableArgs<typeof data>['onUpdate'] = (_data, api) => {
       api.rollback();
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo" valueAsNumber=true}} />
+
+    await render(<template>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo' {{api.register 'foo' valueAsNumber=true}} />
           {{#if api.isSubmitted}}
-             <p id="is-submitted">SUBMITTED</p>
+            <p id='is-submitted'>SUBMITTED</p>
           {{/if}}
-          <button id="submit"  type="submit">SUBMIT</button>
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
     assert.dom('#foo').hasValue('404');
     await fillIn('#foo', '5');
     assert.dom('#foo').hasValue('5');
@@ -92,24 +97,26 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#is-submitted').doesNotExist();
   });
 
-  test('Rollback -- date -- no options -- It should rollback the value ', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Rollback -- date -- no options -- It should rollback the value ', async function (assert) {
+    const data = {
       foo: new Date('2000-05-05'),
     };
-    this.onUpdate = (_data, api: { rollback: () => void }) => {
+
+    const onUpdate: FormidableArgs<typeof data>['onUpdate'] = (_data, api) => {
       api.rollback();
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo" valueAsDate=true}} />
+
+    await render(<template>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo' {{api.register 'foo' valueAsDate=true}} />
           {{#if api.isSubmitted}}
-             <p id="is-submitted">SUBMITTED</p>
+            <p id='is-submitted'>SUBMITTED</p>
           {{/if}}
-          <button id="submit"  type="submit">SUBMIT</button>
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
     assert.dom('#foo').hasValue(new Date('2000-05-05').toString());
     await fillIn('#foo', '2001-05-05');
     assert.dom('#foo').hasValue(new Date('2001-05-05').toString());
@@ -118,25 +125,29 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#is-submitted').doesNotExist();
   });
 
-  test('Rollback -- object -- no options -- It should rollback the value ', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Rollback -- object -- no options -- It should rollback the value ', async function (assert) {
+    const data = {
       foo: { bar: 'DEFAULT' },
     };
-    this.onUpdate = (_data, api: { rollback: () => void }) => {
+
+    const onUpdate: FormidableArgs<typeof data & { 'foo.bar'?: string }>['onUpdate'] = (
+      _data,
+      api,
+    ) => {
       api.rollback();
     };
 
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo" {{api.register "foo.bar"}} />
+    await render(<template>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo' {{api.register 'foo.bar'}} />
           {{#if api.isSubmitted}}
-             <p id="is-submitted">SUBMITTED</p>
+            <p id='is-submitted'>SUBMITTED</p>
           {{/if}}
-          <button id="submit"  type="submit">SUBMIT</button>
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
 
     assert.dom('#foo').hasValue('DEFAULT');
     await fillIn('#foo', 'CHANGED');
@@ -146,25 +157,31 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#is-submitted').doesNotExist();
   });
 
-  test('Rollback -- array -- no options -- It should rollback the value ', async function (this: FormidableContext, assert) {
-    this.values = {
+  test('Rollback -- array -- no options -- It should rollback the value ', async function (assert) {
+    const data = {
       foo: ['A', 'B'],
     };
-    this.onUpdate = (_data, api: { rollback: () => void }) => {
+
+    const onUpdate: FormidableArgs<{
+      'foo.0'?: string;
+      'foo.1'?: string;
+      foo: string[];
+    }>['onUpdate'] = (_data, api) => {
       api.rollback();
     };
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="foo0" {{api.register "foo.0"}} />
-          <input type="text" id="foo1" {{api.register "foo.1"}} />
+
+    await render(<template>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo0' {{api.register 'foo.0'}} />
+          <input type='text' id='foo1' {{api.register 'foo.1'}} />
           {{#if api.isSubmitted}}
-             <p id="is-submitted">SUBMITTED</p>
+            <p id='is-submitted'>SUBMITTED</p>
           {{/if}}
-          <button id="submit"  type="submit">SUBMIT</button>
+          <button id='submit' type='submit'>SUBMIT</button>
         </form>
       </Formidable>
-    `);
+    </template>);
     assert.dom('#foo0').hasValue('A');
     assert.dom('#foo1').hasValue('B');
 
@@ -176,66 +193,5 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#foo0').hasValue('A');
     assert.dom('#foo1').hasValue('B');
     assert.dom('#is-submitted').doesNotExist();
-  });
-
-  test('Values -- It should rollback the value -- model', async function (this: FormidableContext, assert) {
-    const store = this.owner.lookup('service:store');
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.values = store.createRecord('child', {
-      str: 'Child',
-      bool: false,
-      num: 2,
-      date: new Date('2000-01-01'),
-      obj: { foo: { bar: 'Biz' }, ember: 'Ness' },
-    });
-
-    this.onUpdate = (_data, api: { rollback: () => void }) => {
-      api.rollback();
-    };
-
-    await render(hbs`
-      <Formidable @values={{this.values}} @onValuesChanged={{this.onUpdate}} as |values api|>
-        <form {{on "submit" api.onSubmit}}>
-          <input type="text" id="child-str" {{api.register "str"}} />
-          <input type="checkbox" id="child-bool" {{api.register "bool"}} />
-          <input type="text" id="child-num" {{api.register "num" valueAsNumber=true}} />
-          <input type="text" id="child-date" {{api.register "date" valueAsDate=true}} />
-          <input type="text" id="child-obj-foo" {{api.register "obj.foo.bar"}} />
-          <input type="text" id="child-obj-ember" {{api.register "obj.ember"}} />
-          <button id="submit"  type="submit">SUBMIT</button>
-        </form>
-      </Formidable>
-    `);
-
-    assert.dom('#child-str').hasValue('Child');
-    assert.dom('#child-bool').isNotChecked();
-    assert.dom('#child-num').hasValue('2');
-    assert.dom('#child-date').hasValue(new Date('2000-01-01').toString());
-    assert.dom('#child-obj-foo').hasValue('Biz');
-    assert.dom('#child-obj-ember').hasValue('Ness');
-
-    await fillIn('#child-str', 'New Child');
-    await click('#child-bool');
-    await fillIn('#child-num', '202');
-    await fillIn('#child-date', new Date('1990-01-01').toString());
-    await fillIn('#child-obj-foo', 'Bonjour');
-    await fillIn('#child-obj-ember', 'Paris');
-
-    assert.dom('#child-str').hasValue('New Child');
-    assert.dom('#child-bool').isChecked();
-    assert.dom('#child-num').hasValue('202');
-    assert.dom('#child-date').hasValue(new Date('1990-01-01').toString());
-    assert.dom('#child-obj-foo').hasValue('Bonjour');
-    assert.dom('#child-obj-ember').hasValue('Paris');
-
-    await click('#submit');
-
-    assert.dom('#child-str').hasValue('Child');
-    assert.dom('#child-bool').isNotChecked();
-    assert.dom('#child-num').hasValue('2');
-    assert.dom('#child-date').hasValue(new Date('2000-01-01').toString());
-    assert.dom('#child-obj-foo').hasValue('Biz');
-    assert.dom('#child-obj-ember').hasValue('Ness');
   });
 });

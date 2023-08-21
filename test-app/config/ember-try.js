@@ -6,20 +6,24 @@ const { embroiderSafe, embroiderOptimized } = require('@embroider/test-setup');
 module.exports = async function () {
   return {
     usePnpm: true,
+    command: 'pnpm turbo run test',
+    buildManagerOptions() {
+      return ['--ignore-scripts', '--no-frozen-lockfile'];
+    },
     scenarios: [
       {
-        name: 'ember-lts-3.28',
+        name: 'ember-lts-4.12',
         npm: {
           devDependencies: {
-            'ember-source': '~3.28.0',
+            'ember-source': '~4.12.0',
           },
         },
       },
       {
-        name: 'ember-lts-4.4',
+        name: 'ember-5.0',
         npm: {
           devDependencies: {
-            'ember-source': '~4.4.0',
+            'ember-source': '~5.0.0',
           },
         },
       },
@@ -47,26 +51,46 @@ module.exports = async function () {
           },
         },
       },
-      {
-        name: 'ember-classic',
-        env: {
-          EMBER_OPTIONAL_FEATURES: JSON.stringify({
-            'application-template-wrapper': true,
-            'default-async-observers': false,
-            'template-only-glimmer-components': false,
-          }),
-        },
+      embroiderSafe({
+        name: 'ember-lts-4.12 + embroider-safe',
         npm: {
           devDependencies: {
-            'ember-source': '~3.28.0',
-          },
-          ember: {
-            edition: 'classic',
+            'ember-source': '~4.12.0',
           },
         },
-      },
-      embroiderSafe(),
-      embroiderOptimized(),
+      }),
+      embroiderSafe({
+        name: 'ember-lts-5.0 + embroider-safe',
+        npm: {
+          devDependencies: {
+            'ember-source': '~5.0.0',
+          },
+        },
+      }),
+      embroiderOptimized({
+        name: 'ember-lts-4.12 + embroider-optimized',
+        npm: {
+          devDependencies: {
+            'ember-source': '~4.12.0',
+          },
+        },
+      }),
+      embroiderOptimized({
+        name: 'ember-lts-5.0 + embroider-optimized',
+        npm: {
+          devDependencies: {
+            'ember-source': '~5.0.0',
+          },
+        },
+      }),
+      embroiderOptimized({
+        name: 'ember-release + embroider-optimized',
+        npm: {
+          devDependencies: {
+            'ember-source': await getChannelURL('release'),
+          },
+        },
+      }),
     ],
   };
 };

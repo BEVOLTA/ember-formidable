@@ -1,41 +1,50 @@
-import { tracked } from 'tracked-built-ins';
-
+import { assert } from '@ember/debug';
 import Service from '@ember/service';
 
-export default class FormidableService extends Service {
-  @tracked formidableApis: Record<string, any> = {};
+import { tracked } from 'tracked-built-ins';
 
-  getFormidableApi(id: string) {
-    if (!this.formidableApis[id]) {
-      const ids = Object.keys(this.formidableApis);
-      throw new Error(
-        `Your formidable must have an id for your service to work!
+import type { FormidableApi, GenericObject } from '../';
+
+type GetApiFn = () => FormidableApi;
+export default class FormidableService extends Service {
+  @tracked formidableApis: Record<string, GetApiFn> = {};
+
+  getFormidableApi(id: string): FormidableApi {
+    const ids = Object.keys(this.formidableApis);
+    const getApi = this.formidableApis[id];
+
+    assert(
+      `Your formidable must have an id for your service to work!
          id: ${id}
          available formidables: ${ids.length ? ids.join(',') : 'None'}
         `,
-      );
-    }
-    return this.formidableApis[id]();
+      !!getApi,
+    );
+
+    return getApi();
   }
 
-  getValue(id: string, field: string) {
+  getValue(id: string, field: string): unknown {
     const { getValue } = this.getFormidableApi(id);
+
     return getValue(field);
   }
 
-  getValues(id: string, fields: string[]) {
+  getValues(id: string, fields: string[]): GenericObject {
     const { getValue } = this.getFormidableApi(id);
+
     return fields.reduce((acc: Record<string, unknown>, field) => {
       acc[field] = getValue(field);
+
       return acc;
     }, {});
   }
 
-  _register(id: string, getData: () => any) {
+  _register(id: string, getData: GetApiFn): void {
     this.formidableApis[id] = getData;
   }
 
-  _unregister(id: string) {
+  _unregister(id: string): void {
     if (this.formidableApis[id]) {
       delete this.formidableApis[id];
     }

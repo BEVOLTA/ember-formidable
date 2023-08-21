@@ -1,18 +1,22 @@
+export { default as Formidable } from './components/formidable';
+export { yupResolver } from './resolvers';
+export { default as FormidableService } from './services/formidable';
 export type {
-  UpdateEvents,
-  GenericObject,
-  FormidableErrors,
   DirtyFields,
-  InvalidFields,
-  FormatOptions,
-  Parser,
-  FormidableError,
-  RollbackContext,
-  SetContext,
   FieldState,
+  FormatOptions,
   FormidableApi,
   FormidableArgs,
+  FormidableError,
+  FormidableErrors,
+  GenericObject,
+  InvalidFields,
+  Parser,
+  RegisterModifier,
   RegisterOptions,
-} from './-private/types';
-export { default as Formidable } from './components/formidable';
-export { default as FormidableService } from './services/formidable';
+  ResolverOptions,
+  RollbackContext,
+  SetContext,
+  UnregisterContext,
+  UpdateEvent,
+} from './types';

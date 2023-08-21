@@ -1,49 +1,59 @@
 {
-  "name": "ember-formidable",
   "version": "0.0.0",
   "private": true,
-  "repository": "",
+  "repository": "https://github.com/BEVOLTA/ember-formidable",
   "license": "MIT",
   "author": "",
   "scripts": {
-    "build": "pnpm --filter ember-formidable build",
-    "lint": "pnpm --filter '*' lint",
-    "lint:fix": "pnpm --filter '*' lint:fix",
-    "prepare": "pnpm build",
-    "start": "concurrently 'npm:start:*' --restart-after 5000 --prefix-colors cyan,white,yellow",
-    "start:addon": "pnpm --filter ember-formidable start --no-watch.clearScreen",
-    "start:test-app": "pnpm --filter test-app start",
-    "start:docs": "pnpm --filter docs start",
-    "test": "pnpm --filter '*' test"
+    "release": "changeset publish",
+    "build": "turbo run build --output-logs errors-only",
+    "start": "pnpm build; concurrently 'npm:_start:*' --prefix ' ' --restart-after 5000 --restart-tries -1",
+    "reset": "rm -rf node_modules ember-formidable/node_modules ember-formidable/dist ember-formidable/dist-types ember-formidable/.turbo test-app/.turbo test-app/node_modules  docs/.turbo docs/node_modules && rm -f pnpm-lock.json",
+    "_start:docs": "pnpm --filter docs start",
+    "_start:tests": "pnpm --filter test-app start",
+    "_start:package": "pnpm --filter 'ember-formidable' start --no-watch.clearScreen",
+    "test": "turbo run test --output-logs errors-only",
+    "lint:fix": "turbo run _:lint:fix --output-logs errors-only",
+    "lint": "turbo run _:lint --output-logs errors-only"
   },
   "devDependencies": {
-    "@release-it-plugins/lerna-changelog": "^5.0.0",
-    "concurrently": "8.2.0",
-    "prettier": "3.0.0",
-    "release-it": "16.0.0"
+    "@changesets/cli": "^2.26.2",
+    "@nullvoxpopuli/dev": "workspace:*",
+    "concurrently": "^8.2.0",
+    "prettier": "^3.0.2",
+    "prettier-plugin-ember-template-tag": "^1.0.2",
+    "turbo": "^1.10.12"
   },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org"
+  "engines": {
+    "node": ">= 18.*",
+    "yarn": "use pnpm",
+    "npm": "use pnpm"
+  },
+  "volta": {
+    "node": "18.17.1",
+    "pnpm": "8.6.12"
   },
   "pnpm": {
     "overrides": {
-      "@types/eslint": "^7.0.0"
-    }
-  },
-  "release-it": {
-    "plugins": {
-      "@release-it-plugins/lerna-changelog": {
-        "infile": "CHANGELOG.md",
-        "launchEditor": true
+      "@glimmer/validator": "^0.84.3",
+      "ember-cli-babel": "^7.26.11"
+    },
+    "packageExtensions": {
+      "ember-qunit": {
+        "peerDependencies": {
+          "@ember/test-helpers": "^2.7.0 || >= 3.0.0"
+        }
       }
     },
-    "git": {
-      "tagName": "v${version}"
-    },
-    "github": {
-      "release": true,
-      "tokenRef": "GITHUB_AUTH"
-    },
-    "npm": false
+    "peerDependencyRules": {
+      "allowAny": [
+        "typescript",
+        "ember-source"
+      ],
+      "ignoreMissing": [
+        "webpack",
+        "rsvp"
+      ]
+    }
   }
 }

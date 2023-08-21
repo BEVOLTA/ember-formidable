@@ -3,5 +3,11 @@
   "include": ["src/**/*", "unpublished-development-types/**/*"],
   "glint": {
     "environment": ["ember-loose", "ember-template-imports"]
+  },
+  "compilerOptions": {
+    "types": ["lodash"],
+    "allowJs": true,
+    "allowImportingTsExtensions": true,
+    "declarationDir": "dist-types"
   }
 }
