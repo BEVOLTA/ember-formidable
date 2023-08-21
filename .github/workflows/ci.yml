@@ -152,7 +152,7 @@ jobs:
       - run: pnpm i -f # sync for some reason isn't running before lint
       - run: pnpm build --filter docs
       - run: pnpm i -f # sync for some reason isn't running before lint
-      - run: pnpm deploy
+      - run: pnpm ember deploy production
         working-directory: docs
 
 
