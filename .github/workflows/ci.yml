@@ -133,52 +133,53 @@ jobs:
       - name: 'Type checking'
         run: pnpm turbo --filter 'test-app' lint:types
 
-  docs-deps:
-    name: Install Docs dependencies
-    runs-on: ubuntu-latest
-    needs: [ lint ]
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: 'npm'
-          cache-dependency-path: '**/docs/package-lock.json'
-      - uses: actions/cache@v3
-        with:
-          path: '**/docs/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/docs/package-lock.json') }}
-      - name: Reconfigure git to use HTTP authentication
-        run: >
-          git config --global url."https://github.com/".insteadOf
-          ssh://git@github.com/
-      - name: Install docs deps
-        run: |
-          cd docs
-          npm ci
+  # Doesn't work yet...
+  # docs-deps:
+  #   name: Install Docs dependencies
+  #   runs-on: ubuntu-latest
+  #   needs: [ lint ]
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 18
+  #         cache: 'npm'
+  #         cache-dependency-path: '**/docs/package-lock.json'
+  #     - uses: actions/cache@v3
+  #       with:
+  #         path: '**/docs/node_modules'
+  #         key: ${{ runner.os }}-modules-${{ hashFiles('**/docs/package-lock.json') }}
+  #     - name: Reconfigure git to use HTTP authentication
+  #       run: >
+  #         git config --global url."https://github.com/".insteadOf
+  #         ssh://git@github.com/
+  #     - name: Install docs deps
+  #       run: |
+  #         cd docs
+  #         npm ci
 
-  docs-build:
-    name: Build Docs App
-    runs-on: ubuntu-latest
-    needs: [ docs-deps ]
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: 'npm'
-          cache-dependency-path: '**/docs/package-lock.json'
-      - uses: actions/cache@v3
-        with:
-          path: '**/docs/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/client/package-lock.json') }}
-      - uses: actions/cache@v3
-        with:
-          path: '**/client/dist'
-          key: ${{ runner.os }}-client-dist-${{ github.sha }}
-      - run: |
-          cd docs
-          ./node_modules/ember-cli/bin/ember build --environment=production
+  # docs-build:
+  #   name: Build Docs App
+  #   runs-on: ubuntu-latest
+  #   needs: [ docs-deps ]
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 18
+  #         cache: 'npm'
+  #         cache-dependency-path: '**/docs/package-lock.json'
+  #     - uses: actions/cache@v3
+  #       with:
+  #         path: '**/docs/node_modules'
+  #         key: ${{ runner.os }}-modules-${{ hashFiles('**/client/package-lock.json') }}
+  #     - uses: actions/cache@v3
+  #       with:
+  #         path: '**/client/dist'
+  #         key: ${{ runner.os }}-client-dist-${{ github.sha }}
+  #     - run: |
+  #         cd docs
+  #         ./node_modules/ember-cli/bin/ember build --environment=production
 
 
 

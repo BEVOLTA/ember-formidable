@@ -1,4 +1,5 @@
 export { default as Formidable } from './components/formidable';
+export { yupResolver } from './resolvers';
 export { default as FormidableService } from './services/formidable';
 export type {
   DirtyFields,

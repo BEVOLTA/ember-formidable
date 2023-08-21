@@ -95,7 +95,8 @@
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-glimmer-template-tag": "^0.4.1",
     "rollup-plugin-ts": "3.2.0",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "yup": "1.2.0"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"

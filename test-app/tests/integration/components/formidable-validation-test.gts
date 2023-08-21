@@ -4,9 +4,9 @@ import { click, fillIn, render } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 
 import { Formidable } from 'ember-formidable';
+import { yupResolver } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
 import { concat, fn } from 'test-app/tests/utils/helpers';
-import { yupResolver } from 'test-app/tests/utils/resolvers/yup';
 import * as yup from 'yup';
 
 import type { FieldState } from 'ember-formidable';

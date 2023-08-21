@@ -1,3 +1,5 @@
+import { assert } from '@ember/debug';
+
 import type * as yup from 'yup';
 
 interface ResolverOptions {
@@ -17,20 +19,22 @@ const formatYupError = (errors: Array<yup.ValidationError>) => {
 
     const formattedError = { type, message: errors.join('\n'), value };
 
-    if (acc[path || 'formidable__error']) {
-      acc[path || 'formidable__error']?.push(formattedError);
+    assert('FORMIDABLE - Error - We could not find any path', !!path);
+
+    if (acc[path]) {
+      acc[path]?.push(formattedError);
     } else {
-      acc[path ?? 'formidable__error'] = [formattedError];
+      acc[path] = [formattedError];
     }
 
     return acc;
   }, {});
 };
 
-export function yupResolver<TFieldValues extends object = object>(
+export const yupResolver = <TFieldValues extends object = object>(
   schema: yup.ObjectSchema<TFieldValues>,
   options: Parameters<(typeof schema)['validate']>[1] & ResolverOptions = {},
-) {
+) => {
   const { mode = 'async', ...schemaOptions } = options;
 
   return async (values: object, context: object) => {
@@ -51,4 +55,4 @@ export function yupResolver<TFieldValues extends object = object>(
       return formatYupError(error.inner);
     }
   };
-}
+};
