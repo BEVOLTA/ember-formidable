@@ -1,6 +1,6 @@
 packages:
   - 'ember-formidable'
   - 'test-app'
-  # - 'docs'
+  # - 'docs' - Cannot work yet with old version of Ember
   - 'resolvers'
   - 'dev'
