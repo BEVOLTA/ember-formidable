@@ -136,10 +136,7 @@ jobs:
   docs-deps:
     name: Install Docs dependencies
     runs-on: ubuntu-latest
-    needs:
-      - try-scenarios
-      - floating
-      - typecheck
+    needs: [ lint ]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
