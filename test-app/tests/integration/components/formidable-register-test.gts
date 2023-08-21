@@ -7,6 +7,8 @@ import { module, test } from 'qunit';
 import { Formidable } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
 
+import type { FormidableArgs } from 'ember-formidable';
+
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
@@ -15,12 +17,12 @@ module('Integration | Component | formidable', function (hooks) {
       foo: 'DEFAULT',
     };
 
-    const onUpdate = (data: { foo: string }) => {
+    const onUpdate: FormidableArgs<{ foo: string }>['onUpdate'] = (data) => {
       assert.strictEqual(data.foo, 'CHANGED');
     };
 
     await render(<template>
-      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -37,12 +39,12 @@ module('Integration | Component | formidable', function (hooks) {
       foo: 'DEFAULT',
     };
 
-    const onUpdate = (data: { foo: string }) => {
+    const onUpdate: FormidableArgs<{ foo: string }>['onUpdate'] = (data) => {
       assert.strictEqual(data.foo, 'CHANGED');
     };
 
     await render(<template>
-      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' name='foo' {{api.register}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -59,12 +61,12 @@ module('Integration | Component | formidable', function (hooks) {
       foo: 'DEFAULT',
     };
 
-    const onUpdate = (data: { foo: string }) => {
+    const onUpdate: FormidableArgs<{ foo: string }>['onUpdate'] = (data) => {
       assert.strictEqual(data.foo, 'CHANGED');
     };
 
     await render(<template>
-      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <textarea id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -81,12 +83,12 @@ module('Integration | Component | formidable', function (hooks) {
       pet: '🐶',
     };
 
-    const onUpdate = (data: { pet: string }) => {
+    const onUpdate: FormidableArgs<{ pet: string }>['onUpdate'] = (data) => {
       assert.strictEqual(data.pet, '🐱');
     };
 
     await render(<template>
-      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <select id='pet' {{api.register 'pet'}}>
             <option value='🐶' id='dog'>Dog</option>
@@ -108,12 +110,12 @@ module('Integration | Component | formidable', function (hooks) {
       drone: 'huey',
     };
 
-    const onUpdate = (data: { drone: string }) => {
+    const onUpdate: FormidableArgs<{ drone: string }>['onUpdate'] = (data) => {
       assert.strictEqual(data.drone, 'dewey');
     };
 
     await render(<template>
-      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <fieldset>
             <legend>Select a maintenance drone:</legend>
@@ -147,12 +149,12 @@ module('Integration | Component | formidable', function (hooks) {
       foo: '🐍',
     };
 
-    const onUpdate = (data: { foo: string }) => {
+    const onUpdate: FormidableArgs<{ foo: string }>['onUpdate'] = (data) => {
       assert.strictEqual(data.foo, '🦎');
     };
 
     await render(<template>
-      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='checkbox' id='foo' {{api.register 'foo'}} value='🐍' />
           <input type='checkbox' id='bar' {{api.register 'foo'}} value='🦎' />
@@ -176,12 +178,12 @@ module('Integration | Component | formidable', function (hooks) {
       foo: 3,
     };
 
-    const onUpdate = (data: { foo: number }) => {
+    const onUpdate: FormidableArgs<{ foo: number }>['onUpdate'] = (data) => {
       assert.strictEqual(data.foo, 5);
     };
 
     await render(<template>
-      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo' valueAsNumber=true}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -198,12 +200,12 @@ module('Integration | Component | formidable', function (hooks) {
       foo: new Date('2000-05-05'),
     };
 
-    const onUpdate = (data: { foo: Date }) => {
+    const onUpdate: FormidableArgs<{ foo: Date }>['onUpdate'] = (data) => {
       assert.deepEqual(data.foo, new Date('2001-05-05'));
     };
 
     await render(<template>
-      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo' valueAsDate=true}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -220,12 +222,14 @@ module('Integration | Component | formidable', function (hooks) {
       foo: { bar: 'DEFAULT' },
     };
 
-    const onUpdate = (data: { foo: { bar: string } }) => {
+    const onUpdate: FormidableArgs<{ foo: { bar: string }; 'foo.bar'?: string }>['onUpdate'] = (
+      data,
+    ) => {
       assert.strictEqual(data.foo.bar, 'CHANGED');
     };
 
     await render(<template>
-      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo.bar'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -243,12 +247,16 @@ module('Integration | Component | formidable', function (hooks) {
       foo: ['💞', '💝'],
     };
 
-    const onUpdate = (data: { foo: string[] }) => {
+    const onUpdate: FormidableArgs<{
+      'foo.0'?: string;
+      'foo.1'?: string;
+      foo: string[];
+    }>['onUpdate'] = (data) => {
       assert.deepEqual(data.foo, ['*', '**']);
     };
 
     await render(<template>
-      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo0' {{api.register 'foo.0'}} />
           <input type='text' id='foo1' {{api.register 'foo.1'}} />

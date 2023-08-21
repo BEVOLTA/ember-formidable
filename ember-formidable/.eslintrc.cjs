@@ -13,6 +13,7 @@ module.exports = {
       files: ['**/*.ts', '**/*.gts'],
       rules: {
         '@typescript-eslint/prefer-optional-chain': 'off',
+        '@typescript-eslint/no-explicit-any': 1,
       },
     },
   ],

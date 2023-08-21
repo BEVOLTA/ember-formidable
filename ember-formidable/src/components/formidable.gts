@@ -24,13 +24,14 @@ import type {
   GenericObject,
   InvalidFields,
   Parser,
-  RegisterOptions,
+  RegisterModifier,
   RollbackContext,
   SetContext,
   UnregisterContext,
-  UpdateEvents,
+  UpdateEvent,
 } from '../index';
 import type FormidableService from '../services/formidable';
+import type { FunctionBasedModifier } from 'ember-modifier';
 
 const DATA_NAME = 'data-formidable-name';
 const DATA_REQUIRED = 'data-formidable-required';
@@ -38,7 +39,7 @@ const DATA_DISABLED = 'data-formidable-disabled';
 
 const UNREGISTERED_ATTRIBUTE = 'data-formidable-unregistered';
 
-const formatValue = (value: unknown, formatOptions: FormatOptions | undefined): unknown => {
+const formatValue = (value: any, formatOptions: FormatOptions | undefined): any => {
   if (!formatOptions) {
     return value;
   }
@@ -136,7 +137,7 @@ export default class Formidable<
     return _isEmpty(this.dirtyFields);
   }
 
-  get updateEvents(): UpdateEvents[] {
+  get updateEvents(): UpdateEvent[] {
     return this.args.updateEvents ?? ['onSubmit'];
   }
 
@@ -157,7 +158,7 @@ export default class Formidable<
       getValue: this.getValue,
       getValues: this.getValues,
       getFieldState: this.getFieldState,
-      register: this.register,
+      register: this.register as FunctionBasedModifier<RegisterModifier<Values>>,
       unregister: this.unregister,
       onSubmit: async (e: SubmitEvent) => await this.submit(e),
       validate: async (field?: keyof Values) => await this.validate(field),
@@ -184,7 +185,7 @@ export default class Formidable<
     };
   }
 
-  constructor(owner: unknown, args: FormidableArgs<Values, ValidatorOptions>) {
+  constructor(owner: any, args: FormidableArgs<Values, ValidatorOptions>) {
     super(owner, args);
 
     if (this.args.serviceId) {
@@ -238,17 +239,17 @@ export default class Formidable<
   }
 
   @action
-  getFieldState(name: keyof Values): FieldState<Values> {
+  getFieldState(name: keyof Values): FieldState {
     const isDirty = this.dirtyFields[name] ?? false;
     const isPristine = !isDirty;
-    const error = this.errors[name] as FormidableErrors<keyof Values>;
+    const error = this.errors[name];
     const isInvalid = !_isEmpty(error);
 
     return { isDirty, isPristine, isInvalid, error };
   }
 
   @action
-  getValue(field: keyof Values): unknown {
+  getValue(field: keyof Values): any {
     return get(this.parsedValues, field);
   }
 
@@ -402,18 +403,18 @@ export default class Formidable<
         return this.args.onSubmit(event, this.api);
       }
 
-      if (this.updateEvents.includes('onSubmit') && this.args.onValuesChanged) {
-        this.args.onValuesChanged(this.parsedValues, this.api);
+      if (this.updateEvents.includes('onSubmit') && this.args.onUpdate) {
+        this.args.onUpdate(this.parsedValues, this.api);
       }
     } finally {
       this.isSubmitting = false;
     }
   }
 
-  register = modifier(
+  register = modifier<RegisterModifier<Values>>(
     (
-      input: HTMLInputElement,
-      [_name]: [keyof Values | undefined],
+      input,
+      [_name] = [undefined],
       {
         disabled,
         required,
@@ -429,7 +430,7 @@ export default class Formidable<
         onChange,
         onBlur,
         onFocus,
-      }: RegisterOptions,
+      } = {},
     ) => {
       const {
         setAttribute,
@@ -472,7 +473,7 @@ export default class Formidable<
 
       // ATTRIBUTES
 
-      if (isInput && input.type === 'number') {
+      if (isInput && (input as HTMLInputElement).type === 'number') {
         setAttribute('min', min);
         setAttribute('max', max);
       } else if (isInput || isTextarea) {
@@ -494,9 +495,9 @@ export default class Formidable<
         const value = this.getValue(name);
 
         if (isRadio || isCheckbox) {
-          input.checked = input.value === value;
+          (input as HTMLInputElement).checked = (input as HTMLInputElement).value === value;
         } else if (isInput || isTextarea) {
-          input.value = (value as string) ?? '';
+          (input as HTMLInputElement).value = (value as string) ?? '';
         }
       }
 
@@ -567,8 +568,8 @@ export default class Formidable<
       return onChange(event, this.api as FormidableApi<GenericObject>);
     }
 
-    if (this.updateEvents.includes('onChange') && this.args.onValuesChanged) {
-      this.args.onValuesChanged(this.parsedValues, this.api);
+    if (this.updateEvents.includes('onChange') && this.args.onUpdate) {
+      this.args.onUpdate(this.parsedValues, this.api);
     }
   }
 
@@ -588,8 +589,8 @@ export default class Formidable<
       return onBlur(event, this.api as FormidableApi<GenericObject>);
     }
 
-    if (this.updateEvents.includes('onBlur') && this.args.onValuesChanged) {
-      this.args.onValuesChanged(this.parsedValues, this.api);
+    if (this.updateEvents.includes('onBlur') && this.args.onUpdate) {
+      this.args.onUpdate(this.parsedValues, this.api);
     }
   }
 
@@ -609,8 +610,8 @@ export default class Formidable<
       return onFocus(event, this.api as FormidableApi<GenericObject>);
     }
 
-    if (this.updateEvents.includes('onFocus') && this.args.onValuesChanged) {
-      this.args.onValuesChanged(this.parsedValues, this.api);
+    if (this.updateEvents.includes('onFocus') && this.args.onUpdate) {
+      this.args.onUpdate(this.parsedValues, this.api);
     }
   }
 

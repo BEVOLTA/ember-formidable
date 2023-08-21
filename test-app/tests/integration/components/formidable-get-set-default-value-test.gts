@@ -66,7 +66,7 @@ module('Integration | Component | formidable', function (hooks) {
     const date = new Date('1996-12-02');
 
     const data = {
-      foo: new Date('1990-04-10'),
+      foo: new Date('1990-04-10').toString(),
     };
 
     await render(<template>
@@ -86,7 +86,10 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('Get/Set/Default Value -- It should update the value -- object', async function (assert) {
-    const data = {
+    const data: {
+      foo: { bar: string };
+      'foo.bar'?: string;
+    } = {
       foo: { bar: 'Tequila' },
     };
     const bar = { bar: 'Sunrise!' };
@@ -104,7 +107,11 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('Get/Set/Default Value -- It should update the value -- array', async function (assert) {
-    const data = {
+    const data: {
+      foo: string[];
+      'foo.0'?: string;
+      'foo.1'?: string;
+    } = {
       foo: ['🐡', '🐟'],
     };
     const fishes = ['🍤', '🍣'];
@@ -176,7 +183,7 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('SetValue -- shouldValidate -- It should update and validate the field', async function (assert) {
-    const validator = yupResolver(userSchema);
+    const validator = yupResolver(userSchema) as any;
 
     const data = validUser;
     const options = { shouldValidate: true };

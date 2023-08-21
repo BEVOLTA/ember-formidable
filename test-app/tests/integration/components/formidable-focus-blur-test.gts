@@ -9,6 +9,8 @@ import { fn } from 'test-app/tests/utils/helpers';
 import { yupResolver } from 'test-app/tests/utils/resolvers/yup';
 import * as yup from 'yup';
 
+import type { UpdateEvent } from 'ember-formidable';
+
 const userSchema = yup.object({
   name: yup.string().required('Name is required.'),
 });
@@ -21,7 +23,7 @@ module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
   test('setFocus -- Should focus the input when triggered', async function (assert) {
-    const updateEvents = ['onFocus'];
+    const updateEvents: UpdateEvent[] = ['onFocus'];
 
     await render(<template>
       <Formidable @updateEvents={{updateEvents}} as |values api|>
@@ -37,9 +39,9 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('setFocus -- shouldValidate -- Should focus and validate the input when triggered', async function (assert) {
-    const validator = yupResolver(userSchema);
+    const validator = yupResolver(userSchema) as any;
     const data = { ...validUser, name: '' };
-    const updateEvents = ['onFocus'];
+    const updateEvents: UpdateEvent[] = ['onFocus'];
     const options = { shouldValidate: true };
 
     await render(<template>
@@ -70,7 +72,7 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('setFocus -- shouldDirty -- Should focus and dirty the input when triggered', async function (assert) {
-    const updateEvents = ['onFocus'];
+    const updateEvents: UpdateEvent[] = ['onFocus'];
     const options = { shouldDirty: true };
     const data = {
       name: 'Henry',
@@ -93,7 +95,7 @@ module('Integration | Component | formidable', function (hooks) {
     </template>);
 
     await fillIn('#name', 'Deby');
-    await blur('#name');
+    await blur();
     await click('#focus');
     assert.dom('#name').isFocused();
     assert.dom('#dirty-name').exists();

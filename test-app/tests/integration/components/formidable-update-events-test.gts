@@ -6,11 +6,13 @@ import { module, test } from 'qunit';
 import { Formidable } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
 
+import type { UpdateEvent } from 'ember-formidable';
+
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
   test('UpdateEvents -- onSubmit -- It should be triggred on specified updated events', async function (assert) {
-    const updateEvents = ['onSubmit'];
+    const updateEvents: UpdateEvent[] = ['onSubmit'];
 
     let counter = 0;
 
@@ -19,7 +21,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @onValuesChanged={{onUpdate}} @updateEvents={{updateEvents}} as |values api|>
+      <Formidable @onUpdate={{onUpdate}} @updateEvents={{updateEvents}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -35,7 +37,7 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('UpdateEvents -- onChange -- It should be triggred on specified updated events ', async function (assert) {
-    const updateEvents = ['onChange'];
+    const updateEvents: UpdateEvent[] = ['onChange'];
 
     let counter = 0;
 
@@ -44,7 +46,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @onValuesChanged={{onUpdate}} @updateEvents={{updateEvents}} as |values api|>
+      <Formidable @onUpdate={{onUpdate}} @updateEvents={{updateEvents}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -60,7 +62,7 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('UpdateEvents -- onChange + onSubmit -- It should be triggred on specified updated events ', async function (assert) {
-    const updateEvents = ['onChange', 'onSubmit'];
+    const updateEvents: UpdateEvent[] = ['onChange', 'onSubmit'];
 
     let counter = 0;
 
@@ -69,7 +71,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @onValuesChanged={{onUpdate}} @updateEvents={{updateEvents}} as |values api|>
+      <Formidable @onUpdate={{onUpdate}} @updateEvents={{updateEvents}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -86,7 +88,7 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('UpdateEvents -- onBlur -- It should be triggred on specified updated events ', async function (assert) {
-    const updateEvents = ['onBlur'];
+    const updateEvents: UpdateEvent[] = ['onBlur'];
 
     let counter = 0;
 
@@ -95,7 +97,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @onValuesChanged={{onUpdate}} @updateEvents={{updateEvents}} as |values api|>
+      <Formidable @onUpdate={{onUpdate}} @updateEvents={{updateEvents}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>

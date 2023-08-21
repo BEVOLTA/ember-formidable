@@ -1,7 +1,7 @@
 import _isNil from 'lodash/isNil';
 
 export const inputUtils = (
-  input: HTMLInputElement,
+  input: Element,
 ): {
   setAttribute: (attribute: string, value: string | number | undefined | boolean) => void;
   isFormInput: boolean;
@@ -24,8 +24,8 @@ export const inputUtils = (
     isInput: input.tagName === 'INPUT',
     isTextarea: input.tagName === 'TEXTAREA',
     isSelect: input.tagName === 'SELECT',
-    isCheckbox: input.type === 'checkbox',
-    isRadio: input.type === 'radio',
+    isCheckbox: (input as HTMLInputElement).type === 'checkbox',
+    isRadio: (input as HTMLInputElement).type === 'radio',
     name: input.getAttribute('name'),
   };
 };

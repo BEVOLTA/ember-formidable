@@ -1,4 +1,4 @@
-export const concat = (...args: string[]) => args.join('');
+export const concat = (...args: (string | number)[]) => args.join('');
 export const fn =
   (fn: Function, ...args: unknown[]) =>
   () =>

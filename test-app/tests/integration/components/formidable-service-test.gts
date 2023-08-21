@@ -31,7 +31,7 @@ module('Integration | Component | formidable', function (hooks) {
     await fillIn('#foo', 'CHANGED');
 
     await click('#submit');
-    assert.strictEqual(formidable.getFormidableApi('test').values.foo, 'CHANGED');
+    assert.strictEqual(formidable.getFormidableApi('test').values['foo'], 'CHANGED');
     assert.strictEqual(formidable.getValue('test', 'foo'), 'CHANGED');
 
     assert.deepEqual(formidable.getValues('test', ['foo', 'bar']), {

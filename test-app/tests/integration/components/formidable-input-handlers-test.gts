@@ -4,6 +4,8 @@ import { module, test } from 'qunit';
 import { Formidable } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
 
+import type { RegisterOptions } from 'ember-formidable';
+
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
@@ -12,7 +14,7 @@ module('Integration | Component | formidable', function (hooks) {
       foo: 'DEFAULT',
     };
 
-    const onChange = (_event, api) => {
+    const onChange: RegisterOptions['onChange'] = (_event, api) => {
       api.setValue('foo', '🔆');
     };
 
@@ -34,7 +36,7 @@ module('Integration | Component | formidable', function (hooks) {
       foo: 'DEFAULT',
     };
 
-    const onFocus = (_event, api) => {
+    const onFocus: RegisterOptions['onFocus'] = (_event, api) => {
       api.setValue('foo', '❄️');
     };
 
@@ -56,7 +58,7 @@ module('Integration | Component | formidable', function (hooks) {
       foo: 'DEFAULT',
     };
 
-    const onBlur = (_event, api) => {
+    const onBlur: RegisterOptions['onBlur'] = (_event, api) => {
       api.setValue('foo', 'CHANGED');
     };
 

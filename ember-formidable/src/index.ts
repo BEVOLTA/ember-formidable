@@ -11,10 +11,11 @@ export type {
   GenericObject,
   InvalidFields,
   Parser,
+  RegisterModifier,
   RegisterOptions,
   ResolverOptions,
   RollbackContext,
   SetContext,
   UnregisterContext,
-  UpdateEvents,
+  UpdateEvent,
 } from './types';

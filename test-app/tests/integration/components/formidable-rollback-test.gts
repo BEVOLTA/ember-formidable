@@ -8,6 +8,8 @@ import { Formidable } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
 import { fn } from 'test-app/tests/utils/helpers';
 
+import type { FormidableArgs } from 'ember-formidable';
+
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
@@ -16,12 +18,12 @@ module('Integration | Component | formidable', function (hooks) {
       foo: 'DEFAULT',
     };
 
-    const onUpdate = (_data, api: { rollback: () => void }) => {
+    const onUpdate: FormidableArgs<typeof data>['onUpdate'] = (_data, api) => {
       api.rollback();
     };
 
     await render(<template>
-      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           {{#if api.isSubmitted}}
@@ -42,7 +44,7 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('Rollback -- defaultValue -- The default value should be reset', async function (assert) {
-    const data = {
+    const data: { foo: string; bar?: string } = {
       foo: 'DEFAULT',
     };
     const options = { defaultValue: 'Shiny and new!' };
@@ -72,12 +74,12 @@ module('Integration | Component | formidable', function (hooks) {
       foo: 404,
     };
 
-    const onUpdate = (_data, api: { rollback: () => void }) => {
+    const onUpdate: FormidableArgs<typeof data>['onUpdate'] = (_data, api) => {
       api.rollback();
     };
 
     await render(<template>
-      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo' valueAsNumber=true}} />
           {{#if api.isSubmitted}}
@@ -100,12 +102,12 @@ module('Integration | Component | formidable', function (hooks) {
       foo: new Date('2000-05-05'),
     };
 
-    const onUpdate = (_data, api: { rollback: () => void }) => {
+    const onUpdate: FormidableArgs<typeof data>['onUpdate'] = (_data, api) => {
       api.rollback();
     };
 
     await render(<template>
-      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo' valueAsDate=true}} />
           {{#if api.isSubmitted}}
@@ -128,12 +130,15 @@ module('Integration | Component | formidable', function (hooks) {
       foo: { bar: 'DEFAULT' },
     };
 
-    const onUpdate = (_data, api: { rollback: () => void }) => {
+    const onUpdate: FormidableArgs<typeof data & { 'foo.bar'?: string }>['onUpdate'] = (
+      _data,
+      api,
+    ) => {
       api.rollback();
     };
 
     await render(<template>
-      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo.bar'}} />
           {{#if api.isSubmitted}}
@@ -157,12 +162,16 @@ module('Integration | Component | formidable', function (hooks) {
       foo: ['A', 'B'],
     };
 
-    const onUpdate = (_data, api: { rollback: () => void }) => {
+    const onUpdate: FormidableArgs<{
+      'foo.0'?: string;
+      'foo.1'?: string;
+      foo: string[];
+    }>['onUpdate'] = (_data, api) => {
       api.rollback();
     };
 
     await render(<template>
-      <Formidable @values={{data}} @onValuesChanged={{onUpdate}} as |values api|>
+      <Formidable @values={{data}} @onUpdate={{onUpdate}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo0' {{api.register 'foo.0'}} />
           <input type='text' id='foo1' {{api.register 'foo.1'}} />

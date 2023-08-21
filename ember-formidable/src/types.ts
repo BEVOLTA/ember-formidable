@@ -1,8 +1,16 @@
 import type { FunctionBasedModifier } from 'ember-modifier';
 
-export type UpdateEvents = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
+export type UpdateEvent = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
 
 export type GenericObject = Record<string, unknown>;
+
+export type RegisterModifier<Values extends GenericObject = GenericObject> = {
+  Args: {
+    Positional?: [keyof Values | undefined];
+    Named?: RegisterOptions | undefined;
+  };
+  Element: Element;
+};
 
 export type FormidableErrors<T extends string | number | symbol = string | number | symbol> =
   Record<T, FormidableError[]>;
@@ -121,7 +129,7 @@ export interface UnregisterContext {
  * The field's state.
  * Checks if the field had a dirty or invalid state.
  */
-export interface FieldState<Values extends GenericObject = GenericObject> {
+export interface FieldState {
   /**
    * Checks if the field has changed / is not pristine.
    */
@@ -140,7 +148,7 @@ export interface FieldState<Values extends GenericObject = GenericObject> {
   /**
    * Retrieve the field's error.
    */
-  error?: FormidableErrors<keyof Values>;
+  error?: FormidableError[];
 }
 
 /**
@@ -165,7 +173,7 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
   /**
    * This function get the field's value.
    */
-  getValue: (field: keyof Values) => unknown;
+  getValue: (field: keyof Values) => any;
 
   /**
    * This function return all the field values.
@@ -175,20 +183,14 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
   getValues: () => Values;
 
   /**
-   * This function get the field's state.
+   * This function get the field's state.- Dirty/Pristine - Valid/Errors
    */
   getFieldState: (field: keyof Values) => FieldState;
 
   /**
-   * The initial data the form will use to pre-populate the fields.
+   * Modifier that allows you to listen to the input changes, and incorporate its value to the update listeners.
    */
-  register: FunctionBasedModifier<{
-    Args: {
-      Positional: [keyof Values | undefined];
-      Named: RegisterOptions;
-    };
-    Element: HTMLInputElement;
-  }>;
+  register: FunctionBasedModifier<RegisterModifier<Values>>;
 
   /**
    * This function allows you to unregister a field.
@@ -198,9 +200,9 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
   /**
    * This functions is a submit handler that validates the form,
    * and trigger the `onSubmit` method if defined in the `args`.
-   * If onSubmit is unspecified, and the `updateEvents` includes `onSubmit`, triggers `onValuesChanged`.
+   * If onSubmit is unspecified, and the `updateEvents` includes `onSubmit`, triggers `onUpdate`.
    */
-  onSubmit: (e: SubmitEvent, api: FormidableApi<Values>) => void;
+  onSubmit: (e: SubmitEvent) => void;
 
   /**
    * This function either validate all the form, or one field if specified.
@@ -352,7 +354,7 @@ export interface FormidableArgs<
    * It can be overriden by custom handlers when you register an input,
    * or by the `onSubmit` argument.
    */
-  onValuesChanged?: (data: Values, api: FormidableApi<Values>) => void;
+  onUpdate?: (data: Values, api: FormidableApi<Values>) => void;
 
   /**
    * The initial data the form will use to pre-populate the fields.
@@ -363,17 +365,17 @@ export interface FormidableArgs<
    * This functions gets triggered when the form is submitted.
    *
    * You can either use this method to deal with the data,
-   * or use the updateEvents `onSubmit` and `onValuesChanged` method to have the values directly as params,
+   * or use the updateEvents `onSubmit` and `onUpdate` method to have the values directly as params,
    * but not both! `onSubmit` is called in priority.
    *
    */
   onSubmit?: (event: SubmitEvent, api: FormidableApi<Values>) => void;
 
   /**
-   * An array that specifies when to trigger `onValuesChanged`.
+   * An array that specifies when to trigger `onUpdate`.
    * @default ['onSubmit']
    */
-  updateEvents?: UpdateEvents[];
+  updateEvents?: UpdateEvent[];
 
   /**
    * If set to true, allows you to use the native input validation.
@@ -455,28 +457,28 @@ export interface RegisterOptions<Values extends GenericObject = GenericObject> {
   /**
    * This function allows you to apply any parsing to the input if specified.
    */
-  valueFormat: (value: unknown) => unknown;
+  valueFormat?: (value: unknown) => any;
 
   // Handlers
 
   /**
    * This function is a custom event that is triggered by the change of this input and only applies for this one.
    *
-   * If this is specified, it does not trigger `onValuesChanged`.
+   * If this is specified, it does not trigger `onUpdate`.
    */
   onChange?: (event: Event, api: FormidableApi<Values>) => void;
 
   /**
    * This function is a custom event that is triggered by the blur of this input and only applies for this one.
    *
-   * If this is specified, it does not trigger `onValuesChanged`.
+   * If this is specified, it does not trigger `onUpdate`.
    */
   onBlur?: (event: Event, api: FormidableApi<Values>) => void;
 
   /**
    * This function is a custom event that is triggered by the focus of this input and only applies for this one.
    *
-   * If this is specified, it does not trigger `onValuesChanged`.
+   * If this is specified, it does not trigger `onUpdate`.
    */
   onFocus?: (event: Event, api: FormidableApi<Values>) => void;
 }

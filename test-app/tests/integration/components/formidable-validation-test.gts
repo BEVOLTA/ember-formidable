@@ -9,6 +9,8 @@ import { concat, fn } from 'test-app/tests/utils/helpers';
 import { yupResolver } from 'test-app/tests/utils/resolvers/yup';
 import * as yup from 'yup';
 
+import type { FieldState } from 'ember-formidable';
+
 // Define a schema for a user object
 const userSchema = yup.object({
   // Basic string property with required validation
@@ -43,13 +45,6 @@ const userSchema = yup.object({
     .of(yup.string().required('Hobby is required.'))
     .min(3, 'At least 3 hobbies are required.'),
 
-  // Custom validation method to check if the user is at least 18 years old
-  adult: yup.boolean().test('is-adult', 'User must be at least 18 years old.', (value) => {
-    const age = yup.number().integer().positive().validateSync(value);
-
-    return age ?? 0 >= 18;
-  }),
-
   // Mixed type property with one of values allowed
   gender: yup.mixed().oneOf(['male', 'female', 'other'], 'Invalid gender.'),
 });
@@ -80,7 +75,7 @@ const validUser = {
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  const validator = yupResolver(userSchema);
+  const validator = yupResolver(userSchema) as any;
   const data = validUser;
 
   test('Validate -- It should validate', async function (assert) {
@@ -252,6 +247,10 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('getFieldState -- It should update the state', async function (assert) {
+    const getError = (state: FieldState) => {
+      return state.error?.[0]?.message;
+    };
+
     await render(<template>
       <Formidable @values={{data}} @validator={{validator}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
@@ -262,13 +261,13 @@ module('Integration | Component | formidable', function (hooks) {
             <p id='invalid-name'>INVALID</p>
           {{/if}}
           {{#if (get (api.getFieldState 'name') 'error')}}
-            <p id='error-name'>{{get (api.getFieldState 'name') 'error.0.message'}}</p>
+            <p id='error-name'>{{getError (api.getFieldState 'name')}}</p>
           {{/if}}
           {{#if (get (api.getFieldState 'email') 'isInvalid')}}
             <p id='invalid-email'>INVALID</p>
           {{/if}}
           {{#if (get (api.getFieldState 'email') 'error')}}
-            <p id='error-email'>{{get (api.getFieldState 'email') 'error.0.message'}}</p>
+            <p id='error-email'>{{getError (api.getFieldState 'email')}}</p>
           {{/if}}
         </form>
       </Formidable>

@@ -9,6 +9,8 @@ import { fn } from 'test-app/tests/utils/helpers';
 import { yupResolver } from 'test-app/tests/utils/resolvers/yup';
 import * as yup from 'yup';
 
+import type { UpdateEvent } from 'ember-formidable';
+
 const userSchema = yup.object({
   name: yup.string().required('Name is required.'),
 });
@@ -20,8 +22,8 @@ const validUser = {
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  const updateEvents = ['onChange'];
-  const validator = yupResolver(userSchema);
+  const updateEvents: UpdateEvent[] = ['onChange'];
+  const validator = yupResolver(userSchema) as any;
   const data = validUser;
 
   test('unregister -- It should unregister the input', async function (assert) {

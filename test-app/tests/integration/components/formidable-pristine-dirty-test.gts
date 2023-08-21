@@ -11,11 +11,11 @@ import { fn } from 'test-app/tests/utils/helpers';
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('dirtyFields -- The dirty states should be updated', async function (assert) {
-    const data = {
-      foo: 'DEFAULT',
-    };
+  const data: { foo: string; bar?: string } = {
+    foo: 'DEFAULT',
+  };
 
+  test('dirtyFields -- The dirty states should be updated', async function (assert) {
     await render(<template>
       <Formidable @values={{data}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
@@ -38,10 +38,6 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('isDirty/isPristine -- The dirty states should be updated', async function (assert) {
-    const data = {
-      foo: 'DEFAULT',
-    };
-
     await render(<template>
       <Formidable @values={{data}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
@@ -65,10 +61,6 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('dirtyFields -- Fields should be pristine when rollbacked', async function (assert) {
-    const data = {
-      foo: 'DEFAULT',
-    };
-
     await render(<template>
       <Formidable @values={{data}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
@@ -91,9 +83,6 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('keepDirty -- Every field should stay dirty when rollbacked', async function (assert) {
-    const data = {
-      foo: 'DEFAULT',
-    };
     const options = { keepDirty: true };
 
     await render(<template>
@@ -118,10 +107,6 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('dirtyFields -- The rollbacked field should be pristine when rollbacked', async function (assert) {
-    const data = {
-      foo: 'DEFAULT',
-    };
-
     await render(<template>
       <Formidable @values={{data}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
@@ -152,9 +137,6 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('keepDirty -- The rollbacked field should stay dirty', async function (assert) {
-    const data = {
-      foo: 'DEFAULT',
-    };
     const options = { keepDirty: true };
 
     await render(<template>
@@ -187,10 +169,6 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('getFieldState -- It should have the appropriate dirty and pristine values when updated', async function (assert) {
-    const data = {
-      foo: 'DEFAULT',
-    };
-
     await render(<template>
       <Formidable @values={{data}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
