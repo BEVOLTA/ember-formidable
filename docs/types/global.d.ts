@@ -1,6 +1,6 @@
 // Types for compiled templates
-declare module 'docs/templates/*' {
-  import { TemplateFactory } from 'ember-cli-htmlbars';
+declare module 'test-app/templates/*' {
+  import type { TemplateFactory } from 'ember-cli-htmlbars';
 
   const tmpl: TemplateFactory;
   export default tmpl;

@@ -5,7 +5,7 @@
   "keywords": [
     "ember-addon"
   ],
-  "repository": "",
+  "repository": "https://github.com/BEVOLTA/ember-formidable",
   "license": "MIT",
   "author": "shishouille",
   "files": [

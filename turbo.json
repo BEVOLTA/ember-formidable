@@ -30,7 +30,7 @@
   // Additive to package.json and turbo.json
   //
   // https://turbo.build/repo/docs/core-concepts/caching/file-inputs#specifying-additional-inputs
-  "globalDependencies": ["pnpm-lock.yaml", "dev", "patches"],
+  "globalDependencies": ["pnpm-lock.yaml", "dev"],
   "pipeline": {
     /////////////////////////////////////////////////
     /////////////////////////////////////////////////
@@ -68,7 +68,7 @@
     },
     // production
     "build": {
-      "outputs": ["dist/**", "dist-types/**", "docs.json"],
+      "outputs": ["dist/**", "dist-types/**"],
       "dependsOn": ["_syncPnpm"]
     },
     "_syncPnpm": {

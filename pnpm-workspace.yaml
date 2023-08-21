@@ -1,5 +1,5 @@
 packages:
   - 'ember-formidable'
   - 'test-app'
-  # - 'docs' - Cannot work yet with old version of Ember
+  - 'docs'
   - 'dev'

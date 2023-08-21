@@ -1,7 +1,7 @@
 {
   "version": "0.0.0",
   "private": true,
-  "repository": "",
+  "repository": "https://github.com/BEVOLTA/ember-formidable",
   "license": "MIT",
   "author": "",
   "scripts": {
