@@ -297,9 +297,6 @@ importers:
       '@glimmer/component':
         specifier: ^1.1.2
         version: 1.1.2(@babel/core@7.22.10)
-      ember-concurrency:
-        specifier: 3.1.0
-        version: 3.1.0(@babel/core@7.22.10)(ember-source@5.1.2)
       lodash:
         specifier: 4.17.21
         version: 4.17.21
@@ -394,9 +391,6 @@ importers:
       concurrently:
         specifier: ^8.2.0
         version: 8.2.0
-      ember-async-data:
-        specifier: 1.0.1
-        version: 1.0.1(ember-source@5.1.2)
       ember-modifier:
         specifier: ^4.1.0
         version: 4.1.0(ember-source@5.1.2)
@@ -8570,18 +8564,6 @@ packages:
       - webpack
     dev: true
 
-  /ember-async-data@1.0.1(ember-source@5.1.2):
-    resolution: {integrity: sha512-R9nBxCZ9WDPMJpuGBODs8wV1PHXUbkSbrzVmL34R4aOWbx237yLBllJghQOwfJs1+D72wdzgxg/+J3DY43xz3g==}
-    peerDependencies:
-      ember-source: '*'
-    dependencies:
-      '@ember/test-waiters': 3.0.2
-      '@embroider/addon-shim': 1.8.6
-      ember-source: 5.1.2(@babel/core@7.22.10)(@glimmer/component@1.1.2)(@glint/template@1.0.2)
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
   /ember-auto-import@2.6.3(@glint/template@1.0.2):
     resolution: {integrity: sha512-uLhrRDJYWCRvQ4JQ1e64XlSrqAKSd6PXaJ9ZsZI6Tlms9T4DtQFxNXasqji2ZRJBVrxEoLCRYX3RTldsQ0vNGQ==}
     engines: {node: 12.* || 14.* || >= 16}
@@ -9335,25 +9317,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
-
-  /ember-concurrency@3.1.0(@babel/core@7.22.10)(ember-source@5.1.2):
-    resolution: {integrity: sha512-vJrP+awbiYJvm2y9xYIYO96n2Jx1FXp7mbM7ucjSp+hPuNwNw9i7xXVrgxBYIuJ/0zlbSMF0P2XJoyi4A0XCrQ==}
-    engines: {node: 16.* || >= 18}
-    peerDependencies:
-      ember-source: '*'
-    dependencies:
-      '@babel/helper-plugin-utils': 7.22.5
-      '@babel/types': 7.22.10
-      '@glimmer/tracking': 1.1.2
-      ember-cli-babel: 7.26.11
-      ember-cli-babel-plugin-helpers: 1.1.1
-      ember-cli-htmlbars: 6.3.0
-      ember-compatibility-helpers: 1.2.6(@babel/core@7.22.10)
-      ember-source: 5.1.2(@babel/core@7.22.10)(@glimmer/component@1.1.2)(@glint/template@1.0.2)
-    transitivePeerDependencies:
-      - '@babel/core'
-      - supports-color
-    dev: false
 
   /ember-concurrency@3.1.0(@babel/core@7.22.10)(ember-source@5.2.0):
     resolution: {integrity: sha512-vJrP+awbiYJvm2y9xYIYO96n2Jx1FXp7mbM7ucjSp+hPuNwNw9i7xXVrgxBYIuJ/0zlbSMF0P2XJoyi4A0XCrQ==}
