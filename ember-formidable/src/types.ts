@@ -24,17 +24,17 @@ export type FormidableErrors<T extends string | number | symbol = string | numbe
   Record<T, FormidableError[]>;
 
 export type DirtyFields<Values extends GenericObject = GenericObject> = Record<
-  keyof Values,
+  ValueKey<Values>,
   boolean
 >;
 
 export type InvalidFields<Values extends GenericObject = GenericObject> = Record<
-  keyof Values,
+  ValueKey<Values>,
   boolean
 >;
 
 export type NativeValidations<Values extends GenericObject = GenericObject> = Record<
-  keyof Values,
+  ValueKey<Values>,
   ValidationRules
 >;
 

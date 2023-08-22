@@ -21,7 +21,6 @@ import type {
   FormidableArgs,
   FormidableError,
   FormidableErrors,
-  GenericObject,
   InvalidFields,
   NativeValidations,
   Parser,
@@ -33,6 +32,7 @@ import type {
   UpdateEvent,
 } from '../index';
 import type FormidableService from '../services/formidable';
+import type { GenericObject, ValueKey } from '../types';
 import type { FunctionBasedModifier } from 'ember-modifier';
 
 const DATA_NAME = 'data-formidable-name';
@@ -147,7 +147,7 @@ export default class Formidable<
 
   get parsedValues(): Values {
     return Object.entries(this.values).reduce((obj, [key, value]) => {
-      return _set(obj, key, formatValue(value, this.parsers[key as keyof Values]));
+      return _set(obj, key, formatValue(value, this.parsers[key as ValueKey<Values>]));
     }, {}) as Values;
   }
 
@@ -155,7 +155,7 @@ export default class Formidable<
     return {
       values: this.parsedValues,
       setValue: async (
-        field: keyof Values,
+        field: ValueKey<Values>,
         value: string | boolean | undefined,
         context?: SetContext,
       ) => await this.setValue(field, value, context),
@@ -166,14 +166,14 @@ export default class Formidable<
       register: this.register as FunctionBasedModifier<RegisterModifier<Values>>,
       unregister: this.unregister,
       onSubmit: async (e: SubmitEvent) => await this.submit(e),
-      validate: async (field?: keyof Values) => await this.validate(field),
+      validate: async (field?: ValueKey<Values>) => await this.validate(field),
       errors: this.errors,
       errorMessages: this.errorMessages,
       setError: this.setError,
       clearError: this.clearError,
       clearErrors: this.clearErrors,
       rollback: this.rollback,
-      setFocus: async (name: keyof Values, context?: SetContext) =>
+      setFocus: async (name: ValueKey<Values>, context?: SetContext) =>
         await this.setFocus(name, context),
       defaultValues: this.rollbackValues,
       isSubmitted: this.isSubmitted,
@@ -209,16 +209,16 @@ export default class Formidable<
 
   @action
   rollback(
-    field?: keyof Values,
+    field?: ValueKey<Values>,
     { keepError, keepDirty, defaultValue }: RollbackContext = {},
   ): void {
     if (field) {
       this.values[field] = (defaultValue ??
         this.rollbackValues[field] ??
-        undefined) as Values[keyof Values];
+        undefined) as Values[ValueKey<Values>];
 
       if (defaultValue) {
-        this.rollbackValues[field] = defaultValue as Values[keyof Values];
+        this.rollbackValues[field] = defaultValue as Values[ValueKey<Values>];
       }
 
       if (!keepError) {
@@ -226,7 +226,7 @@ export default class Formidable<
       }
 
       if (!keepDirty) {
-        delete this.dirtyFields[field as keyof Values];
+        delete this.dirtyFields[field as ValueKey<Values>];
       }
     } else {
       this.values = new TrackedObject(_cloneDeep(this.rollbackValues));
@@ -244,7 +244,7 @@ export default class Formidable<
   }
 
   @action
-  getFieldState(name: keyof Values): FieldState {
+  getFieldState(name: ValueKey<Values>): FieldState {
     const isDirty = this.dirtyFields[name] ?? false;
     const isPristine = !isDirty;
     const error = this.errors[name];
@@ -254,7 +254,7 @@ export default class Formidable<
   }
 
   @action
-  getValue(field: keyof Values): any {
+  getValue(field: ValueKey<Values>): any {
     return get(this.parsedValues, field);
   }
 
@@ -264,12 +264,12 @@ export default class Formidable<
   }
 
   @action
-  getDefaultValue(field: keyof Values): any {
+  getDefaultValue(field: ValueKey<Values>): any {
     return get(this.rollbackValues, field);
   }
 
   @action
-  setError(field: keyof Values, error: string | FormidableError): void {
+  setError(field: ValueKey<Values>, error: string | FormidableError): void {
     if (typeof error === 'string') {
       this.errors[field] = [
         ...(this.errors[field] ?? []),
@@ -292,7 +292,7 @@ export default class Formidable<
   }
 
   @action
-  clearError(field: keyof Values): void {
+  clearError(field: ValueKey<Values>): void {
     if (this.errors[field]) {
       delete this.errors[field];
     }
@@ -305,7 +305,7 @@ export default class Formidable<
 
   @action
   unregister(
-    field: keyof Values,
+    field: ValueKey<Values>,
     { keepError, keepDirty, keepValue, keepDefaultValue }: UnregisterContext = {},
   ): void {
     const element = this.getDOMElement(field as string);
@@ -335,11 +335,11 @@ export default class Formidable<
 
   @action
   async setValue(
-    field: keyof Values,
+    field: ValueKey<Values>,
     value: string | boolean | undefined,
     { shouldValidate, shouldDirty }: SetContext = {},
   ): Promise<void> {
-    this.values[field] = value as Values[keyof Values];
+    this.values[field] = value as Values[ValueKey<Values>];
 
     if (shouldDirty) {
       this.dirtyField(field);
@@ -352,7 +352,7 @@ export default class Formidable<
 
   @action
   async setFocus(
-    field: keyof Values,
+    field: ValueKey<Values>,
     { shouldValidate, shouldDirty }: SetContext = {},
   ): Promise<void> {
     this.getDOMElement(field as string)?.focus();
@@ -368,7 +368,7 @@ export default class Formidable<
 
   // --- TASKS
   @action
-  async validate(field?: keyof Values): Promise<void> {
+  async validate(field?: ValueKey<Values>): Promise<void> {
     try {
       this.isValidating = true;
 
@@ -574,7 +574,7 @@ export default class Formidable<
 
   @action
   async onChange(
-    field: keyof Values,
+    field: ValueKey<Values>,
     event: Event,
     onChange?: (event: Event, api: FormidableApi<GenericObject>) => void,
   ): Promise<void> {
@@ -596,7 +596,7 @@ export default class Formidable<
 
   @action
   async onBlur(
-    field: keyof Values,
+    field: ValueKey<Values>,
     event: Event,
     onBlur?: (event: Event, api: FormidableApi<GenericObject>) => void,
   ): Promise<void> {
@@ -617,7 +617,7 @@ export default class Formidable<
 
   @action
   async onFocus(
-    field: keyof Values,
+    field: ValueKey<Values>,
     event: Event,
     onFocus?: (event: Event, api: FormidableApi<GenericObject>) => void,
   ): Promise<void> {
@@ -637,7 +637,7 @@ export default class Formidable<
   }
 
   @action
-  dirtyField(field: keyof Values): void {
+  dirtyField(field: ValueKey<Values>): void {
     this.dirtyFields[field] = !_isEqual(
       get(this.rollbackValues, field),
       get(this.parsedValues, field),

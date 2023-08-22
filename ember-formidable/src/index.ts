@@ -9,7 +9,6 @@ export type {
   FormidableArgs,
   FormidableError,
   FormidableErrors,
-  GenericObject,
   InvalidFields,
   NativeValidations,
   Parser,
