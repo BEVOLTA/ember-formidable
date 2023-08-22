@@ -3,7 +3,8 @@ import Service from '@ember/service';
 
 import { tracked } from 'tracked-built-ins';
 
-import type { FormidableApi, GenericObject } from '../';
+import type { FormidableApi } from '../';
+import type { GenericObject } from '../types';
 
 type GetApiFn = () => FormidableApi;
 export default class FormidableService extends Service {
