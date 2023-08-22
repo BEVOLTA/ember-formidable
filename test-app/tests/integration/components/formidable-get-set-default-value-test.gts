@@ -88,7 +88,6 @@ module('Integration | Component | formidable', function (hooks) {
   test('Get/Set/Default Value -- It should update the value -- object', async function (assert) {
     const data: {
       foo: { bar: string };
-      'foo.bar'?: string;
     } = {
       foo: { bar: 'Tequila' },
     };
@@ -109,8 +108,6 @@ module('Integration | Component | formidable', function (hooks) {
   test('Get/Set/Default Value -- It should update the value -- array', async function (assert) {
     const data: {
       foo: string[];
-      'foo.0'?: string;
-      'foo.1'?: string;
     } = {
       foo: ['🐡', '🐟'],
     };
@@ -125,8 +122,8 @@ module('Integration | Component | formidable', function (hooks) {
         >CHANGE</button>
         <p id='value0'>{{api.getValue 'foo.0'}}</p>
         <p id='value1'>{{api.getValue 'foo.1'}}</p>
-        <p id='default0'>{{get api.defaultValues 'foo.0'}}</p>
-        <p id='default1'>{{get api.defaultValues 'foo.1'}}</p>
+        <p id='default0'>{{api.getDefaultValue 'foo.0'}}</p>
+        <p id='default1'>{{api.getDefaultValue 'foo.1'}}</p>
       </Formidable>
     </template>);
     await click('#change');

@@ -248,8 +248,6 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     const onUpdate: FormidableArgs<{
-      'foo.0'?: string;
-      'foo.1'?: string;
       foo: string[];
     }>['onUpdate'] = (data) => {
       assert.deepEqual(data.foo, ['*', '**']);

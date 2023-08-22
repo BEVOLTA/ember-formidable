@@ -147,7 +147,7 @@ export default class Formidable<
 
   get parsedValues(): Values {
     return Object.entries(this.values).reduce((obj, [key, value]) => {
-      return _set(obj, key, formatValue(value, this.parsers[key]));
+      return _set(obj, key, formatValue(value, this.parsers[key as keyof Values]));
     }, {}) as Values;
   }
 
@@ -161,6 +161,7 @@ export default class Formidable<
       ) => await this.setValue(field, value, context),
       getValue: this.getValue,
       getValues: this.getValues,
+      getDefaultValue: this.getDefaultValue,
       getFieldState: this.getFieldState,
       register: this.register as FunctionBasedModifier<RegisterModifier<Values>>,
       unregister: this.unregister,
@@ -260,6 +261,11 @@ export default class Formidable<
   @action
   getValues(): Values {
     return this.parsedValues;
+  }
+
+  @action
+  getDefaultValue(field: keyof Values): any {
+    return get(this.rollbackValues, field);
   }
 
   @action

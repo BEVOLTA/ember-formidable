@@ -3,10 +3,18 @@ import type { FunctionBasedModifier } from 'ember-modifier';
 export type UpdateEvent = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
 
 export type GenericObject = Record<string, unknown>;
+export type ValueKey<Values extends GenericObject = GenericObject> =
+  Values[keyof Values] extends Array<unknown>
+    ? keyof Values | `${Extract<keyof Values, string>}.${number}`
+    : Values[keyof Values] extends object
+    ? keyof Values | `${Extract<keyof Values, string>}.${string}`
+    : keyof Values;
 
 export type RegisterModifier<Values extends GenericObject = GenericObject> = {
   Args: {
-    Positional?: [keyof Values | undefined];
+    Positional?: [
+      (Values[ValueKey<Values>] extends Array<unknown> ? string : ValueKey<Values>) | undefined,
+    ];
     Named?: RegisterOptions | undefined;
   };
   Element: Element;
@@ -41,7 +49,7 @@ export type FormatOptions = Pick<
 >;
 
 export type Parser<Values extends GenericObject = GenericObject> = Record<
-  keyof Values,
+  ValueKey<Values>,
   FormatOptions
 >;
 
@@ -59,6 +67,7 @@ export type ResolverOptions<Options extends GenericObject = GenericObject> = {
    */
   nativeValidations?: NativeValidations;
 } & Options;
+
 export interface FormidableError {
   /**
    * The specified reason validation may have failed.
@@ -177,12 +186,12 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
   /**
    * This function set the value in a controlled fashion.
    */
-  setValue: (field: keyof Values, value: string | boolean, context?: SetContext) => void;
+  setValue: (field: ValueKey<Values>, value: string | boolean, context?: SetContext) => void;
 
   /**
    * This function get the field's value.
    */
-  getValue: (field: keyof Values) => any;
+  getValue: (field: ValueKey<Values>) => any;
 
   /**
    * This function return all the field values.
@@ -192,9 +201,20 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
   getValues: () => Values;
 
   /**
+   * This function get the field's default value.
+   *
+   * Mostly to use if you have conflicts with the field name/type that can happen for arrays and objects
+   *
+   * @example
+   * api.getDefaultValue "foo.1"
+   * api.getDefaultValue "foo.bar"
+   */
+  getDefaultValue: (field: ValueKey<Values>) => any;
+
+  /**
    * This function get the field's state.- Dirty/Pristine - Valid/Errors
    */
-  getFieldState: (field: keyof Values) => FieldState;
+  getFieldState: (field: ValueKey<Values>) => FieldState;
 
   /**
    * Modifier that allows you to listen to the input changes, and incorporate its value to the update listeners.
@@ -204,7 +224,7 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
   /**
    * This function allows you to unregister a field.
    */
-  unregister: (field: keyof Values, ontext?: UnregisterContext) => void;
+  unregister: (field: ValueKey<Values>, ontext?: UnregisterContext) => void;
 
   /**
    * This functions is a submit handler that validates the form,
@@ -216,12 +236,12 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
   /**
    * This function either validate all the form, or one field if specified.
    */
-  validate: (field?: keyof Values) => void;
+  validate: (field?: ValueKey<Values>) => void;
 
   /**
    * The fields' errors.
    */
-  errors: FormidableErrors<keyof Values>;
+  errors: FormidableErrors<ValueKey<Values>>;
 
   /**
    * An array of all the error messages.
@@ -231,12 +251,12 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
   /**
    * The function allows you to manually set one error.
    */
-  setError: (key: keyof Values, value: string | FormidableError) => void;
+  setError: (key: ValueKey<Values>, value: string | FormidableError) => void;
 
   /**
    * This function can manually clear a field's error.
    */
-  clearError: (key: keyof Values) => void;
+  clearError: (key: ValueKey<Values>) => void;
 
   /**
    * This function can manually clear all the errors in the form.
@@ -249,13 +269,13 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
    * You can keep the errors and dirty state if necessary.
    * By default, everything gets cleared.
    */
-  rollback: (name?: keyof Values, context?: RollbackContext) => void;
+  rollback: (name?: ValueKey<Values>, context?: RollbackContext) => void;
 
   /**
    * This function will allow users to programmatically focus on input.
    * Make sure input's ref is registered into the hook form.
    */
-  setFocus: (name: keyof Values) => void;
+  setFocus: (name: ValueKey<Values>) => void;
 
   /**
    * Default values for the form.
@@ -304,7 +324,7 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
   /**
    * An object with the fields that got errors.
    */
-  invalidFields: Record<keyof Values, boolean>;
+  invalidFields: Record<ValueKey<Values>, boolean>;
 
   /**
    * 	Set to `true` after the user modifies any of the inputs.
@@ -315,7 +335,7 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
    * An object with the user-modified fields.
    * If some dirty fields are set manually, the value must be different from the default one to be dirty.
    */
-  dirtyFields: Record<keyof Values, boolean>;
+  dirtyFields: Record<ValueKey<Values>, boolean>;
 
   /**
    * 	Set to `true` after the user modifies any of the inputs.
@@ -348,7 +368,10 @@ export interface FormidableArgs<
   /**
    * This function validates the field to return a formatted error.
    */
-  validator?: (values: Values, options: ResolverOptions<Options>) => FormidableErrors<keyof Values>;
+  validator?: (
+    values: Values,
+    options: ResolverOptions<Options>,
+  ) => FormidableErrors<ValueKey<Values>>;
 
   /**
    * If you need a context for your validator to work, you can pass it via this property.
