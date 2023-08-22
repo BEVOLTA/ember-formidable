@@ -25,6 +25,16 @@ export type InvalidFields<Values extends GenericObject = GenericObject> = Record
   boolean
 >;
 
+export type NativeValidations<Values extends GenericObject = GenericObject> = Record<
+  keyof Values,
+  ValidationRules
+>;
+
+export type ValidationRules = Record<
+  'required' | 'maxLength' | 'minLength' | 'max' | 'min' | 'pattern',
+  boolean | string | number | undefined | RegExp
+>;
+
 export type FormatOptions = Pick<
   RegisterOptions,
   'valueAsDate' | 'valueAsNumber' | 'valueFormat' | 'valueAsBoolean'
@@ -41,14 +51,13 @@ export type ResolverOptions<Options extends GenericObject = GenericObject> = {
    */
   mode?: 'async' | 'sync';
   /**
-   * Return the raw input values rather than the parsed values.
-   * @default false
-   */
-  raw?: boolean;
-  /**
    * @default false
    */
   shouldUseNativeValidation?: boolean;
+  /**
+   * @default false
+   */
+  nativeValidations?: NativeValidations;
 } & Options;
 export interface FormidableError {
   /**

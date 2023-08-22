@@ -11,6 +11,7 @@ export type {
   FormidableErrors,
   GenericObject,
   InvalidFields,
+  NativeValidations,
   Parser,
   RegisterModifier,
   RegisterOptions,
@@ -19,4 +20,5 @@ export type {
   SetContext,
   UnregisterContext,
   UpdateEvent,
+  ValidationRules,
 } from './types';

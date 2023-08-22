@@ -11,7 +11,7 @@ import type { UpdateEvent } from 'ember-formidable';
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('UpdateEvents -- onSubmit -- It should be triggred on specified updated events', async function (assert) {
+  test('UpdateEvents -- onSubmit -- It should be triggered on specified updated events', async function (assert) {
     const updateEvents: UpdateEvent[] = ['onSubmit'];
 
     let counter = 0;
@@ -36,7 +36,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.strictEqual(counter, 1);
   });
 
-  test('UpdateEvents -- onChange -- It should be triggred on specified updated events ', async function (assert) {
+  test('UpdateEvents -- onChange -- It should be triggered on specified updated events ', async function (assert) {
     const updateEvents: UpdateEvent[] = ['onChange'];
 
     let counter = 0;
@@ -61,7 +61,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.strictEqual(counter, 2);
   });
 
-  test('UpdateEvents -- onChange + onSubmit -- It should be triggred on specified updated events ', async function (assert) {
+  test('UpdateEvents -- onChange + onSubmit -- It should be triggered on specified updated events ', async function (assert) {
     const updateEvents: UpdateEvent[] = ['onChange', 'onSubmit'];
 
     let counter = 0;
@@ -87,7 +87,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.strictEqual(counter, 4);
   });
 
-  test('UpdateEvents -- onBlur -- It should be triggred on specified updated events ', async function (assert) {
+  test('UpdateEvents -- onBlur -- It should be triggered on specified updated events ', async function (assert) {
     const updateEvents: UpdateEvent[] = ['onBlur'];
 
     let counter = 0;

@@ -75,7 +75,6 @@
     "@typescript-eslint/parser": "^6.4.0",
     "babel-plugin-ember-template-compilation": "^2.2.0",
     "concurrently": "^8.2.0",
-    "ember-async-data": "1.0.1",
     "ember-modifier": "^4.1.0",
     "ember-source": "~5.1.2",
     "ember-template-imports": "^3.4.2",
