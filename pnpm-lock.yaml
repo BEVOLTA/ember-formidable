@@ -139,8 +139,8 @@ importers:
         specifier: ~5.1.0
         version: 5.1.0
       ember-cli-addon-docs:
-        specifier: git+https://github.com/Shishouille/ember-cli-addon-docs.git#1ef617dfcba555d8ca6f7093452d87a35437714f
-        version: github.com/Shishouille/ember-cli-addon-docs/1ef617dfcba555d8ca6f7093452d87a35437714f(@babel/core@7.22.10)(@ember/test-helpers@3.2.0)(ember-data@4.11.3)(ember-fetch@8.1.2)(ember-source@5.2.0)(webpack@5.88.2)
+        specifier: git+https://github.com/ember-learn/ember-cli-addon-docs.git#64d25035b07ff9dcf99cf98fd0cb55a48741e6cb
+        version: github.com/ember-learn/ember-cli-addon-docs/64d25035b07ff9dcf99cf98fd0cb55a48741e6cb(@babel/core@7.22.10)(@ember/test-helpers@3.2.0)(ember-data@4.11.3)(ember-fetch@8.1.2)(ember-source@5.2.0)(webpack@5.88.2)
       ember-cli-addon-docs-yuidoc:
         specifier: ^1.0.0
         version: 1.0.0
@@ -18811,9 +18811,9 @@ packages:
       - supports-color
     dev: false
 
-  github.com/Shishouille/ember-cli-addon-docs/1ef617dfcba555d8ca6f7093452d87a35437714f(@babel/core@7.22.10)(@ember/test-helpers@3.2.0)(ember-data@4.11.3)(ember-fetch@8.1.2)(ember-source@5.2.0)(webpack@5.88.2):
-    resolution: {tarball: https://codeload.github.com/Shishouille/ember-cli-addon-docs/tar.gz/1ef617dfcba555d8ca6f7093452d87a35437714f}
-    id: github.com/Shishouille/ember-cli-addon-docs/1ef617dfcba555d8ca6f7093452d87a35437714f
+  github.com/ember-learn/ember-cli-addon-docs/64d25035b07ff9dcf99cf98fd0cb55a48741e6cb(@babel/core@7.22.10)(@ember/test-helpers@3.2.0)(ember-data@4.11.3)(ember-fetch@8.1.2)(ember-source@5.2.0)(webpack@5.88.2):
+    resolution: {tarball: https://codeload.github.com/ember-learn/ember-cli-addon-docs/tar.gz/64d25035b07ff9dcf99cf98fd0cb55a48741e6cb}
+    id: github.com/ember-learn/ember-cli-addon-docs/64d25035b07ff9dcf99cf98fd0cb55a48741e6cb
     name: ember-cli-addon-docs
     version: 5.2.0
     engines: {node: 14.* || 16.* || >= 18}
