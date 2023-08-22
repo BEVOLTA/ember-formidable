@@ -1,6 +1,6 @@
 {
   "name": "ember-formidable",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.1",
   "description": "Ember form manager.",
   "keywords": [
     "ember-addon"
@@ -136,6 +136,6 @@
   "peerDependencies": {
     "@glimmer/component": ">= 1.1.2",
     "ember-modifier": ">= 4.1.0",
-    "ember-source": ">= 5.1.2"
+    "ember-source": ">= 4.12.0"
   }
 }
