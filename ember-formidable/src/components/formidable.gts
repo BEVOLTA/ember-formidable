@@ -23,8 +23,10 @@ import type {
   FormidableErrors,
   GenericObject,
   InvalidFields,
+  NativeValidations,
   Parser,
   RegisterModifier,
+  ResolverOptions,
   RollbackContext,
   SetContext,
   UnregisterContext,
@@ -92,6 +94,8 @@ export default class Formidable<
   @tracked isValidating = false;
 
   @tracked submitCount = 0;
+
+  @tracked nativeValidations: NativeValidations<Values> = {} as NativeValidations<Values>;
 
   // --- ERRORS
   errors: FormidableErrors = new TrackedObject({});
@@ -368,7 +372,9 @@ export default class Formidable<
 
       const validation: FormidableErrors = await this.validator(this.parsedValues, {
         ...this.args.validatorOptions,
-      } as ValidatorOptions);
+        shouldUseNativeValidation: this.args.shouldUseNativeValidation,
+        nativeValidations: this.nativeValidations,
+      } as ResolverOptions<ValidatorOptions>);
 
       if (field) {
         this.errors = _set(this.errors, field, get(validation, field));
@@ -518,6 +524,15 @@ export default class Formidable<
         if (!this.args.shouldUseNativeValidation) {
           e.preventDefault();
         }
+      };
+
+      this.nativeValidations[name] = {
+        required,
+        maxLength,
+        minLength,
+        max,
+        min,
+        pattern,
       };
 
       // EVENTS

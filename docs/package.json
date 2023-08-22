@@ -104,6 +104,5 @@
     "paths": [
       "../ember-formidable"
     ]
-  },
-  "homepage": "http://ember.bevolta.com/ember-formidable"
+  }
 }
