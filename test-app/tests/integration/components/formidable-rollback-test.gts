@@ -4,16 +4,17 @@ import { get } from '@ember/object';
 import { click, fillIn, render } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 
-import { Formidable } from 'ember-formidable';
+import { Formidable, yupResolver } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
 import { fn } from 'test-app/tests/utils/helpers';
+import * as yup from 'yup';
 
-import type { FormidableArgs } from 'ember-formidable';
+import type { FormidableArgs, UpdateEvent } from 'ember-formidable';
 
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('Rollback -- text -- no options -- It should rollback the value', async function (assert) {
+  test('rollback -- text -- no options -- It should rollback the value', async function (assert) {
     const data = {
       foo: 'DEFAULT',
     };
@@ -43,7 +44,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#is-submitted').doesNotExist();
   });
 
-  test('Rollback -- defaultValue -- The default value should be reset', async function (assert) {
+  test('rollback -- defaultValue -- The default value should be reset', async function (assert) {
     const data: { foo: string; bar?: string } = {
       foo: 'DEFAULT',
     };
@@ -69,7 +70,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#foo').hasValue('Shiny and new!');
   });
 
-  test('Rollback -- number -- no options -- It should rollback the value ', async function (assert) {
+  test('rollback -- number -- no options -- It should rollback the value ', async function (assert) {
     const data = {
       foo: 404,
     };
@@ -97,7 +98,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#is-submitted').doesNotExist();
   });
 
-  test('Rollback -- date -- no options -- It should rollback the value ', async function (assert) {
+  test('rollback -- date -- no options -- It should rollback the value ', async function (assert) {
     const data = {
       foo: new Date('2000-05-05'),
     };
@@ -125,7 +126,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#is-submitted').doesNotExist();
   });
 
-  test('Rollback -- object -- no options -- It should rollback the value ', async function (assert) {
+  test('rollback -- object -- no options -- It should rollback the value ', async function (assert) {
     const data = {
       foo: { bar: 'DEFAULT' },
     };
@@ -157,7 +158,7 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#is-submitted').doesNotExist();
   });
 
-  test('Rollback -- array -- no options -- It should rollback the value ', async function (assert) {
+  test('rollback -- array -- no options -- It should rollback the value ', async function (assert) {
     const data = {
       foo: ['A', 'B'],
     };

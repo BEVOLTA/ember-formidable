@@ -39,7 +39,7 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('setFocus -- shouldValidate -- Should focus and validate the input when triggered', async function (assert) {
-    const validator = yupResolver(userSchema) as any;
+    const validator = yupResolver(userSchema);
     const data = { ...validUser, name: '' };
     const updateEvents: UpdateEvent[] = ['onFocus'];
     const options = { shouldValidate: true };

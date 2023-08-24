@@ -371,7 +371,7 @@ export interface FormidableArgs<
   validator?: (
     values: Values,
     options: ResolverOptions<Options>,
-  ) => FormidableErrors<ValueKey<Values>>;
+  ) => FormidableErrors<ValueKey<Values>> | Promise<FormidableErrors<ValueKey<Values>>>;
 
   /**
    * If you need a context for your validator to work, you can pass it via this property.
