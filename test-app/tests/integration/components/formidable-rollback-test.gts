@@ -237,7 +237,6 @@ module('Integration | Component | formidable', function (hooks) {
           <p id='value-email'>{{api.getValue 'email'}}</p>
           <p id='value-gender'>{{api.getValue 'gender'}}</p>
         </form>
-        {{log values}}
       </Formidable>
     </template>);
 
@@ -246,9 +245,9 @@ module('Integration | Component | formidable', function (hooks) {
     await fillIn('#gender', 'female');
 
     await click('#rollback');
-    assert.dom('#value-name').hasValue('Emma Watson');
-    assert.dom('#value-age').hasValue('34');
-    assert.dom('#value-email').hasValue('emma.watson@example.com');
-    assert.dom('#value-gender').hasValue('female');
+    assert.dom('#value-name').hasText('Emma Watson');
+    assert.dom('#value-age').hasText('34');
+    assert.dom('#value-email').hasText('emma.watson@example.com');
+    assert.dom('#value-gender').hasText('female');
   });
 });
