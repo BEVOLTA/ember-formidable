@@ -1,4 +1,5 @@
 import Component from '@glimmer/component';
+import { cached } from '@glimmer/tracking';
 import { assert, warn } from '@ember/debug';
 import { action, get } from '@ember/object';
 import { inject as service } from '@ember/service';
@@ -162,6 +163,7 @@ export default class Formidable<
     }, {}) as Values;
   }
 
+  @cached
   get api(): FormidableApi<Values> {
     return {
       values: this.parsedValues,

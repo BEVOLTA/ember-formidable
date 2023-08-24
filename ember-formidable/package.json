@@ -61,6 +61,7 @@
     "@babel/preset-typescript": "^7.22.5",
     "@embroider/addon-dev": "4.1.0",
     "@glimmer/component": "^1.1.2",
+    "@glimmer/tracking": "^1.1.2",
     "@glint/core": "^1.0.2",
     "@glint/environment-ember-loose": "^1.0.2",
     "@glint/environment-ember-template-imports": "^1.0.2",
