@@ -272,6 +272,13 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
   rollback: (name?: ValueKey<Values>, context?: RollbackContext) => void;
 
   /**
+   * This function resets all the invalid fields.
+   *
+   * You can set the context the same way you are rollbacking a field.
+   */
+  rollbackInvalid: (context?: RollbackContext) => void;
+
+  /**
    * This function will allow users to programmatically focus on input.
    * Make sure input's ref is registered into the hook form.
    */

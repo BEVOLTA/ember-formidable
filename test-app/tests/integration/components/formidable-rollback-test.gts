@@ -193,4 +193,61 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#foo1').hasValue('B');
     assert.dom('#is-submitted').doesNotExist();
   });
+
+  test('rollbackInvalid -- It should rollback the invalid value', async function (assert) {
+    const user = {
+      name: 'Emma Watson',
+      age: 34,
+      email: 'emma.watson@example.com',
+      gender: 'male',
+    };
+
+    const validator = yupResolver(
+      yup.object({
+        name: yup.string().required('Name is required.'),
+        age: yup
+          .number()
+          .required('Age is required.')
+          .positive('Age must be positive.')
+          .integer('Age must be an integer.'),
+        email: yup.string().email('Invalid email format.'),
+        gender: yup.mixed().oneOf(['male', 'female', 'other'], 'Invalid gender.'),
+      }),
+    );
+
+    const updateEvents: UpdateEvent[] = ['onChange'];
+
+    await render(<template>
+      <Formidable
+        @values={{user}}
+        @validator={{validator}}
+        @updateEvents={{updateEvents}}
+        as |values api|
+      >
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='name' {{api.register 'name'}} />
+          <input type='number' id='age' {{api.register 'age'}} />
+          <input type='text' id='email' {{api.register 'email'}} />
+          <input type='text' id='gender' {{api.register 'gender'}} />
+          <button id='rollback' type='button' {{on 'click' (fn api.rollbackInvalid undefined)}}>
+            ROLLBACK
+          </button>
+          <p id='value-name'>{{api.getValue 'name'}}</p>
+          <p id='value-age'>{{api.getValue 'age'}}</p>
+          <p id='value-email'>{{api.getValue 'email'}}</p>
+          <p id='value-gender'>{{api.getValue 'gender'}}</p>
+        </form>
+      </Formidable>
+    </template>);
+
+    await fillIn('#name', '');
+    await fillIn('#age', '-2.4');
+    await fillIn('#gender', 'female');
+
+    await click('#rollback');
+    assert.dom('#value-name').hasText('Emma Watson');
+    assert.dom('#value-age').hasText('34');
+    assert.dom('#value-email').hasText('emma.watson@example.com');
+    assert.dom('#value-gender').hasText('female');
+  });
 });

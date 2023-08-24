@@ -1,5 +1,5 @@
 import Component from '@glimmer/component';
-import { assert } from '@ember/debug';
+import { assert, warn } from '@ember/debug';
 import { action, get } from '@ember/object';
 import { inject as service } from '@ember/service';
 
@@ -130,7 +130,18 @@ export default class Formidable<
   get errorMessages(): string[] {
     return Object.values(this.errors)
       .flat()
-      .map((err) => err.message);
+      .map((err) => {
+        warn(
+          `FORMIDABLE - We cannot find any error message. Are you sure it's in the right format? Here's what we received:
+        ${typeof err === 'object' ? JSON.stringify(err) : err}`,
+          Boolean(err && err.message),
+          {
+            id: 'ember-formidable.error-message-not-found',
+          },
+        );
+
+        return err?.message;
+      });
   }
 
   get isDirty(): boolean {
@@ -173,6 +184,7 @@ export default class Formidable<
       clearError: this.clearError,
       clearErrors: this.clearErrors,
       rollback: this.rollback,
+      rollbackInvalid: async (context?: RollbackContext) => await this.rollbackInvalid(context),
       setFocus: async (name: ValueKey<Values>, context?: SetContext) =>
         await this.setFocus(name, context),
       defaultValues: this.rollbackValues,
@@ -240,6 +252,15 @@ export default class Formidable<
       }
 
       this.isSubmitted = false;
+    }
+  }
+
+  @action
+  async rollbackInvalid(context: RollbackContext = {}): Promise<void> {
+    await this.validate();
+
+    for (const field of Object.keys(this.invalidFields)) {
+      this.rollback(field, context);
     }
   }
 
