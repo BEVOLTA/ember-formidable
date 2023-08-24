@@ -173,6 +173,7 @@ export default class Formidable<
       clearError: this.clearError,
       clearErrors: this.clearErrors,
       rollback: this.rollback,
+      rollbackInvalid: this.rollbackInvalid,
       setFocus: async (name: ValueKey<Values>, context?: SetContext) =>
         await this.setFocus(name, context),
       defaultValues: this.rollbackValues,
@@ -240,6 +241,15 @@ export default class Formidable<
       }
 
       this.isSubmitted = false;
+    }
+  }
+
+  @action
+  async rollbackInvalid(context: RollbackContext = {}): Promise<void> {
+    await this.validate();
+
+    for (const field of Object.keys(this.invalidFields)) {
+      this.rollback(field, context);
     }
   }
 
