@@ -1,23 +1,14 @@
 import { assert } from '@ember/debug';
 
+import type { FormidableErrors } from './';
+import type { GenericObject, ResolverOptions, ValueKey } from './types';
 import type * as yup from 'yup';
 
-interface ResolverOptions {
-  /**
-   * @default async
-   */
-  mode?: 'async' | 'sync';
-  /**
-   * @default false
-   */
-  shouldUseNativeValidation?: boolean;
-}
-
 const formatYupError = (errors: Array<yup.ValidationError>) => {
-  return errors.reduce((acc: Record<string, unknown[]>, err) => {
+  return errors.reduce((acc: FormidableErrors, err) => {
     const { type, path, errors, value } = err;
 
-    const formattedError = { type, message: errors.join('\n'), value };
+    const formattedError = { type: type ?? 'unknown', message: errors.join('\n'), value };
 
     assert('FORMIDABLE - Error - We could not find any path', !!path);
 
@@ -31,20 +22,30 @@ const formatYupError = (errors: Array<yup.ValidationError>) => {
   }, {});
 };
 
-export const yupResolver = <TFieldValues extends object = object>(
-  schema: yup.ObjectSchema<TFieldValues>,
-  options: Parameters<(typeof schema)['validate']>[1] & ResolverOptions = {},
-) => {
+export const yupResolver = <
+  Values extends GenericObject = GenericObject,
+  ValidatorOptions extends GenericObject = GenericObject,
+>(
+  schema: yup.ObjectSchema<Values>,
+  options: Parameters<(typeof schema)['validate']>[1] &
+    ResolverOptions<ValidatorOptions> = {} as ResolverOptions<ValidatorOptions>,
+): ((
+  values: Values,
+  context: ResolverOptions<ValidatorOptions>,
+) => Promise<FormidableErrors<ValueKey<Values>>>) => {
   const { mode = 'async', ...schemaOptions } = options;
 
-  return async (values: object, context: object) => {
+  return async (
+    values: Values,
+    context: ResolverOptions<ValidatorOptions>,
+  ): Promise<FormidableErrors<ValueKey<Values>>> => {
     try {
       await schema[mode === 'sync' ? 'validateSync' : 'validate'](
         values,
         Object.assign({ abortEarly: false }, schemaOptions, { context }),
       );
 
-      return {};
+      return {} as FormidableErrors<keyof Values>;
     } catch (e) {
       const error = e as yup.ValidationError;
 

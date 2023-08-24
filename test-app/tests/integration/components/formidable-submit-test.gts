@@ -21,7 +21,7 @@ const validUser = {
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  const validator = yupResolver(userSchema) as any;
+  const validator = yupResolver(userSchema);
   let data = validUser;
 
   test('isSubmitSuccessful -- Should be OK when submitting', async function (assert) {

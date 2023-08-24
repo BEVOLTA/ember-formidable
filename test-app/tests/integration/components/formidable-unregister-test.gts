@@ -23,7 +23,7 @@ module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
   const updateEvents: UpdateEvent[] = ['onChange'];
-  const validator = yupResolver(userSchema) as any;
+  const validator = yupResolver(userSchema);
   const data = validUser;
 
   test('unregister -- It should unregister the input', async function (assert) {

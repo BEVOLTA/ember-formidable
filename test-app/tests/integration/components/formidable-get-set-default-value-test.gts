@@ -180,7 +180,7 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('SetValue -- shouldValidate -- It should update and validate the field', async function (assert) {
-    const validator = yupResolver(userSchema) as any;
+    const validator = yupResolver(userSchema);
 
     const data = validUser;
     const options = { shouldValidate: true };

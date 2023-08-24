@@ -62,20 +62,13 @@ const validUser = {
     zipCode: '10001',
   },
   hobbies: ['Reading', 'Hiking', 'Cooking'],
-  adult: true,
   gender: 'male',
-  details: {
-    label: 'USD',
-    code: 'USD',
-    symbol: '$',
-    alpha_2: 'US',
-  },
 };
 
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  const validator = yupResolver(userSchema) as any;
+  const validator = yupResolver(userSchema);
   const data = validUser;
 
   test('Validate -- It should validate', async function (assert) {
