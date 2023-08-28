@@ -22,6 +22,7 @@ import type {
   FormidableArgs,
   FormidableError,
   FormidableErrors,
+  HandlerEvent,
   InvalidFields,
   NativeValidations,
   Parser,
@@ -30,7 +31,6 @@ import type {
   RollbackContext,
   SetContext,
   UnregisterContext,
-  UpdateEvent,
 } from '../index';
 import type FormidableService from '../services/formidable';
 import type { GenericObject, ValueKey } from '../types';
@@ -129,20 +129,24 @@ export default class Formidable<
   }
 
   get errorMessages(): string[] {
-    return Object.values(this.errors)
-      .flat()
-      .map((err) => {
-        warn(
-          `FORMIDABLE - We cannot find any error message. Are you sure it's in the right format? Here's what we received:
+    return (
+      Object.values(this.errors)
+        .flat()
+        // Useful after a clearError
+        .filter(Boolean)
+        .map((err) => {
+          warn(
+            `FORMIDABLE - We cannot find any error message. Are you sure it's in the right format? Here's what we received:
         ${typeof err === 'object' ? JSON.stringify(err) : err}`,
-          Boolean(err && err.message),
-          {
-            id: 'ember-formidable.error-message-not-found',
-          },
-        );
+            Boolean(err && err.message),
+            {
+              id: 'ember-formidable.error-message-not-found',
+            },
+          );
 
-        return err?.message;
-      });
+          return err?.message;
+        })
+    );
   }
 
   get isDirty(): boolean {
@@ -153,8 +157,12 @@ export default class Formidable<
     return _isEmpty(this.dirtyFields);
   }
 
-  get updateEvents(): UpdateEvent[] {
-    return this.args.updateEvents ?? ['onSubmit'];
+  get handleOn(): HandlerEvent[] {
+    return this.args.handleOn ?? ['onSubmit'];
+  }
+
+  get validateOn(): HandlerEvent[] {
+    return this.args.validateOn ?? ['onBlur', 'onSubmit'];
   }
 
   get parsedValues(): Values {
@@ -236,11 +244,11 @@ export default class Formidable<
       }
 
       if (!keepError) {
-        delete this.errors[field];
+        _unset(this.errors, field);
       }
 
       if (!keepDirty) {
-        delete this.dirtyFields[field as ValueKey<Values>];
+        _unset(this.dirtyFields, field);
       }
     } else {
       this.values = new TrackedObject(_cloneDeep(this.rollbackValues));
@@ -317,7 +325,7 @@ export default class Formidable<
   @action
   clearError(field: ValueKey<Values>): void {
     if (this.errors[field]) {
-      delete this.errors[field];
+      _unset(this.errors, field);
     }
   }
 
@@ -424,7 +432,7 @@ export default class Formidable<
 
       event.preventDefault();
 
-      if (this.updateEvents.includes('onSubmit')) {
+      if (this.validateOn.includes('onSubmit')) {
         await this.validate();
       }
 
@@ -438,8 +446,8 @@ export default class Formidable<
         return this.args.onSubmit(event, this.api);
       }
 
-      if (this.updateEvents.includes('onSubmit') && this.args.onUpdate) {
-        this.args.onUpdate(this.parsedValues, this.api);
+      if (this.handleOn.includes('onSubmit') && this.args.handler) {
+        this.args.handler(this.parsedValues, this.api);
       }
     } finally {
       this.isSubmitting = false;
@@ -569,11 +577,11 @@ export default class Formidable<
       input.addEventListener(isInput || isSelect || isTextarea ? 'input' : 'change', handleChange);
       input.addEventListener('invalid', preventDefault);
 
-      if (onBlur || this.updateEvents.includes('onBlur')) {
+      if (onBlur || this.validateOn.includes('onBlur') || this.handleOn.includes('onBlur')) {
         input.addEventListener('blur', handleBlur);
       }
 
-      if (onFocus || this.updateEvents.includes('onFocus')) {
+      if (onFocus || this.validateOn.includes('onFocus') || this.handleOn.includes('onFocus')) {
         input.addEventListener('focusin', handleFocus);
       }
 
@@ -584,11 +592,11 @@ export default class Formidable<
         );
         input.removeEventListener('invalid', preventDefault);
 
-        if (onBlur || this.updateEvents.includes('onBlur')) {
+        if (onBlur || this.validateOn.includes('onBlur') || this.handleOn.includes('onBlur')) {
           input.removeEventListener('blur', handleBlur);
         }
 
-        if (onFocus || this.updateEvents.includes('onFocus')) {
+        if (onFocus || this.validateOn.includes('onFocus') || this.handleOn.includes('onFocus')) {
           input.removeEventListener('focus', handleFocus);
         }
       };
@@ -604,7 +612,7 @@ export default class Formidable<
     assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
     await this.setValue(field, (event.target as HTMLInputElement).value, {
-      shouldValidate: this.updateEvents.includes('onChange'),
+      shouldValidate: this.validateOn.includes('onChange'),
       shouldDirty: true,
     });
 
@@ -612,8 +620,8 @@ export default class Formidable<
       return onChange(event, this.api as FormidableApi<GenericObject>);
     }
 
-    if (this.updateEvents.includes('onChange') && this.args.onUpdate) {
-      this.args.onUpdate(this.parsedValues, this.api);
+    if (this.handleOn.includes('onChange') && this.args.handler) {
+      this.args.handler(this.parsedValues, this.api);
     }
   }
 
@@ -626,15 +634,15 @@ export default class Formidable<
     assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
     await this.setValue(field, (event.target as HTMLInputElement).value, {
-      shouldValidate: this.updateEvents.includes('onBlur'),
+      shouldValidate: this.validateOn.includes('onBlur'),
     });
 
     if (onBlur) {
       return onBlur(event, this.api as FormidableApi<GenericObject>);
     }
 
-    if (this.updateEvents.includes('onBlur') && this.args.onUpdate) {
-      this.args.onUpdate(this.parsedValues, this.api);
+    if (this.handleOn.includes('onBlur') && this.args.handler) {
+      this.args.handler(this.parsedValues, this.api);
     }
   }
 
@@ -647,15 +655,15 @@ export default class Formidable<
     assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
     await this.setValue(field, (event.target as HTMLInputElement).value, {
-      shouldValidate: this.updateEvents.includes('onFocus'),
+      shouldValidate: this.validateOn.includes('onFocus'),
     });
 
     if (onFocus) {
       return onFocus(event, this.api as FormidableApi<GenericObject>);
     }
 
-    if (this.updateEvents.includes('onFocus') && this.args.onUpdate) {
-      this.args.onUpdate(this.parsedValues, this.api);
+    if (this.handleOn.includes('onFocus') && this.args.handler) {
+      this.args.handler(this.parsedValues, this.api);
     }
   }
 

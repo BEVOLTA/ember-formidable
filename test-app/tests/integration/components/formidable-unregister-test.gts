@@ -9,7 +9,7 @@ import { setupRenderingTest } from 'test-app/tests/helpers';
 import { fn } from 'test-app/tests/utils/helpers';
 import * as yup from 'yup';
 
-import type { UpdateEvent } from 'ember-formidable';
+import type { HandlerEvent } from 'ember-formidable';
 
 const userSchema = yup.object({
   name: yup.string().required('Name is required.'),
@@ -22,18 +22,14 @@ const validUser = {
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  const updateEvents: UpdateEvent[] = ['onChange'];
+  const handleOn: HandlerEvent[] = ['onChange'];
+
   const validator = yupResolver(userSchema);
   const data = validUser;
 
   test('unregister -- It should unregister the input', async function (assert) {
     await render(<template>
-      <Formidable
-        @values={{data}}
-        @validator={{validator}}
-        @updateEvents={{updateEvents}}
-        as |values api|
-      >
+      <Formidable @values={{data}} @validator={{validator}} @handleOn={{handleOn}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button
@@ -70,12 +66,7 @@ module('Integration | Component | formidable', function (hooks) {
     const options = { keepValue: true };
 
     await render(<template>
-      <Formidable
-        @values={{data}}
-        @validator={{validator}}
-        @updateEvents={{updateEvents}}
-        as |values api|
-      >
+      <Formidable @values={{data}} @validator={{validator}} @handleOn={{handleOn}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button
@@ -111,12 +102,7 @@ module('Integration | Component | formidable', function (hooks) {
     const options = { keepError: true };
 
     await render(<template>
-      <Formidable
-        @values={{data}}
-        @validator={{validator}}
-        @updateEvents={{updateEvents}}
-        as |values api|
-      >
+      <Formidable @values={{data}} @validator={{validator}} @handleOn={{handleOn}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button
@@ -153,12 +139,7 @@ module('Integration | Component | formidable', function (hooks) {
     const options = { keepDirty: true };
 
     await render(<template>
-      <Formidable
-        @values={{data}}
-        @validator={{validator}}
-        @updateEvents={{updateEvents}}
-        as |values api|
-      >
+      <Formidable @values={{data}} @validator={{validator}} @handleOn={{handleOn}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button
@@ -195,12 +176,7 @@ module('Integration | Component | formidable', function (hooks) {
     const options = { keepDefaultValue: true };
 
     await render(<template>
-      <Formidable
-        @values={{data}}
-        @validator={{validator}}
-        @updateEvents={{updateEvents}}
-        as |values api|
-      >
+      <Formidable @values={{data}} @validator={{validator}} @handleOn={{handleOn}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button
