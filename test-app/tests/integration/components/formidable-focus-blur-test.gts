@@ -9,7 +9,7 @@ import { setupRenderingTest } from 'test-app/tests/helpers';
 import { fn } from 'test-app/tests/utils/helpers';
 import * as yup from 'yup';
 
-import type { UpdateEvent } from 'ember-formidable';
+import type { HandlerEvent } from 'ember-formidable';
 
 const userSchema = yup.object({
   name: yup.string().required('Name is required.'),
@@ -23,10 +23,8 @@ module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
   test('setFocus -- Should focus the input when triggered', async function (assert) {
-    const updateEvents: UpdateEvent[] = ['onFocus'];
-
     await render(<template>
-      <Formidable @updateEvents={{updateEvents}} as |values api|>
+      <Formidable as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button id='focus' type='button' {{on 'click' (fn api.setFocus 'name')}}>FOCUS</button>
@@ -41,14 +39,15 @@ module('Integration | Component | formidable', function (hooks) {
   test('setFocus -- shouldValidate -- Should focus and validate the input when triggered', async function (assert) {
     const validator = yupResolver(userSchema);
     const data = { ...validUser, name: '' };
-    const updateEvents: UpdateEvent[] = ['onFocus'];
+    const validateOn: HandlerEvent[] = ['onFocus'];
+
     const options = { shouldValidate: true };
 
     await render(<template>
       <Formidable
         @values={{data}}
         @validator={{validator}}
-        @updateEvents={{updateEvents}}
+        @validateOn={{validateOn}}
         as |values api|
       >
         <form {{on 'submit' api.onSubmit}}>
@@ -72,14 +71,14 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('setFocus -- shouldDirty -- Should focus and dirty the input when triggered', async function (assert) {
-    const updateEvents: UpdateEvent[] = ['onFocus'];
+    const validateOn: HandlerEvent[] = ['onFocus'];
     const options = { shouldDirty: true };
     const data = {
       name: 'Henry',
     };
 
     await render(<template>
-      <Formidable @values={{data}} @updateEvents={{updateEvents}} as |values api|>
+      <Formidable @values={{data}} @validateOn={{validateOn}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button

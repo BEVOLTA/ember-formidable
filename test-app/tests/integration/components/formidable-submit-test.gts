@@ -164,7 +164,7 @@ module('Integration | Component | formidable', function (hooks) {
       foo: 'DEFAULT',
     };
 
-    const onUpdate: FormidableArgs<typeof foo>['onUpdate'] = async (_data, api) => {
+    const handler: FormidableArgs<typeof foo>['handler'] = async (_data, api) => {
       return await new Promise((resolve) => {
         setTimeout(resolve, 1000);
         assert.true(api.isSubmitting);
@@ -172,7 +172,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{foo}} @onUpdate={{onUpdate}} as |values api|>
+      <Formidable @values={{foo}} @handler={{handler}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>

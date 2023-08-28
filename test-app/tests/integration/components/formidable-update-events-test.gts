@@ -6,22 +6,22 @@ import { module, test } from 'qunit';
 import { Formidable } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
 
-import type { UpdateEvent } from 'ember-formidable';
+import type { HandlerEvent } from 'ember-formidable';
 
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('UpdateEvents -- onSubmit -- It should be triggered on specified updated events', async function (assert) {
-    const updateEvents: UpdateEvent[] = ['onSubmit'];
+  test('handleOn -- onSubmit -- It should be triggered on specified updated handleOn', async function (assert) {
+    const handleOn: HandlerEvent[] = ['onSubmit'];
 
     let counter = 0;
 
-    const onUpdate = () => {
+    const handler = () => {
       counter += 1;
     };
 
     await render(<template>
-      <Formidable @onUpdate={{onUpdate}} @updateEvents={{updateEvents}} as |values api|>
+      <Formidable @handler={{handler}} @handleOn={{handleOn}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -36,17 +36,17 @@ module('Integration | Component | formidable', function (hooks) {
     assert.strictEqual(counter, 1);
   });
 
-  test('UpdateEvents -- onChange -- It should be triggered on specified updated events ', async function (assert) {
-    const updateEvents: UpdateEvent[] = ['onChange'];
+  test('handleOn -- onChange -- It should be triggered on specified updated handleOn ', async function (assert) {
+    const handleOn: HandlerEvent[] = ['onChange'];
 
     let counter = 0;
 
-    const onUpdate = () => {
+    const handler = () => {
       counter += 1;
     };
 
     await render(<template>
-      <Formidable @onUpdate={{onUpdate}} @updateEvents={{updateEvents}} as |values api|>
+      <Formidable @handler={{handler}} @handleOn={{handleOn}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -61,17 +61,17 @@ module('Integration | Component | formidable', function (hooks) {
     assert.strictEqual(counter, 2);
   });
 
-  test('UpdateEvents -- onChange + onSubmit -- It should be triggered on specified updated events ', async function (assert) {
-    const updateEvents: UpdateEvent[] = ['onChange', 'onSubmit'];
+  test('handleOn -- onChange + onSubmit -- It should be triggered on specified updated handleOn ', async function (assert) {
+    const handleOn: HandlerEvent[] = ['onChange', 'onSubmit'];
 
     let counter = 0;
 
-    const onUpdate = () => {
+    const handler = () => {
       counter += 1;
     };
 
     await render(<template>
-      <Formidable @onUpdate={{onUpdate}} @updateEvents={{updateEvents}} as |values api|>
+      <Formidable @handler={{handler}} @handleOn={{handleOn}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -87,17 +87,17 @@ module('Integration | Component | formidable', function (hooks) {
     assert.strictEqual(counter, 4);
   });
 
-  test('UpdateEvents -- onBlur -- It should be triggered on specified updated events ', async function (assert) {
-    const updateEvents: UpdateEvent[] = ['onBlur'];
+  test('handleOn -- onBlur -- It should be triggered on specified updated handleOn ', async function (assert) {
+    const handleOn: HandlerEvent[] = ['onBlur'];
 
     let counter = 0;
 
-    const onUpdate = () => {
+    const handler = () => {
       counter += 1;
     };
 
     await render(<template>
-      <Formidable @onUpdate={{onUpdate}} @updateEvents={{updateEvents}} as |values api|>
+      <Formidable @handler={{handler}} @handleOn={{handleOn}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>

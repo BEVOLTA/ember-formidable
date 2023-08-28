@@ -1,6 +1,6 @@
 import type { FunctionBasedModifier } from 'ember-modifier';
 
-export type UpdateEvent = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
+export type HandlerEvent = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
 
 export type GenericObject = Record<string, unknown>;
 export type ValueKey<Values extends GenericObject = GenericObject> =
@@ -229,7 +229,7 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
   /**
    * This functions is a submit handler that validates the form,
    * and trigger the `onSubmit` method if defined in the `args`.
-   * If onSubmit is unspecified, and the `updateEvents` includes `onSubmit`, triggers `onUpdate`.
+   * If onSubmit is unspecified, and the `handleOn` includes `onSubmit`, triggers `handler`.
    */
   onSubmit: (e: SubmitEvent) => void;
 
@@ -386,14 +386,14 @@ export interface FormidableArgs<
   validatorOptions?: ResolverOptions<Options>;
 
   /**
-   * This function is triggered depending on the `updateEvents`.
+   * This function is triggered depending on `handleOn`.
    *
    * It is called after validation if there is one.
    *
    * It can be overriden by custom handlers when you register an input,
    * or by the `onSubmit` argument.
    */
-  onUpdate?: (data: Values, api: FormidableApi<Values>) => void;
+  handler?: (data: Values, api: FormidableApi<Values>) => void;
 
   /**
    * The initial data the form will use to pre-populate the fields.
@@ -404,17 +404,23 @@ export interface FormidableArgs<
    * This functions gets triggered when the form is submitted.
    *
    * You can either use this method to deal with the data,
-   * or use the updateEvents `onSubmit` and `onUpdate` method to have the values directly as params,
+   * or use the handleOn `onSubmit` and `handler` method to have the values directly as params,
    * but not both! `onSubmit` is called in priority.
    *
    */
   onSubmit?: (event: SubmitEvent, api: FormidableApi<Values>) => void;
 
   /**
-   * An array that specifies when to trigger `onUpdate`.
+   * An record that specifies when to trigger `handler` and validation.
    * @default ['onSubmit']
    */
-  updateEvents?: UpdateEvent[];
+  handleOn?: HandlerEvent[];
+
+  /**
+   * An record that specifies when to trigger `handler` and validation.
+   * @default  ['onBlur', 'onSubmit']
+   */
+  validateOn?: HandlerEvent[];
 
   /**
    * If set to true, allows you to use the native input validation.
@@ -503,21 +509,21 @@ export interface RegisterOptions<Values extends GenericObject = GenericObject> {
   /**
    * This function is a custom event that is triggered by the change of this input and only applies for this one.
    *
-   * If this is specified, it does not trigger `onUpdate`.
+   * If this is specified, it does not trigger `handler`.
    */
   onChange?: (event: Event, api: FormidableApi<Values>) => void;
 
   /**
    * This function is a custom event that is triggered by the blur of this input and only applies for this one.
    *
-   * If this is specified, it does not trigger `onUpdate`.
+   * If this is specified, it does not trigger `handler`.
    */
   onBlur?: (event: Event, api: FormidableApi<Values>) => void;
 
   /**
    * This function is a custom event that is triggered by the focus of this input and only applies for this one.
    *
-   * If this is specified, it does not trigger `onUpdate`.
+   * If this is specified, it does not trigger `handler`.
    */
   onFocus?: (event: Event, api: FormidableApi<Values>) => void;
 }

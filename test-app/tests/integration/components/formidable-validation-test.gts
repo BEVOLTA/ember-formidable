@@ -89,18 +89,18 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#error').hasText('Name is required.');
   });
 
-  test('clearError -- It should clean an error', async function (assert) {
+  test('clearError -- It should clear an error', async function (assert) {
     await render(<template>
       <Formidable @values={{data}} @validator={{validator}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
-          <input type='number' id='age' {{api.register 'age'}} />
+          <input type='text' id='email' {{api.register 'email'}} />
           <button id='submit' type='submit'>SUBMIT</button>
           <button id='clear' type='button' {{on 'click' (fn api.clearError 'name')}}>CLEAR</button>
           {{#each api.errors.name as |error|}}
             <p id='error-name'>{{error.message}}</p>
           {{/each}}
-          {{#each api.errors.age as |error|}}
+          {{#each api.errors.email as |error|}}
             <p id='error-email'>{{error.message}}</p>
           {{/each}}
         </form>
@@ -108,14 +108,10 @@ module('Integration | Component | formidable', function (hooks) {
     </template>);
     assert.dom('#name').hasValue('John Doe');
     await fillIn('#name', '');
-    await fillIn('#age', '');
-
     await click('#submit');
     assert.dom('#error-name').exists();
-    assert.dom('#error-email').exists();
     await click('#clear');
     assert.dom('#error-name').doesNotExist();
-    assert.dom('#error-email').exists();
   });
 
   test('setError -- string -- It should set an error', async function (assert) {

@@ -9,6 +9,7 @@ export type {
   FormidableArgs,
   FormidableError,
   FormidableErrors,
+  HandlerEvent,
   InvalidFields,
   NativeValidations,
   Parser,
@@ -18,6 +19,5 @@ export type {
   RollbackContext,
   SetContext,
   UnregisterContext,
-  UpdateEvent,
   ValidationRules,
 } from './types';
