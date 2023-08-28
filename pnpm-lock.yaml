@@ -294,9 +294,6 @@ importers:
       '@embroider/macros':
         specifier: 1.13.1
         version: 1.13.1(@glint/template@1.0.2)
-      '@glimmer/component':
-        specifier: ^1.1.2
-        version: 1.1.2(@babel/core@7.22.10)
       lodash:
         specifier: 4.17.21
         version: 4.17.21
@@ -349,6 +346,9 @@ importers:
       '@embroider/addon-dev':
         specifier: 4.1.0
         version: 4.1.0(@glint/template@1.0.2)(rollup@3.28.0)
+      '@glimmer/component':
+        specifier: ^1.1.2
+        version: 1.1.2(@babel/core@7.22.10)
       '@glimmer/tracking':
         specifier: ^1.1.2
         version: 1.1.2
@@ -462,7 +462,7 @@ importers:
     dependencies:
       ember-formidable:
         specifier: workspace:*
-        version: file:ember-formidable(@babel/core@7.22.10)(@glimmer/component@1.1.2)(@glint/template@1.0.2)(ember-modifier@4.1.0)(ember-source@5.2.0)
+        version: file:ember-formidable(@babel/core@7.22.10)(@glimmer/component@1.1.2)(@glimmer/tracking@1.1.2)(@glint/template@1.0.2)(ember-modifier@4.1.0)(ember-source@5.2.0)
     devDependencies:
       '@babel/core':
         specifier: ^7.22.10
@@ -8915,6 +8915,7 @@ packages:
       walk-sync: 2.2.0
     transitivePeerDependencies:
       - supports-color
+    dev: true
 
   /ember-cli-inject-live-reload@2.1.0:
     resolution: {integrity: sha512-YV5wYRD5PJHmxaxaJt18u6LE6Y+wo455BnmcpN+hGNlChy2piM9/GMvYgTAz/8Vin8RJ5KekqP/w/NEaRndc/A==}
@@ -9338,6 +9339,7 @@ packages:
     transitivePeerDependencies:
       - '@babel/core'
       - supports-color
+    dev: true
 
   /ember-data@4.11.3(@babel/core@7.22.10)(@ember/string@3.1.1)(@glimmer/tracking@1.1.2)(ember-source@5.2.0)(webpack@5.88.2):
     resolution: {integrity: sha512-7vir6Re3M3M6yJoCHy6UxEg3oSY1JEnsuTByY3lJquWPaUamn7qbPQvNr16Tqh8EKrt+e/+X26czFm4kRGhpVg==}
@@ -18788,12 +18790,13 @@ packages:
       type-fest: 2.19.0
     dev: true
 
-  file:ember-formidable(@babel/core@7.22.10)(@glimmer/component@1.1.2)(@glint/template@1.0.2)(ember-modifier@4.1.0)(ember-source@5.2.0):
+  file:ember-formidable(@babel/core@7.22.10)(@glimmer/component@1.1.2)(@glimmer/tracking@1.1.2)(@glint/template@1.0.2)(ember-modifier@4.1.0)(ember-source@5.2.0):
     resolution: {directory: ember-formidable, type: directory}
     id: file:ember-formidable
     name: ember-formidable
     peerDependencies:
       '@glimmer/component': '>= 1.1.2'
+      '@glimmer/tracking': '>= 1.1.2'
       ember-modifier: '>= 4.1.0'
       ember-source: '*'
     dependencies:
@@ -18802,7 +18805,7 @@ packages:
       '@embroider/addon-shim': 1.8.6
       '@embroider/macros': 1.13.1(@glint/template@1.0.2)
       '@glimmer/component': 1.1.2(@babel/core@7.22.10)
-      ember-concurrency: 3.1.0(@babel/core@7.22.10)(ember-source@5.2.0)
+      '@glimmer/tracking': 1.1.2
       ember-modifier: 4.1.0(ember-source@5.2.0)
       ember-source: 5.2.0(@babel/core@7.22.10)(@glimmer/component@1.1.2)(@glint/template@1.0.2)(webpack@5.88.2)
       lodash: 4.17.21
