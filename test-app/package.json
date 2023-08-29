@@ -1,6 +1,6 @@
 {
   "name": "test-app",
-  "version": "0.0.0",
+  "version": "0.0.0-beta.0",
   "private": true,
   "description": "Test app for ember-formidable addon",
   "repository": "",
@@ -107,5 +107,6 @@
   },
   "ember": {
     "edition": "octane"
-  }
+  },
+  "homepage": "http://ember-formidable.bevolta.com/"
 }

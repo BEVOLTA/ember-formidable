@@ -1030,6 +1030,7 @@ packages:
       '@babel/helper-replace-supers': 7.22.9(@babel/core@7.22.10)
       '@babel/helper-split-export-declaration': 7.22.6
       '@babel/plugin-syntax-decorators': 7.22.10(@babel/core@7.22.10)
+    dev: true
 
   /@babel/plugin-proposal-decorators@7.22.10(@babel/core@7.22.10):
     resolution: {integrity: sha512-KxN6TqZzcFi4uD3UifqXElBTBNLAEH1l3vzMQj6JwJZbL2sZlThxSViOKCYY+4Ah4V4JhQ95IVB7s/Y6SJSlMQ==}
@@ -1043,7 +1044,6 @@ packages:
       '@babel/helper-replace-supers': 7.22.9(@babel/core@7.22.10)
       '@babel/helper-split-export-declaration': 7.22.6
       '@babel/plugin-syntax-decorators': 7.22.10(@babel/core@7.22.10)
-    dev: true
 
   /@babel/plugin-proposal-json-strings@7.18.6(@babel/core@7.22.10):
     resolution: {integrity: sha512-lr1peyn9kOdbYc0xr0OdHTZ5FMqS6Di+H0Fz2I/JwMzGmzJETNeOFq2pBySw6X/KFL5EWDjlJuMsUGRFb8fQgQ==}
@@ -8573,7 +8573,7 @@ packages:
     dependencies:
       '@babel/core': 7.22.10(supports-color@8.1.1)
       '@babel/plugin-proposal-class-properties': 7.18.6(@babel/core@7.22.10)
-      '@babel/plugin-proposal-decorators': 7.21.0(@babel/core@7.22.10)
+      '@babel/plugin-proposal-decorators': 7.22.10(@babel/core@7.22.10)
       '@babel/preset-env': 7.22.10(@babel/core@7.22.10)
       '@embroider/macros': 1.13.1(@glint/template@1.0.2)
       '@embroider/shared-internals': 2.4.0(supports-color@8.1.1)
@@ -8613,7 +8613,7 @@ packages:
     dependencies:
       '@babel/core': 7.22.10(supports-color@8.1.1)
       '@babel/plugin-proposal-class-properties': 7.18.6(@babel/core@7.22.10)
-      '@babel/plugin-proposal-decorators': 7.21.0(@babel/core@7.22.10)
+      '@babel/plugin-proposal-decorators': 7.22.10(@babel/core@7.22.10)
       '@babel/preset-env': 7.22.10(@babel/core@7.22.10)
       '@embroider/macros': 1.13.1(@glint/template@1.0.2)
       '@embroider/shared-internals': 2.4.0(supports-color@8.1.1)
@@ -8728,7 +8728,7 @@ packages:
       '@babel/core': 7.22.10(supports-color@8.1.1)
       '@babel/helper-compilation-targets': 7.22.10
       '@babel/plugin-proposal-class-properties': 7.18.6(@babel/core@7.22.10)
-      '@babel/plugin-proposal-decorators': 7.21.0(@babel/core@7.22.10)
+      '@babel/plugin-proposal-decorators': 7.22.10(@babel/core@7.22.10)
       '@babel/plugin-proposal-private-methods': 7.18.6(@babel/core@7.22.10)
       '@babel/plugin-proposal-private-property-in-object': 7.21.11(@babel/core@7.22.10)
       '@babel/plugin-transform-modules-amd': 7.22.5(@babel/core@7.22.10)
@@ -15348,6 +15348,7 @@ packages:
 
   /psl@1.9.0:
     resolution: {integrity: sha512-E/ZsdU4HLs/68gYzgGTkMicWTLPdAftJLfJFlLUAAKZGkStNU72sZjT66SnMDVOfOWY/YAoiD7Jxa9iHvngcag==}
+    requiresBuild: true
     dev: true
 
   /publint@0.2.1:
@@ -15405,6 +15406,7 @@ packages:
 
   /querystringify@2.2.0:
     resolution: {integrity: sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==}
+    requiresBuild: true
     dev: true
 
   /queue-microtask@1.2.3:
@@ -18042,6 +18044,7 @@ packages:
   /universalify@0.2.0:
     resolution: {integrity: sha512-CJ1QgKmNg3CwvAv/kOFmtnEN05f0D/cn9QntgNOQlQF9dgvVTHj3t+8JPdjqawCHk7V/KA+fbUqzZ9XWhcqPUg==}
     engines: {node: '>= 4.0.0'}
+    requiresBuild: true
     dev: true
 
   /universalify@2.0.0:
@@ -18102,6 +18105,7 @@ packages:
 
   /url-parse@1.5.10:
     resolution: {integrity: sha512-WypcfiRhfeUP9vvF0j6rw0J3hrWrw6iZv3+22h6iRMJ/8z1Tj6XfLP4DsUix5MhMPnXpiHDoKyoZ/bdCkwBCiQ==}
+    requiresBuild: true
     dependencies:
       querystringify: 2.2.0
       requires-port: 1.0.0
