@@ -1,3 +1,4 @@
+import { fn } from '@ember/helper';
 import { on } from '@ember/modifier';
 import { get } from '@ember/object';
 import { click, fillIn, render } from '@ember/test-helpers';
@@ -6,7 +7,6 @@ import { module, test } from 'qunit';
 import { Formidable } from 'ember-formidable';
 import { yupResolver } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
-import { fn } from 'test-app/tests/utils/helpers';
 import * as yup from 'yup';
 
 import type { HandlerEvent } from 'ember-formidable';

@@ -1,4 +1,5 @@
 /* eslint-disable qunit/require-expect */
+import { fn } from '@ember/helper';
 import { on } from '@ember/modifier';
 import { get } from '@ember/object';
 import { click, fillIn, render } from '@ember/test-helpers';
@@ -6,10 +7,9 @@ import { module, test } from 'qunit';
 
 import { Formidable, yupResolver } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
-import { fn } from 'test-app/tests/utils/helpers';
 import * as yup from 'yup';
 
-import type { FormidableArgs,HandlerEvent } from 'ember-formidable';
+import type { FormidableArgs, HandlerEvent } from 'ember-formidable';
 
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);

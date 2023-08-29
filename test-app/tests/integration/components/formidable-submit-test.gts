@@ -1,3 +1,4 @@
+import { fn } from '@ember/helper';
 import { on } from '@ember/modifier';
 import { click, fillIn, render } from '@ember/test-helpers';
 import { module, test } from 'qunit';
@@ -5,7 +6,6 @@ import { module, test } from 'qunit';
 import { Formidable } from 'ember-formidable';
 import { yupResolver } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
-import { fn } from 'test-app/tests/utils/helpers';
 import * as yup from 'yup';
 
 import type { FormidableArgs } from 'ember-formidable';
@@ -93,7 +93,7 @@ module('Integration | Component | formidable', function (hooks) {
           <button
             id='rollback'
             type='button'
-            {{on 'click' (fn api.rollback undefined)}}
+            {{on 'click' (fn api.rollback undefined undefined)}}
           >ROLLBACK</button>
           <button id='submit' type='submit'>SUBMIT</button>
           {{#if api.isSubmitted}}

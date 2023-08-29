@@ -93,7 +93,7 @@ module('Integration | Component | formidable', function (hooks) {
           <select id='pet' {{api.register 'pet'}}>
             <option value='🐶' id='dog'>Dog</option>
             <option value='🐱' id='cat'>Cat</option>
-            <option value='hamster' id='hamster'>Hamster</option>
+            <option value='🐹' id='hamster'>Hamster</option>
           </select>
           <button id='submit' type='submit'>SUBMIT</button>
         </form>
@@ -171,6 +171,9 @@ module('Integration | Component | formidable', function (hooks) {
     await click('#submit');
     assert.dom('#foo').isNotChecked();
     assert.dom('#bar').isChecked();
+
+    await click('#bar');
+    assert.dom('#bar').isNotChecked();
   });
 
   test('Values -- number -- It should update the value ', async function (assert) {

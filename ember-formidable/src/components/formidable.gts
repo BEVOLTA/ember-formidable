@@ -42,6 +42,18 @@ const DATA_DISABLED = 'data-formidable-disabled';
 
 const UNREGISTERED_ATTRIBUTE = 'data-formidable-unregistered';
 
+const valueIfChecked = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const { isCheckbox, isRadio } = inputUtils(target);
+  const isCheckable = isCheckbox || isRadio;
+
+  if (!isCheckable || (isCheckable && !!target.checked)) {
+    return target.value;
+  }
+
+  return undefined;
+};
+
 const formatValue = (value: any, formatOptions: FormatOptions | undefined): any => {
   if (!formatOptions) {
     return value;
@@ -516,7 +528,10 @@ export default class Formidable<
 
       // ATTRIBUTES
 
-      if (isInput && (input as HTMLInputElement).type === 'number') {
+      if (
+        (isInput && (input as HTMLInputElement).type === 'number') ||
+        (input as HTMLInputElement).type === 'time'
+      ) {
         setAttribute('min', min);
         setAttribute('max', max);
       } else if (isInput || isTextarea) {
@@ -611,7 +626,7 @@ export default class Formidable<
   ): Promise<void> {
     assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
-    await this.setValue(field, (event.target as HTMLInputElement).value, {
+    await this.setValue(field, valueIfChecked(event), {
       shouldValidate: this.validateOn.includes('onChange'),
       shouldDirty: true,
     });
@@ -633,7 +648,7 @@ export default class Formidable<
   ): Promise<void> {
     assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
-    await this.setValue(field, (event.target as HTMLInputElement).value, {
+    await this.setValue(field, valueIfChecked(event), {
       shouldValidate: this.validateOn.includes('onBlur'),
     });
 
@@ -654,7 +669,7 @@ export default class Formidable<
   ): Promise<void> {
     assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
-    await this.setValue(field, (event.target as HTMLInputElement).value, {
+    await this.setValue(field, valueIfChecked(event), {
       shouldValidate: this.validateOn.includes('onFocus'),
     });
 

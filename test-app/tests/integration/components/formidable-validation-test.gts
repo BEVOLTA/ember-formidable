@@ -1,3 +1,4 @@
+import { concat, fn } from '@ember/helper';
 import { on } from '@ember/modifier';
 import { get } from '@ember/object';
 import { click, fillIn, render } from '@ember/test-helpers';
@@ -6,10 +7,9 @@ import { module, test } from 'qunit';
 import { Formidable } from 'ember-formidable';
 import { yupResolver } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
-import { concat, fn } from 'test-app/tests/utils/helpers';
 import * as yup from 'yup';
 
-import type { FieldState } from 'ember-formidable';
+import type { FieldState, FormidableError } from 'ember-formidable';
 
 // Define a schema for a user object
 const userSchema = yup.object({
@@ -143,7 +143,10 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('setError -- FormidableError -- It should set an error ', async function (assert) {
-    const customError = { message: "This shouldn't exist! What the hell!", type: 'random' };
+    const customError = {
+      message: "This shouldn't exist! What the hell!",
+      type: 'random',
+    } as FormidableError;
 
     await render(<template>
       <Formidable @values={{data}} @validator={{validator}} as |values api|>
