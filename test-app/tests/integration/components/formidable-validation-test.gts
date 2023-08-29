@@ -9,7 +9,7 @@ import { yupResolver } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
 import * as yup from 'yup';
 
-import type { FieldState, FormidableError } from 'ember-formidable';
+import type { FieldState, FormidableError, HandlerEvent } from 'ember-formidable';
 
 // Define a schema for a user object
 const userSchema = yup.object({
@@ -279,5 +279,35 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#error-name').hasText('Name is required.');
     assert.dom('#error-email').doesNotExist();
     assert.dom('#invalid-email').doesNotExist();
+  });
+
+  test('revalidateOn -- onChange -- It should revalidate errors', async function (assert) {
+    const validateOn: HandlerEvent[] = ['onSubmit'];
+    const revalidateOn: HandlerEvent[] = ['onChange'];
+
+    await render(<template>
+      <Formidable
+        @values={{data}}
+        @validator={{validator}}
+        @validateOn={{validateOn}}
+        @revalidateOn={{revalidateOn}}
+        as |values api|
+      >
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='name' {{api.register 'name'}} />
+          <input type='email' id='email' {{api.register 'email'}} />
+          <button id='submit' type='submit'>SUBMIT</button>
+          {{#each api.errorMessages as |error|}}
+            <p id='error'>{{error}}</p>
+          {{/each}}
+        </form>
+      </Formidable>
+    </template>);
+
+    await fillIn('#name', '');
+    await click('#submit');
+    assert.dom('#error').hasText('Name is required.');
+    await fillIn('#name', 'Nicolas Sarkozy');
+    assert.dom('#error').doesNotExist();
   });
 });

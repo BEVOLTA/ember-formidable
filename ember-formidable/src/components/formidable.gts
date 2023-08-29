@@ -177,6 +177,10 @@ export default class Formidable<
     return this.args.validateOn ?? ['onBlur', 'onSubmit'];
   }
 
+  get revalidateOn(): HandlerEvent[] {
+    return this.args.revalidateOn ?? ['onChange', 'onSubmit'];
+  }
+
   get parsedValues(): Values {
     return Object.entries(this.values).reduce((obj, [key, value]) => {
       return _set(obj, key, formatValue(value, this.parsers[key as ValueKey<Values>]));
@@ -410,6 +414,7 @@ export default class Formidable<
   }
 
   // --- TASKS
+
   @action
   async validate(field?: ValueKey<Values>): Promise<void> {
     try {
@@ -440,11 +445,10 @@ export default class Formidable<
     try {
       this.isSubmitting = true;
       this.isSubmitted = true;
-      this.submitCount += 1;
 
       event.preventDefault();
 
-      if (this.validateOn.includes('onSubmit')) {
+      if (this.shouldValidateOrRevalidate('onSubmit')) {
         await this.validate();
       }
 
@@ -463,6 +467,7 @@ export default class Formidable<
       }
     } finally {
       this.isSubmitting = false;
+      this.submitCount += 1;
     }
   }
 
@@ -592,11 +597,15 @@ export default class Formidable<
       input.addEventListener(isInput || isSelect || isTextarea ? 'input' : 'change', handleChange);
       input.addEventListener('invalid', preventDefault);
 
-      if (onBlur || this.validateOn.includes('onBlur') || this.handleOn.includes('onBlur')) {
+      if (onBlur || this.shouldValidateOrRevalidate('onBlur') || this.handleOn.includes('onBlur')) {
         input.addEventListener('blur', handleBlur);
       }
 
-      if (onFocus || this.validateOn.includes('onFocus') || this.handleOn.includes('onFocus')) {
+      if (
+        onFocus ||
+        this.shouldValidateOrRevalidate('onFocus') ||
+        this.handleOn.includes('onFocus')
+      ) {
         input.addEventListener('focusin', handleFocus);
       }
 
@@ -607,11 +616,19 @@ export default class Formidable<
         );
         input.removeEventListener('invalid', preventDefault);
 
-        if (onBlur || this.validateOn.includes('onBlur') || this.handleOn.includes('onBlur')) {
+        if (
+          onBlur ||
+          this.shouldValidateOrRevalidate('onBlur') ||
+          this.handleOn.includes('onBlur')
+        ) {
           input.removeEventListener('blur', handleBlur);
         }
 
-        if (onFocus || this.validateOn.includes('onFocus') || this.handleOn.includes('onFocus')) {
+        if (
+          onFocus ||
+          this.shouldValidateOrRevalidate('onFocus') ||
+          this.handleOn.includes('onFocus')
+        ) {
           input.removeEventListener('focus', handleFocus);
         }
       };
@@ -627,7 +644,7 @@ export default class Formidable<
     assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
     await this.setValue(field, valueIfChecked(event), {
-      shouldValidate: this.validateOn.includes('onChange'),
+      shouldValidate: this.shouldValidateOrRevalidate('onChange'),
       shouldDirty: true,
     });
 
@@ -649,7 +666,7 @@ export default class Formidable<
     assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
     await this.setValue(field, valueIfChecked(event), {
-      shouldValidate: this.validateOn.includes('onBlur'),
+      shouldValidate: this.shouldValidateOrRevalidate('onBlur'),
     });
 
     if (onBlur) {
@@ -670,7 +687,7 @@ export default class Formidable<
     assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
     await this.setValue(field, valueIfChecked(event), {
-      shouldValidate: this.validateOn.includes('onFocus'),
+      shouldValidate: this.shouldValidateOrRevalidate('onFocus'),
     });
 
     if (onFocus) {
@@ -688,6 +705,12 @@ export default class Formidable<
       get(this.rollbackValues, field),
       get(this.parsedValues, field),
     );
+  }
+
+  private shouldValidateOrRevalidate(eventType: HandlerEvent) {
+    return this.submitCount > 0
+      ? this.revalidateOn.includes(eventType)
+      : this.validateOn.includes(eventType);
   }
 
   private getDOMElement(name: string): HTMLInputElement | null {
