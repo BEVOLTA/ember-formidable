@@ -7,6 +7,7 @@ settings:
 overrides:
   '@glimmer/validator': ^0.84.3
   ember-cli-babel: ^7.26.11
+  '@glimmer/reference': 0.84.3
 
 packageExtensionsChecksum: 58622e143ea7a8a4d6ecfd1a236094a0
 
@@ -3060,7 +3061,7 @@ packages:
       '@glimmer/env': 0.1.7
       '@glimmer/global-context': 0.84.2
       '@glimmer/interfaces': 0.84.2
-      '@glimmer/reference': 0.84.2
+      '@glimmer/reference': 0.84.3
       '@glimmer/util': 0.84.2
       '@glimmer/validator': 0.84.3
 
@@ -3079,7 +3080,7 @@ packages:
       '@glimmer/encoder': 0.84.2
       '@glimmer/env': 0.1.7
       '@glimmer/interfaces': 0.84.2
-      '@glimmer/reference': 0.84.2
+      '@glimmer/reference': 0.84.3
       '@glimmer/util': 0.84.2
       '@glimmer/vm': 0.84.2
       '@glimmer/wire-format': 0.84.2
@@ -3098,15 +3099,6 @@ packages:
       '@glimmer/manager': 0.84.2
       '@glimmer/opcode-compiler': 0.84.2
       '@glimmer/util': 0.84.2
-
-  /@glimmer/reference@0.84.2:
-    resolution: {integrity: sha512-hH0VD76OXMsGSHbqaqD64u1aBEqy//jhZtIaHGwAHNpTEX+zDtW3ka298KbAn2CZyDDrNAnuc2U1Vy4COR3zlA==}
-    dependencies:
-      '@glimmer/env': 0.1.7
-      '@glimmer/global-context': 0.84.2
-      '@glimmer/interfaces': 0.84.2
-      '@glimmer/util': 0.84.2
-      '@glimmer/validator': 0.84.3
 
   /@glimmer/reference@0.84.3:
     resolution: {integrity: sha512-lV+p/aWPVC8vUjmlvYVU7WQJsLh319SdXuAWoX/SE3pq340BJlAJiEcAc6q52y9JNhT57gMwtjMX96W5Xcx/qw==}
@@ -3127,7 +3119,7 @@ packages:
       '@glimmer/low-level': 0.78.2
       '@glimmer/owner': 0.84.2
       '@glimmer/program': 0.84.2
-      '@glimmer/reference': 0.84.2
+      '@glimmer/reference': 0.84.3
       '@glimmer/util': 0.84.2
       '@glimmer/validator': 0.84.3
       '@glimmer/vm': 0.84.2
@@ -9689,7 +9681,7 @@ packages:
       '@glimmer/opcode-compiler': 0.84.2
       '@glimmer/owner': 0.84.2
       '@glimmer/program': 0.84.2
-      '@glimmer/reference': 0.84.2
+      '@glimmer/reference': 0.84.3
       '@glimmer/runtime': 0.84.2
       '@glimmer/syntax': 0.84.2
       '@glimmer/validator': 0.84.3
@@ -9747,7 +9739,7 @@ packages:
       '@glimmer/opcode-compiler': 0.84.2
       '@glimmer/owner': 0.84.2
       '@glimmer/program': 0.84.2
-      '@glimmer/reference': 0.84.2
+      '@glimmer/reference': 0.84.3
       '@glimmer/runtime': 0.84.2
       '@glimmer/syntax': 0.84.2
       '@glimmer/validator': 0.84.3
