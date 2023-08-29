@@ -423,6 +423,12 @@ export interface FormidableArgs<
   validateOn?: HandlerEvent[];
 
   /**
+   * An record that specifies when to trigger `handler` and validation.
+   * @default  ['onChange', 'onSubmit']
+   */
+  revalidateOn?: HandlerEvent[];
+
+  /**
    * If set to true, allows you to use the native input validation.
    * If set to false, the `invalid` event is not triggered.
    * @default false
