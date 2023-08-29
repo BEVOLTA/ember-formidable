@@ -8,7 +8,6 @@ import { modifier } from 'ember-modifier';
 import _cloneDeep from 'lodash/cloneDeep';
 import _isEmpty from 'lodash/isEmpty';
 import _isEqual from 'lodash/isEqual';
-import _isNil from 'lodash/isNil';
 import _set from 'lodash/set';
 import _unset from 'lodash/unset';
 import { tracked, TrackedObject } from 'tracked-built-ins';
