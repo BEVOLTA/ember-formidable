@@ -1,3 +1,4 @@
+import { fn } from '@ember/helper';
 import { on } from '@ember/modifier';
 import { get } from '@ember/object';
 import { click, fillIn, render } from '@ember/test-helpers';
@@ -6,7 +7,6 @@ import { module, test } from 'qunit';
 import { Formidable } from 'ember-formidable';
 import { yupResolver } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
-import { fn } from 'test-app/tests/utils/helpers';
 import * as yup from 'yup';
 
 import type { HandlerEvent } from 'ember-formidable';
@@ -35,7 +35,7 @@ module('Integration | Component | formidable', function (hooks) {
           <button
             id='unregister'
             type='button'
-            {{on 'click' (fn api.unregister 'name')}}
+            {{on 'click' (fn api.unregister 'name' undefined)}}
           >UNREGISTER</button>
           {{#if (api.getValue 'name')}}
             <p id='value-name'>{{api.getValue 'name'}}</p>

@@ -528,7 +528,10 @@ export default class Formidable<
 
       // ATTRIBUTES
 
-      if (isInput && (input as HTMLInputElement).type === 'number') {
+      if (
+        (isInput && (input as HTMLInputElement).type === 'number') ||
+        (input as HTMLInputElement).type === 'time'
+      ) {
         setAttribute('min', min);
         setAttribute('max', max);
       } else if (isInput || isTextarea) {

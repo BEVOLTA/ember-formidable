@@ -1,4 +1,5 @@
 /* eslint-disable qunit/require-expect */
+import { fn } from '@ember/helper';
 import { on } from '@ember/modifier';
 import { get } from '@ember/object';
 import { click, render } from '@ember/test-helpers';
@@ -7,7 +8,6 @@ import { module, test } from 'qunit';
 import { Formidable } from 'ember-formidable';
 import { yupResolver } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
-import { fn } from 'test-app/tests/utils/helpers';
 import * as yup from 'yup';
 
 // Define a schema for a user object
@@ -34,7 +34,7 @@ module('Integration | Component | formidable', function (hooks) {
         <button
           id='change'
           type='button'
-          {{on 'click' (fn api.setValue 'foo' 'CHANGED')}}
+          {{on 'click' (fn api.setValue 'foo' 'CHANGED' undefined)}}
         >CHANGE</button>
         <p id='value'>{{api.getValue 'foo'}}</p>
         <p id='default'>{{api.defaultValues.foo}}</p>
@@ -52,7 +52,11 @@ module('Integration | Component | formidable', function (hooks) {
 
     await render(<template>
       <Formidable @values={{data}} as |values api|>
-        <button id='change' type='button' {{on 'click' (fn api.setValue 'foo' 505)}}>CHANGE</button>
+        <button
+          id='change'
+          type='button'
+          {{on 'click' (fn api.setValue 'foo' 505 undefined)}}
+        >CHANGE</button>
         <p id='value'>{{api.getValue 'foo'}}</p>
         <p id='default'>{{api.defaultValues.foo}}</p>
       </Formidable>
@@ -74,7 +78,7 @@ module('Integration | Component | formidable', function (hooks) {
         <button
           id='change'
           type='button'
-          {{on 'click' (fn api.setValue 'foo' date)}}
+          {{on 'click' (fn api.setValue 'foo' date undefined)}}
         >CHANGE</button>
         <p id='value'>{{api.getValue 'foo'}}</p>
         <p id='default'>{{api.defaultValues.foo}}</p>
@@ -95,7 +99,11 @@ module('Integration | Component | formidable', function (hooks) {
 
     await render(<template>
       <Formidable @values={{data}} as |values api|>
-        <button id='change' type='button' {{on 'click' (fn api.setValue 'foo' bar)}}>CHANGE</button>
+        <button
+          id='change'
+          type='button'
+          {{on 'click' (fn api.setValue 'foo' bar undefined)}}
+        >CHANGE</button>
         <p id='value'>{{api.getValue 'foo.bar'}}</p>
         <p id='default'>{{api.defaultValues.foo.bar}}</p>
       </Formidable>
@@ -118,7 +126,7 @@ module('Integration | Component | formidable', function (hooks) {
         <button
           id='change'
           type='button'
-          {{on 'click' (fn api.setValue 'foo' fishes)}}
+          {{on 'click' (fn api.setValue 'foo' fishes undefined)}}
         >CHANGE</button>
         <p id='value0'>{{api.getValue 'foo.0'}}</p>
         <p id='value1'>{{api.getValue 'foo.1'}}</p>

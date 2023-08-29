@@ -1,4 +1,5 @@
 /* eslint-disable qunit/require-expect */
+import { fn } from '@ember/helper';
 import { on } from '@ember/modifier';
 import { get } from '@ember/object';
 import { click, fillIn, render } from '@ember/test-helpers';
@@ -6,7 +7,6 @@ import { module, test } from 'qunit';
 
 import { Formidable } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
-import { fn } from 'test-app/tests/utils/helpers';
 
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
@@ -65,7 +65,7 @@ module('Integration | Component | formidable', function (hooks) {
       <Formidable @values={{data}} as |values api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
-          <button id='rollback' type='button' {{on 'click' (fn api.rollback undefined)}}>
+          <button id='rollback' type='button' {{on 'click' (fn api.rollback undefined undefined)}}>
             ROLLBACK
           </button>
           {{#if (get api.dirtyFields 'foo')}}
@@ -112,7 +112,7 @@ module('Integration | Component | formidable', function (hooks) {
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <input type='text' id='bar' {{api.register 'bar'}} />
-          <button id='rollback' type='button' {{on 'click' (fn api.rollback 'foo')}}>
+          <button id='rollback' type='button' {{on 'click' (fn api.rollback 'foo' undefined)}}>
             ROLLBACK
           </button>
           {{#if (get api.dirtyFields 'foo')}}

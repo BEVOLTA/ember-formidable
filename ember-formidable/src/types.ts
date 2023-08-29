@@ -186,7 +186,7 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
   /**
    * This function set the value in a controlled fashion.
    */
-  setValue: (field: ValueKey<Values>, value: string | boolean, context?: SetContext) => void;
+  setValue: (field: ValueKey<Values>, value: any, context?: SetContext) => void;
 
   /**
    * This function get the field's value.
