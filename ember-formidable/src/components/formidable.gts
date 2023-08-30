@@ -12,12 +12,11 @@ import _set from 'lodash/set';
 import _unset from 'lodash/unset';
 import { tracked, TrackedObject } from 'tracked-built-ins';
 
-import { inputUtils } from '../-private/utils';
+import { formatValue, inputUtils, valueIfChecked } from '../-private/utils';
 
 import type {
   DirtyFields,
   FieldState,
-  FormatOptions,
   FormidableApi,
   FormidableArgs,
   FormidableError,
@@ -41,44 +40,6 @@ const DATA_REQUIRED = 'data-formidable-required';
 const DATA_DISABLED = 'data-formidable-disabled';
 
 const UNREGISTERED_ATTRIBUTE = 'data-formidable-unregistered';
-
-const valueIfChecked = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  const { isCheckbox, isRadio } = inputUtils(target);
-  const isCheckable = isCheckbox || isRadio;
-
-  if (!isCheckable || (isCheckable && !!target.checked)) {
-    return target.value;
-  }
-
-  return undefined;
-};
-
-const formatValue = (value: any, formatOptions: FormatOptions | undefined): any => {
-  if (!formatOptions) {
-    return value;
-  }
-
-  const { valueAsNumber, valueAsDate, valueFormat, valueAsBoolean } = formatOptions;
-
-  if (valueFormat) {
-    return valueFormat(value);
-  }
-
-  if (valueAsNumber) {
-    return +(value as string | number);
-  }
-
-  if (valueAsDate) {
-    return new Date(value as string | number);
-  }
-
-  if (valueAsBoolean) {
-    return Boolean(value);
-  }
-
-  return value;
-};
 
 export interface FormidableSignature<
   Values extends GenericObject = GenericObject,
@@ -635,7 +596,6 @@ export default class Formidable<
     },
   );
 
-  @action
   async onChange(
     field: ValueKey<Values>,
     event: Event,
@@ -657,7 +617,6 @@ export default class Formidable<
     }
   }
 
-  @action
   async onBlur(
     field: ValueKey<Values>,
     event: Event,
@@ -678,7 +637,6 @@ export default class Formidable<
     }
   }
 
-  @action
   async onFocus(
     field: ValueKey<Values>,
     event: Event,
@@ -699,7 +657,6 @@ export default class Formidable<
     }
   }
 
-  @action
   dirtyField(field: ValueKey<Values>): void {
     this.dirtyFields[field] = !_isEqual(
       get(this.rollbackValues, field),

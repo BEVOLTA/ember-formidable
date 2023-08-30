@@ -1,5 +1,7 @@
 import _isNil from 'lodash/isNil';
 
+import type { FormatOptions } from '../types';
+
 export const inputUtils = (
   input: Element,
 ): {
@@ -28,4 +30,42 @@ export const inputUtils = (
     isRadio: (input as HTMLInputElement).type === 'radio',
     name: input.getAttribute('name'),
   };
+};
+
+export const valueIfChecked = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const { isCheckbox, isRadio } = inputUtils(target);
+  const isCheckable = isCheckbox || isRadio;
+
+  if (!isCheckable || (isCheckable && !!target.checked)) {
+    return target.value;
+  }
+
+  return undefined;
+};
+
+export const formatValue = (value: any, formatOptions: FormatOptions | undefined): any => {
+  if (!formatOptions) {
+    return value;
+  }
+
+  const { valueAsNumber, valueAsDate, valueFormat, valueAsBoolean } = formatOptions;
+
+  if (valueFormat) {
+    return valueFormat(value);
+  }
+
+  if (valueAsNumber) {
+    return +(value as string | number);
+  }
+
+  if (valueAsDate) {
+    return new Date(value as string | number);
+  }
+
+  if (valueAsBoolean) {
+    return Boolean(value);
+  }
+
+  return value;
 };
