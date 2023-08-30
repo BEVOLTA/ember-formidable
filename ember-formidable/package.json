@@ -37,11 +37,12 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.22.10",
+    "@ember/render-modifiers": "^2.1.0",
     "@embroider/addon-shim": "^1.8.6",
     "@embroider/macros": "1.13.1",
-    "@ember/render-modifiers": "^2.1.0",
-    "tracked-built-ins": "3.1.1",
-    "lodash": "4.17.21"
+    "ember-concurrency": "3.1.1",
+    "lodash": "4.17.21",
+    "tracked-built-ins": "3.1.1"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.7.1",

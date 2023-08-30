@@ -107,6 +107,5 @@
   },
   "ember": {
     "edition": "octane"
-  },
-  "homepage": "http://ember-formidable.bevolta.com/"
+  }
 }

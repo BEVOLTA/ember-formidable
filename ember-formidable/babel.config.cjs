@@ -16,5 +16,6 @@ module.exports = {
     ['@babel/plugin-proposal-decorators', { legacy: true }],
     '@babel/plugin-proposal-class-properties',
     '@babel/plugin-transform-private-methods',
+    './node_modules/ember-concurrency/lib/babel-plugin-transform-ember-concurrency-async-tasks',
   ],
 };

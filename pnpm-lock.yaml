@@ -295,6 +295,9 @@ importers:
       '@embroider/macros':
         specifier: 1.13.1
         version: 1.13.1(@glint/template@1.0.2)
+      ember-concurrency:
+        specifier: 3.1.1
+        version: 3.1.1(@babel/core@7.22.10)(ember-source@5.1.2)
       lodash:
         specifier: 4.17.21
         version: 4.17.21
@@ -8907,7 +8910,6 @@ packages:
       walk-sync: 2.2.0
     transitivePeerDependencies:
       - supports-color
-    dev: true
 
   /ember-cli-inject-live-reload@2.1.0:
     resolution: {integrity: sha512-YV5wYRD5PJHmxaxaJt18u6LE6Y+wo455BnmcpN+hGNlChy2piM9/GMvYgTAz/8Vin8RJ5KekqP/w/NEaRndc/A==}
@@ -9314,8 +9316,27 @@ packages:
       - supports-color
     dev: true
 
-  /ember-concurrency@3.1.0(@babel/core@7.22.10)(ember-source@5.2.0):
-    resolution: {integrity: sha512-vJrP+awbiYJvm2y9xYIYO96n2Jx1FXp7mbM7ucjSp+hPuNwNw9i7xXVrgxBYIuJ/0zlbSMF0P2XJoyi4A0XCrQ==}
+  /ember-concurrency@3.1.1(@babel/core@7.22.10)(ember-source@5.1.2):
+    resolution: {integrity: sha512-doXFYYfy1C7jez+jDDlfahTp03QdjXeSY/W3Zbnx/q3UNJ9g10Shf2d7M/HvWo/TC22eU+6dPLIpqd/6q4pR+Q==}
+    engines: {node: 16.* || >= 18}
+    peerDependencies:
+      ember-source: '*'
+    dependencies:
+      '@babel/helper-plugin-utils': 7.22.5
+      '@babel/types': 7.22.10
+      '@glimmer/tracking': 1.1.2
+      ember-cli-babel: 7.26.11
+      ember-cli-babel-plugin-helpers: 1.1.1
+      ember-cli-htmlbars: 6.3.0
+      ember-compatibility-helpers: 1.2.6(@babel/core@7.22.10)
+      ember-source: 5.1.2(@babel/core@7.22.10)(@glimmer/component@1.1.2)(@glint/template@1.0.2)
+    transitivePeerDependencies:
+      - '@babel/core'
+      - supports-color
+    dev: false
+
+  /ember-concurrency@3.1.1(@babel/core@7.22.10)(ember-source@5.2.0):
+    resolution: {integrity: sha512-doXFYYfy1C7jez+jDDlfahTp03QdjXeSY/W3Zbnx/q3UNJ9g10Shf2d7M/HvWo/TC22eU+6dPLIpqd/6q4pR+Q==}
     engines: {node: 16.* || >= 18}
     peerDependencies:
       ember-source: '*'
@@ -9331,7 +9352,6 @@ packages:
     transitivePeerDependencies:
       - '@babel/core'
       - supports-color
-    dev: true
 
   /ember-data@4.11.3(@babel/core@7.22.10)(@ember/string@3.1.1)(@glimmer/tracking@1.1.2)(ember-source@5.2.0)(webpack@5.88.2):
     resolution: {integrity: sha512-7vir6Re3M3M6yJoCHy6UxEg3oSY1JEnsuTByY3lJquWPaUamn7qbPQvNr16Tqh8EKrt+e/+X26czFm4kRGhpVg==}
@@ -18802,6 +18822,7 @@ packages:
       '@embroider/macros': 1.13.1(@glint/template@1.0.2)
       '@glimmer/component': 1.1.2(@babel/core@7.22.10)
       '@glimmer/tracking': 1.1.2
+      ember-concurrency: 3.1.1(@babel/core@7.22.10)(ember-source@5.2.0)
       ember-modifier: 4.1.0(ember-source@5.2.0)
       ember-source: 5.2.0(@babel/core@7.22.10)(@glimmer/component@1.1.2)(@glint/template@1.0.2)(webpack@5.88.2)
       lodash: 4.17.21
@@ -18852,7 +18873,7 @@ packages:
       ember-cli-version-checker: 5.1.2
       ember-code-snippet: 3.0.0
       ember-composable-helpers: 5.0.0
-      ember-concurrency: 3.1.0(@babel/core@7.22.10)(ember-source@5.2.0)
+      ember-concurrency: 3.1.1(@babel/core@7.22.10)(ember-source@5.2.0)
       ember-data: 4.11.3(@babel/core@7.22.10)(@ember/string@3.1.1)(@glimmer/tracking@1.1.2)(ember-source@5.2.0)(webpack@5.88.2)
       ember-fetch: 8.1.2
       ember-keyboard: 8.2.1(@babel/core@7.22.10)(@ember/test-helpers@3.2.0)(ember-source@5.2.0)
