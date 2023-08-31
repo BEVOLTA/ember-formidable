@@ -185,7 +185,6 @@ module('Integration | Component | formidable', function (hooks) {
 
     const handler: FormidableArgs<{ foo: string[]; pastry?: string[] }>['handler'] = (data) => {
       assert.deepEqual(data.foo, ['🦎']);
-      assert.deepEqual(data.pastry, ['🥐', '🍪']);
     };
 
     await render(<template>
@@ -196,6 +195,11 @@ module('Integration | Component | formidable', function (hooks) {
           <input type='checkbox' id='croissant' {{api.register 'pastry'}} value='🥐' />
           <input type='checkbox' id='cookie' {{api.register 'pastry'}} value='🍪' />
           <button id='submit' type='submit'>SUBMIT</button>
+          {{#if (api.getValue 'pastry')}}
+            {{#each values.pastry as |pastry|}}
+              <p id={{pastry}}>{{pastry}} </p>
+            {{/each}}
+          {{/if}}
         </form>
       </Formidable>
     </template>);
@@ -212,6 +216,15 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#bar').isChecked();
     assert.dom('#croissant').isChecked();
     assert.dom('#cookie').isChecked();
+    assert.dom('#🥐').exists();
+    assert.dom('#🍪').exists();
+
+    await click('#croissant');
+    await click('#cookie');
+    assert.dom('#croissant').isNotChecked();
+    assert.dom('#cookie').isNotChecked();
+    assert.dom('#🥐').doesNotExist();
+    assert.dom('#🍪').doesNotExist();
   });
 
   test('Values -- number -- It should update the value ', async function (assert) {
