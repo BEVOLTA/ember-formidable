@@ -32,13 +32,27 @@ export const inputUtils = (
   };
 };
 
-export const valueIfChecked = (event: Event) => {
+export const valueIfChecked = (event: Event, value?: any, defaultValue?: any) => {
   const target = event.target as HTMLInputElement;
   const { isCheckbox, isRadio } = inputUtils(target);
   const isCheckable = isCheckbox || isRadio;
+  const arrayByDefault = Array.isArray(defaultValue);
+  const checkboxSet = new Set(Array.isArray(value) ? value : []);
 
   if (!isCheckable || (isCheckable && !!target.checked)) {
+    if (isCheckbox) {
+      checkboxSet.add(target.value);
+
+      return arrayByDefault || _isNil(defaultValue) ? [...checkboxSet] : target.value;
+    }
+
     return target.value;
+  }
+
+  if (isCheckbox && !target.checked) {
+    checkboxSet.delete(target.value);
+
+    return arrayByDefault ? [...checkboxSet] : undefined;
   }
 
   return undefined;

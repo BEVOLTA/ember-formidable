@@ -140,6 +140,8 @@ module('Integration | Component | formidable', function (hooks) {
     </template>);
     assert.dom('#huey').isChecked();
     await click('#dewey');
+    assert.dom('#huey').isNotChecked();
+
     await click('#submit');
     assert.dom('#dewey').isChecked();
   });
@@ -174,6 +176,42 @@ module('Integration | Component | formidable', function (hooks) {
 
     await click('#bar');
     assert.dom('#bar').isNotChecked();
+  });
+
+  test('Values -- checkbox group -- It should update the value ', async function (assert) {
+    const data = {
+      foo: ['🐍'],
+    };
+
+    const handler: FormidableArgs<{ foo: string[]; pastry?: string[] }>['handler'] = (data) => {
+      assert.deepEqual(data.foo, ['🦎']);
+      assert.deepEqual(data.pastry, ['🥐', '🍪']);
+    };
+
+    await render(<template>
+      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='checkbox' id='foo' {{api.register 'foo'}} value='🐍' />
+          <input type='checkbox' id='bar' {{api.register 'foo'}} value='🦎' />
+          <input type='checkbox' id='croissant' {{api.register 'pastry'}} value='🥐' />
+          <input type='checkbox' id='cookie' {{api.register 'pastry'}} value='🍪' />
+          <button id='submit' type='submit'>SUBMIT</button>
+        </form>
+      </Formidable>
+    </template>);
+    assert.dom('#foo').isChecked();
+    assert.dom('#bar').isNotChecked();
+
+    await click('#foo');
+    await click('#bar');
+    await click('#croissant');
+    await click('#cookie');
+
+    await click('#submit');
+    assert.dom('#foo').isNotChecked();
+    assert.dom('#bar').isChecked();
+    assert.dom('#croissant').isChecked();
+    assert.dom('#cookie').isChecked();
   });
 
   test('Values -- number -- It should update the value ', async function (assert) {
