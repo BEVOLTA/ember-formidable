@@ -4,7 +4,6 @@ import { assert, warn } from '@ember/debug';
 import { action, get } from '@ember/object';
 import { inject as service } from '@ember/service';
 
-import { task } from 'ember-concurrency';
 import { modifier } from 'ember-modifier';
 import _cloneDeep from 'lodash/cloneDeep';
 import _isEmpty from 'lodash/isEmpty';
@@ -65,6 +64,8 @@ export default class Formidable<
   // --- SUBMIT
   @tracked isSubmitSuccessful: boolean | undefined = undefined;
   @tracked isSubmitted = false;
+  @tracked isSubmitting = false;
+  @tracked isValidating = false;
 
   @tracked submitCount = 0;
 
@@ -86,16 +87,8 @@ export default class Formidable<
 
   // --- STATES
 
-  get isSubmitting() {
-    return this.submit.isRunning;
-  }
-
   get isValid(): boolean {
     return _isEmpty(this.errors);
-  }
-
-  get isValidating() {
-    return this.validate.isRunning;
   }
 
   get isInvalid(): boolean {
@@ -163,25 +156,24 @@ export default class Formidable<
         field: ValueKey<Values>,
         value: string | boolean | undefined,
         context?: SetContext,
-      ) => await this.setValue.perform(field, value, context),
+      ) => await this.setValue(field, value, context),
       getValue: this.getValue,
       getValues: this.getValues,
       getDefaultValue: this.getDefaultValue,
       getFieldState: this.getFieldState,
       register: this.register as FunctionBasedModifier<RegisterModifier<Values>>,
       unregister: this.unregister,
-      onSubmit: async (e: SubmitEvent) => await this.submit.perform(e),
-      validate: async (field?: ValueKey<Values>) => await this.validate.perform(field),
+      onSubmit: async (e: SubmitEvent) => await this.submit(e),
+      validate: async (field?: ValueKey<Values>) => await this.validate(field),
       errors: this.errors,
       errorMessages: this.errorMessages,
       setError: this.setError,
       clearError: this.clearError,
       clearErrors: this.clearErrors,
       rollback: this.rollback,
-      rollbackInvalid: async (context?: RollbackContext) =>
-        await this.rollbackInvalid.perform(context),
+      rollbackInvalid: async (context?: RollbackContext) => await this.rollbackInvalid(context),
       setFocus: async (name: ValueKey<Values>, context?: SetContext) =>
-        await this.setFocus.perform(name, context),
+        await this.setFocus(name, context),
       defaultValues: this.rollbackValues,
       isSubmitted: this.isSubmitted,
       isSubmitting: this.isSubmitting,
@@ -247,6 +239,15 @@ export default class Formidable<
       }
 
       this.isSubmitted = false;
+    }
+  }
+
+  @action
+  async rollbackInvalid(context: RollbackContext = {}): Promise<void> {
+    await this.validate();
+
+    for (const field of Object.keys(this.invalidFields)) {
+      this.rollback(field, context);
     }
   }
 
@@ -340,77 +341,76 @@ export default class Formidable<
     }
   }
 
-  rollbackInvalid = task(async (context: RollbackContext = {}): Promise<void> => {
-    await this.validate.perform();
+  @action
+  async setValue(
+    field: ValueKey<Values>,
+    value: any,
+    { shouldValidate, shouldDirty }: SetContext = {},
+  ): Promise<void> {
+    this.values[field] = value as Values[ValueKey<Values>];
 
-    for (const field of Object.keys(this.invalidFields)) {
-      this.rollback(field, context);
+    if (shouldDirty) {
+      this.dirtyField(field);
     }
-  });
 
-  setValue = task(
-    async (
-      field: ValueKey<Values>,
-      value: string | boolean | undefined,
-      { shouldValidate, shouldDirty }: SetContext = {},
-    ): Promise<void> => {
-      this.values[field] = value as Values[ValueKey<Values>];
+    if (shouldValidate) {
+      await this.validate(field);
+    }
+  }
 
-      if (shouldDirty) {
-        this.dirtyField(field);
-      }
+  @action
+  async setFocus(
+    field: ValueKey<Values>,
+    { shouldValidate, shouldDirty }: SetContext = {},
+  ): Promise<void> {
+    this.getDOMElement(field as string)?.focus();
 
-      if (shouldValidate) {
-        await this.validate.perform(field);
-      }
-    },
-  );
+    if (shouldDirty) {
+      this.dirtyField(field);
+    }
 
-  setFocus = task(
-    async (
-      field: ValueKey<Values>,
-      { shouldValidate, shouldDirty }: SetContext = {},
-    ): Promise<void> => {
-      this.getDOMElement(field as string)?.focus();
-
-      if (shouldDirty) {
-        this.dirtyField(field);
-      }
-
-      if (shouldValidate) {
-        await this.validate.perform(field);
-      }
-    },
-  );
+    if (shouldValidate) {
+      await this.validate(field);
+    }
+  }
 
   // --- TASKS
 
-  validate = task(async (field?: ValueKey<Values>): Promise<void> => {
-    if (!this.validator) {
-      return;
-    }
-
-    const validation: FormidableErrors = await this.validator(this.parsedValues, {
-      ...this.args.validatorOptions,
-      shouldUseNativeValidation: this.args.shouldUseNativeValidation,
-      nativeValidations: this.nativeValidations,
-    } as ResolverOptions<ValidatorOptions>);
-
-    if (field) {
-      this.errors = _set(this.errors, field, get(validation, field));
-    } else {
-      this.errors = new TrackedObject(validation);
-    }
-  });
-
-  submit = task(async (event: SubmitEvent): Promise<void> => {
+  @action
+  async validate(field?: ValueKey<Values>): Promise<void> {
     try {
+      this.isValidating = true;
+
+      if (!this.validator) {
+        return;
+      }
+
+      const validation: FormidableErrors = await this.validator(this.parsedValues, {
+        ...this.args.validatorOptions,
+        shouldUseNativeValidation: this.args.shouldUseNativeValidation,
+        nativeValidations: this.nativeValidations,
+      } as ResolverOptions<ValidatorOptions>);
+
+      if (field) {
+        this.errors = _set(this.errors, field, get(validation, field));
+      } else {
+        this.errors = new TrackedObject(validation);
+      }
+    } finally {
+      this.isValidating = false;
+    }
+  }
+
+  @action
+  async submit(event: SubmitEvent): Promise<void> {
+    try {
+      this.isSubmitting = true;
       this.isSubmitted = true;
 
       event.preventDefault();
 
       if (this.shouldValidateOrRevalidate('onSubmit')) {
-        await this.validate.perform();
+        await this.validate();
       }
 
       this.isSubmitSuccessful = this.isValid;
@@ -427,9 +427,10 @@ export default class Formidable<
         this.args.handler(this.parsedValues, this.api);
       }
     } finally {
+      this.isSubmitting = false;
       this.submitCount += 1;
     }
-  });
+  }
 
   register = modifier<RegisterModifier<Values>>(
     (
@@ -518,20 +519,29 @@ export default class Formidable<
         const value = this.getValue(name);
 
         if (isRadio || isCheckbox) {
-          (input as HTMLInputElement).checked = (input as HTMLInputElement).value === value;
+          const checked = Array.isArray(value)
+            ? value.includes((input as HTMLInputElement).value)
+            : (input as HTMLInputElement).value === value;
+
+          (input as HTMLInputElement).checked = checked;
+          setAttribute('aria-checked', checked);
         } else if (isInput || isTextarea) {
           (input as HTMLInputElement).value = (value as string) ?? '';
         }
       }
 
       // HANDLERS
-      const handleChange = (event: Event): Promise<void> =>
-        this.onChange.perform(name, event, onChange);
+      const handleChange = async (event: Event): Promise<void> => {
+        await this.onChange(name, event, onChange);
+      };
 
-      const handleBlur = (event: Event): Promise<void> => this.onBlur.perform(name, event, onBlur);
+      const handleBlur = async (event: Event): Promise<void> => {
+        await this.onBlur(name, event, onBlur);
+      };
 
-      const handleFocus = (event: Event): Promise<void> =>
-        this.onFocus.perform(name, event, onFocus);
+      const handleFocus = async (event: Event): Promise<void> => {
+        await this.onFocus(name, event, onFocus);
+      };
 
       const preventDefault = (e: Event): void => {
         if (!this.args.shouldUseNativeValidation) {
@@ -591,72 +601,78 @@ export default class Formidable<
     },
   );
 
-  onChange = task(
-    async (
-      field: ValueKey<Values>,
-      event: Event,
-      onChange?: (event: Event, api: FormidableApi<GenericObject>) => void,
-    ): Promise<void> => {
-      assert('FORMIDABLE - No input element found when value got set.', !!event.target);
+  async onChange(
+    field: ValueKey<Values>,
+    event: Event,
+    onChange?: (event: Event, api: FormidableApi<GenericObject>) => void,
+  ): Promise<void> {
+    assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
-      await this.setValue.perform(field, valueIfChecked(event), {
+    await this.setValue(
+      field,
+      valueIfChecked(event, this.getValue(field), this.getDefaultValue(field)),
+      {
         shouldValidate: this.shouldValidateOrRevalidate('onChange'),
         shouldDirty: true,
-      });
+      },
+    );
 
-      if (onChange) {
-        return onChange(event, this.api as FormidableApi<GenericObject>);
-      }
+    if (onChange) {
+      return onChange(event, this.api as FormidableApi<GenericObject>);
+    }
 
-      if (this.handleOn.includes('onChange') && this.args.handler) {
-        this.args.handler(this.parsedValues, this.api);
-      }
-    },
-  );
+    if (this.handleOn.includes('onChange') && this.args.handler) {
+      this.args.handler(this.parsedValues, this.api);
+    }
+  }
 
-  onBlur = task(
-    async (
-      field: ValueKey<Values>,
-      event: Event,
-      onBlur?: (event: Event, api: FormidableApi<GenericObject>) => void,
-    ): Promise<void> => {
-      assert('FORMIDABLE - No input element found when value got set.', !!event.target);
+  async onBlur(
+    field: ValueKey<Values>,
+    event: Event,
+    onBlur?: (event: Event, api: FormidableApi<GenericObject>) => void,
+  ): Promise<void> {
+    assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
-      await this.setValue.perform(field, valueIfChecked(event), {
+    await this.setValue(
+      field,
+      valueIfChecked(event, this.getValue(field), this.getDefaultValue(field)),
+      {
         shouldValidate: this.shouldValidateOrRevalidate('onBlur'),
-      });
+      },
+    );
 
-      if (onBlur) {
-        return onBlur(event, this.api as FormidableApi<GenericObject>);
-      }
+    if (onBlur) {
+      return onBlur(event, this.api as FormidableApi<GenericObject>);
+    }
 
-      if (this.handleOn.includes('onBlur') && this.args.handler) {
-        this.args.handler(this.parsedValues, this.api);
-      }
-    },
-  );
+    if (this.handleOn.includes('onBlur') && this.args.handler) {
+      this.args.handler(this.parsedValues, this.api);
+    }
+  }
 
-  onFocus = task(
-    async (
-      field: ValueKey<Values>,
-      event: Event,
-      onFocus?: (event: Event, api: FormidableApi<GenericObject>) => void,
-    ): Promise<void> => {
-      assert('FORMIDABLE - No input element found when value got set.', !!event.target);
+  async onFocus(
+    field: ValueKey<Values>,
+    event: Event,
+    onFocus?: (event: Event, api: FormidableApi<GenericObject>) => void,
+  ): Promise<void> {
+    assert('FORMIDABLE - No input element found when value got set.', !!event.target);
 
-      await this.setValue.perform(field, valueIfChecked(event), {
+    await this.setValue(
+      field,
+      valueIfChecked(event, this.getValue(field), this.getDefaultValue(field)),
+      {
         shouldValidate: this.shouldValidateOrRevalidate('onFocus'),
-      });
+      },
+    );
 
-      if (onFocus) {
-        return onFocus(event, this.api as FormidableApi<GenericObject>);
-      }
+    if (onFocus) {
+      return onFocus(event, this.api as FormidableApi<GenericObject>);
+    }
 
-      if (this.handleOn.includes('onFocus') && this.args.handler) {
-        this.args.handler(this.parsedValues, this.api);
-      }
-    },
-  );
+    if (this.handleOn.includes('onFocus') && this.args.handler) {
+      this.args.handler(this.parsedValues, this.api);
+    }
+  }
 
   dirtyField(field: ValueKey<Values>): void {
     this.dirtyFields[field] = !_isEqual(
