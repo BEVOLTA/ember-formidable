@@ -105,7 +105,7 @@ export default class Formidable<
     return (
       Object.values(this.errors)
         .flat()
-        // Useful after a clearError
+        // undefined entries can happen!
         .filter(Boolean)
         .map((err) => {
           warn(
@@ -148,6 +148,12 @@ export default class Formidable<
     }, {}) as Values;
   }
 
+  get parsedErrors(): FormidableErrors {
+    return Object.entries(this.errors ?? {}).reduce((obj, [key, value]) => {
+      return _set(obj, key, value);
+    }, {});
+  }
+
   @cached
   get api(): FormidableApi<Values> {
     return {
@@ -165,8 +171,9 @@ export default class Formidable<
       unregister: this.unregister,
       onSubmit: async (e: SubmitEvent) => await this.submit(e),
       validate: async (field?: ValueKey<Values>) => await this.validate(field),
-      errors: this.errors,
+      errors: this.parsedErrors,
       errorMessages: this.errorMessages,
+      getError: this.getError,
       setError: this.setError,
       clearError: this.clearError,
       clearErrors: this.clearErrors,
@@ -259,6 +266,11 @@ export default class Formidable<
     const isInvalid = !_isEmpty(error);
 
     return { isDirty, isPristine, isInvalid, error };
+  }
+
+  @action
+  getError(field: ValueKey<Values>): any {
+    return get(this.parsedErrors, field);
   }
 
   @action
