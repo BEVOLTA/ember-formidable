@@ -106,7 +106,7 @@ export default class Formidable<
       Object.values(this.errors)
         .flat()
         // empty errors can happen!
-        .filter((err) => typeof err === 'object' && !!Object.keys(err))
+        .filter((err) => typeof err === 'object' && !!Object.keys(err).length)
         .map((err) => {
           warn(
             `FORMIDABLE - We cannot find any error message. Are you sure it's in the right format? Here's what we received:
