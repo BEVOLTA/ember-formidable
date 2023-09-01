@@ -5,7 +5,7 @@ import { click, fillIn, render } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 
 import { Formidable } from 'ember-formidable';
-import { yupResolver } from 'ember-formidable';
+import { yupValidator } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
 import * as yup from 'yup';
 
@@ -68,12 +68,12 @@ const validUser = {
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  const validator = yupResolver(userSchema);
+  const validator = yupValidator(userSchema);
   const data = validUser;
 
   test('Validate -- It should validate', async function (assert) {
     await render(<template>
-      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+      <Formidable @values={{data}} @validator={{validator}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -91,7 +91,7 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('clearError -- It should clear an error', async function (assert) {
     await render(<template>
-      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+      <Formidable @values={{data}} @validator={{validator}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <input type='text' id='email' {{api.register 'email'}} />
@@ -116,7 +116,7 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('setError -- string -- It should set an error', async function (assert) {
     await render(<template>
-      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+      <Formidable @values={{data}} @validator={{validator}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -149,7 +149,7 @@ module('Integration | Component | formidable', function (hooks) {
     } as FormidableError;
 
     await render(<template>
-      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+      <Formidable @values={{data}} @validator={{validator}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -177,7 +177,7 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('isValid -- It should be update the valid state', async function (assert) {
     await render(<template>
-      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+      <Formidable @values={{data}} @validator={{validator}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -196,7 +196,7 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('invalidFields -- It should show invalid fields', async function (assert) {
     await render(<template>
-      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+      <Formidable @values={{data}} @validator={{validator}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <input type='email' id='email' {{api.register 'email'}} />
@@ -221,7 +221,7 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('errorMessages -- It should show errors', async function (assert) {
     await render(<template>
-      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+      <Formidable @values={{data}} @validator={{validator}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <input type='email' id='email' {{api.register 'email'}} />
@@ -244,7 +244,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+      <Formidable @values={{data}} @validator={{validator}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <input type='email' id='email' {{api.register 'email'}} />
@@ -291,7 +291,7 @@ module('Integration | Component | formidable', function (hooks) {
         @validator={{validator}}
         @validateOn={{validateOn}}
         @revalidateOn={{revalidateOn}}
-        as |values api|
+        as |api|
       >
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />

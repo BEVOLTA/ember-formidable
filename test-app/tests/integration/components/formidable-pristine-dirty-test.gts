@@ -17,7 +17,7 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('dirtyFields -- The dirty states should be updated', async function (assert) {
     await render(<template>
-      <Formidable @values={{data}} as |values api|>
+      <Formidable @values={{data}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <input type='text' id='bar' {{api.register 'bar'}} />
@@ -39,7 +39,7 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('isDirty/isPristine -- The dirty states should be updated', async function (assert) {
     await render(<template>
-      <Formidable @values={{data}} as |values api|>
+      <Formidable @values={{data}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <input type='text' id='bar' {{api.register 'bar'}} />
@@ -62,7 +62,7 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('dirtyFields -- Fields should be pristine when rollbacked', async function (assert) {
     await render(<template>
-      <Formidable @values={{data}} as |values api|>
+      <Formidable @values={{data}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='rollback' type='button' {{on 'click' (fn api.rollback undefined undefined)}}>
@@ -86,7 +86,7 @@ module('Integration | Component | formidable', function (hooks) {
     const options = { keepDirty: true };
 
     await render(<template>
-      <Formidable @values={{data}} as |values api|>
+      <Formidable @values={{data}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='rollback' type='button' {{on 'click' (fn api.rollback undefined options)}}>
@@ -108,7 +108,7 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('dirtyFields -- The rollbacked field should be pristine when rollbacked', async function (assert) {
     await render(<template>
-      <Formidable @values={{data}} as |values api|>
+      <Formidable @values={{data}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <input type='text' id='bar' {{api.register 'bar'}} />
@@ -140,7 +140,7 @@ module('Integration | Component | formidable', function (hooks) {
     const options = { keepDirty: true };
 
     await render(<template>
-      <Formidable @values={{data}} as |values api|>
+      <Formidable @values={{data}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <input type='text' id='bar' {{api.register 'bar'}} />
@@ -170,7 +170,7 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('getFieldState -- It should have the appropriate dirty and pristine values when updated', async function (assert) {
     await render(<template>
-      <Formidable @values={{data}} as |values api|>
+      <Formidable @values={{data}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <input type='text' id='bar' {{api.register 'bar'}} />

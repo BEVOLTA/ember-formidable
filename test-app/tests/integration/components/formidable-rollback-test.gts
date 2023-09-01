@@ -5,7 +5,7 @@ import { get } from '@ember/object';
 import { click, fillIn, render } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 
-import { Formidable, yupResolver } from 'ember-formidable';
+import { Formidable, yupValidator } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
 import * as yup from 'yup';
 
@@ -24,7 +24,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           {{#if api.isSubmitted}}
@@ -51,7 +51,7 @@ module('Integration | Component | formidable', function (hooks) {
     const options = { defaultValue: 'Shiny and new!' };
 
     await render(<template>
-      <Formidable @values={{data}} as |values api|>
+      <Formidable @values={{data}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <input type='text' id='bar' {{api.register 'bar'}} />
@@ -80,7 +80,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo' valueAsNumber=true}} />
           {{#if api.isSubmitted}}
@@ -108,7 +108,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo' valueAsDate=true}} />
           {{#if api.isSubmitted}}
@@ -139,7 +139,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo.bar'}} />
           {{#if api.isSubmitted}}
@@ -170,7 +170,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo0' {{api.register 'foo.0'}} />
           <input type='text' id='foo1' {{api.register 'foo.1'}} />
@@ -202,7 +202,7 @@ module('Integration | Component | formidable', function (hooks) {
       gender: 'male',
     };
 
-    const validator = yupResolver(
+    const validator = yupValidator(
       yup.object({
         name: yup.string().required('Name is required.'),
         age: yup
@@ -223,7 +223,7 @@ module('Integration | Component | formidable', function (hooks) {
         @validator={{validator}}
         @handleOn={{onChange}}
         @validateOn={{onChange}}
-        as |values api|
+        as |api|
       >
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />

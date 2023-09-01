@@ -231,7 +231,7 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
    * and trigger the `onSubmit` method if defined in the `args`.
    * If onSubmit is unspecified, and the `handleOn` includes `onSubmit`, triggers `handler`.
    */
-  onSubmit: (e: SubmitEvent) => void;
+  onSubmit: (e?: SubmitEvent) => void;
 
   /**
    * This function either validate all the form, or one field if specified.
@@ -413,7 +413,7 @@ export interface FormidableArgs<
    * but not both! `onSubmit` is called in priority.
    *
    */
-  onSubmit?: (event: SubmitEvent, api: FormidableApi<Values>) => void;
+  onSubmit?: (values: Values, api: FormidableApi<Values>, event?: SubmitEvent) => void;
 
   /**
    * An record that specifies when to trigger `handler` and validation.

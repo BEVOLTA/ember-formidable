@@ -4,7 +4,7 @@ import { click, fillIn, render } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 
 import { Formidable } from 'ember-formidable';
-import { yupResolver } from 'ember-formidable';
+import { yupValidator } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
 import * as yup from 'yup';
 
@@ -21,12 +21,12 @@ const validUser = {
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  const validator = yupResolver(userSchema);
+  const validator = yupValidator(userSchema);
   let data = validUser;
 
   test('isSubmitSuccessful -- Should be OK when submitting', async function (assert) {
     await render(<template>
-      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+      <Formidable @values={{data}} @validator={{validator}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -44,7 +44,7 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('isSubmitSuccessful -- Should not be true if there are errors', async function (assert) {
     await render(<template>
-      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+      <Formidable @values={{data}} @validator={{validator}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -64,7 +64,7 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('isSubmitted -- Should not be true even with errors', async function (assert) {
     await render(<template>
-      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+      <Formidable @values={{data}} @validator={{validator}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -87,7 +87,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{foo}} as |values api|>
+      <Formidable @values={{foo}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button
@@ -112,7 +112,7 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('submitCount -- Should increment when submitting', async function (assert) {
     await render(<template>
-      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+      <Formidable @values={{data}} @validator={{validator}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -133,18 +133,14 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('onSubmit -- Should have a custom onSubmit', async function (assert) {
-    const handleSubmit: FormidableArgs<typeof data>['onSubmit'] = (event, api) => {
+    const handleSubmit: FormidableArgs<typeof data>['onSubmit'] = (values, api, event) => {
+      assert.deepEqual(values, validUser);
       assert.ok(event);
       assert.ok(api);
     };
 
     await render(<template>
-      <Formidable
-        @values={{data}}
-        @validator={{validator}}
-        @onSubmit={{handleSubmit}}
-        as |values api|
-      >
+      <Formidable @values={{data}} @validator={{validator}} @onSubmit={{handleSubmit}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -172,7 +168,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{foo}} @handler={{handler}} as |values api|>
+      <Formidable @values={{foo}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>

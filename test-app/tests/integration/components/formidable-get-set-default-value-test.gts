@@ -6,7 +6,7 @@ import { click, render } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 
 import { Formidable } from 'ember-formidable';
-import { yupResolver } from 'ember-formidable';
+import { yupValidator } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
 import * as yup from 'yup';
 
@@ -30,7 +30,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} as |values api|>
+      <Formidable @values={{data}} as |api|>
         <button
           id='change'
           type='button'
@@ -51,7 +51,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} as |values api|>
+      <Formidable @values={{data}} as |api|>
         <button
           id='change'
           type='button'
@@ -74,7 +74,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} as |values api|>
+      <Formidable @values={{data}} as |api|>
         <button
           id='change'
           type='button'
@@ -98,7 +98,7 @@ module('Integration | Component | formidable', function (hooks) {
     const bar = { bar: 'Sunrise!' };
 
     await render(<template>
-      <Formidable @values={{data}} as |values api|>
+      <Formidable @values={{data}} as |api|>
         <button
           id='change'
           type='button'
@@ -122,7 +122,7 @@ module('Integration | Component | formidable', function (hooks) {
     const fishes = ['🍤', '🍣'];
 
     await render(<template>
-      <Formidable @values={{data}} as |values api|>
+      <Formidable @values={{data}} as |api|>
         <button
           id='change'
           type='button'
@@ -152,7 +152,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} as |values api|>
+      <Formidable @values={{data}} as |api|>
         {{#each (renderValues (api.getValues)) as |value|}}
           <p id={{value}}>{{value}}</p>
         {{/each}}
@@ -170,7 +170,7 @@ module('Integration | Component | formidable', function (hooks) {
     const options = { shouldDirty: true };
 
     await render(<template>
-      <Formidable @values={{data}} as |values api|>
+      <Formidable @values={{data}} as |api|>
         <button
           id='change'
           type='button'
@@ -188,13 +188,13 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('SetValue -- shouldValidate -- It should update and validate the field', async function (assert) {
-    const validator = yupResolver(userSchema);
+    const validator = yupValidator(userSchema);
 
     const data = validUser;
     const options = { shouldValidate: true };
 
     await render(<template>
-      <Formidable @values={{data}} @validator={{validator}} as |values api|>
+      <Formidable @values={{data}} @validator={{validator}} as |api|>
         <button
           id='change'
           type='button'

@@ -5,7 +5,7 @@ import { click, fillIn, render } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 
 import { Formidable } from 'ember-formidable';
-import { yupResolver } from 'ember-formidable';
+import { yupValidator } from 'ember-formidable';
 import { setupRenderingTest } from 'test-app/tests/helpers';
 import * as yup from 'yup';
 
@@ -24,7 +24,7 @@ module('Integration | Component | formidable', function (hooks) {
 
   test('setFocus -- Should focus the input when triggered', async function (assert) {
     await render(<template>
-      <Formidable as |values api|>
+      <Formidable as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button id='focus' type='button' {{on 'click' (fn api.setFocus 'name')}}>FOCUS</button>
@@ -37,19 +37,14 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('setFocus -- shouldValidate -- Should focus and validate the input when triggered', async function (assert) {
-    const validator = yupResolver(userSchema);
+    const validator = yupValidator(userSchema);
     const data = { ...validUser, name: '' };
     const validateOn: HandlerEvent[] = ['onFocus'];
 
     const options = { shouldValidate: true };
 
     await render(<template>
-      <Formidable
-        @values={{data}}
-        @validator={{validator}}
-        @validateOn={{validateOn}}
-        as |values api|
-      >
+      <Formidable @values={{data}} @validator={{validator}} @validateOn={{validateOn}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button
@@ -78,7 +73,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @validateOn={{validateOn}} as |values api|>
+      <Formidable @values={{data}} @validateOn={{validateOn}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button
