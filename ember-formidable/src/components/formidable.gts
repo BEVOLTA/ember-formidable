@@ -1,6 +1,6 @@
 import Component from '@glimmer/component';
 import { cached } from '@glimmer/tracking';
-import { assert, warn } from '@ember/debug';
+import { assert } from '@ember/debug';
 import { action, get } from '@ember/object';
 import { inject as service } from '@ember/service';
 
@@ -106,17 +106,8 @@ export default class Formidable<
       Object.values(this.errors)
         .flat()
         // empty errors can happen!
-        .filter((err) => typeof err === 'object' && !!Object.keys(err).length)
+        .filter((err) => typeof err === 'object' && !_isEmpty(err))
         .map((err) => {
-          warn(
-            `FORMIDABLE - We cannot find any error message. Are you sure it's in the right format? Here's what we received:
-        ${JSON.stringify(err)}`,
-            Boolean(err && err.message),
-            {
-              id: 'ember-formidable.error-message-not-found',
-            },
-          );
-
           return err?.message;
         })
     );
