@@ -133,7 +133,8 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('onSubmit -- Should have a custom onSubmit', async function (assert) {
-    const handleSubmit: FormidableArgs<typeof data>['onSubmit'] = (event, api) => {
+    const handleSubmit: FormidableArgs<typeof data>['onSubmit'] = (values, api, event) => {
+      assert.deepEqual(values, validUser);
       assert.ok(event);
       assert.ok(api);
     };

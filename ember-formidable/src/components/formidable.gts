@@ -169,7 +169,7 @@ export default class Formidable<
       getFieldState: this.getFieldState,
       register: this.register as FunctionBasedModifier<RegisterModifier<Values>>,
       unregister: this.unregister,
-      onSubmit: async (e: SubmitEvent) => await this.submit(e),
+      onSubmit: async (e?: SubmitEvent) => await this.submit(e),
       validate: async (field?: ValueKey<Values>) => await this.validate(field),
       errors: this.parsedErrors,
       errorMessages: this.errorMessages,
@@ -414,12 +414,12 @@ export default class Formidable<
   }
 
   @action
-  async submit(event: SubmitEvent): Promise<void> {
+  async submit(event?: SubmitEvent): Promise<void> {
     try {
       this.isSubmitting = true;
       this.isSubmitted = true;
 
-      event.preventDefault();
+      event?.preventDefault();
 
       if (this.shouldValidateOrRevalidate('onSubmit')) {
         await this.validate();
@@ -432,7 +432,7 @@ export default class Formidable<
       }
 
       if (this.args.onSubmit) {
-        return this.args.onSubmit(event, this.api);
+        return this.args.onSubmit(this.parsedValues, this.api, event);
       }
 
       if (this.handleOn.includes('onSubmit') && this.args.handler) {
