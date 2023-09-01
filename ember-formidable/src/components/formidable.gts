@@ -105,12 +105,12 @@ export default class Formidable<
     return (
       Object.values(this.errors)
         .flat()
-        // undefined entries can happen!
-        .filter(Boolean)
+        // empty errors can happen!
+        .filter((err) => typeof err === 'object' && !!Object.keys(err))
         .map((err) => {
           warn(
             `FORMIDABLE - We cannot find any error message. Are you sure it's in the right format? Here's what we received:
-        ${typeof err === 'object' ? JSON.stringify(err) : err}`,
+        ${JSON.stringify(err)}`,
             Boolean(err && err.message),
             {
               id: 'ember-formidable.error-message-not-found',
