@@ -48,7 +48,7 @@ export interface FormidableSignature<
   Element: HTMLElement;
   Args: FormidableArgs<Values, ValidatorOptions>;
   Blocks: {
-    default: [parsedValues: Values, api: FormidableApi<Values>];
+    default: [api: FormidableApi<Values>, parsedValues: Values];
   };
 }
 
@@ -707,6 +707,6 @@ export default class Formidable<
   }
 
   <template>
-    {{yield this.parsedValues this.api}}
+    {{yield this.api this.parsedValues}}
   </template>
 }

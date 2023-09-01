@@ -22,7 +22,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -44,7 +44,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' name='foo' {{api.register}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -66,7 +66,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <textarea id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -88,7 +88,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <select id='pet' {{api.register 'pet'}}>
             <option value='🐶' id='dog'>Dog</option>
@@ -115,7 +115,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <fieldset>
             <legend>Select a maintenance drone:</legend>
@@ -156,7 +156,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='checkbox' id='foo' {{api.register 'foo'}} value='🐍' />
           <input type='checkbox' id='bar' {{api.register 'foo'}} value='🦎' />
@@ -188,7 +188,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api values|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='checkbox' id='foo' {{api.register 'foo'}} value='🐍' />
           <input type='checkbox' id='bar' {{api.register 'foo'}} value='🦎' />
@@ -237,7 +237,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo' valueAsNumber=true}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -259,7 +259,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo' valueAsDate=true}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -283,7 +283,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo.bar'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -308,7 +308,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @values={{data}} @handler={{handler}} as |values api|>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo0' {{api.register 'foo.0'}} />
           <input type='text' id='foo1' {{api.register 'foo.1'}} />

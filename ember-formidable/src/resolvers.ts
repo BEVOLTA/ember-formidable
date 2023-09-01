@@ -22,7 +22,7 @@ const formatYupError = (errors: Array<yup.ValidationError>) => {
   }, {});
 };
 
-export const yupResolver = <
+export const yupValidator = <
   Values extends GenericObject = GenericObject,
   ValidatorOptions extends GenericObject = GenericObject,
 >(

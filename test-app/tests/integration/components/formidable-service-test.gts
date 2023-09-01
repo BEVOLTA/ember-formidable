@@ -20,7 +20,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @serviceId='test' @values={{data}} as |values api|>
+      <Formidable @serviceId='test' @values={{data}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>
@@ -51,7 +51,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     await render(<template>
-      <Formidable @serviceId='test' @values={{data}} as |values api|>
+      <Formidable @serviceId='test' @values={{data}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>
