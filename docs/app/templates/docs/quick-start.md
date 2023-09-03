@@ -11,5 +11,3 @@ ember install ember-headless-form
 ```
 
 ## Configuration
-
-Ben didoo didooododo
