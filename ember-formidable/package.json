@@ -1,6 +1,6 @@
 {
   "name": "ember-formidable",
-  "version": "0.0.0-beta.7",
+  "version": "0.0.0-beta.8",
   "description": "Ember form manager.",
   "keywords": [
     "ember-addon"
