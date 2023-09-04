@@ -427,7 +427,7 @@ export default class Formidable<
       }
 
       if (this.handleOn.includes('onSubmit') && this.args.handler) {
-        this.args.handler(this.parsedValues, this.api);
+        this.args.handler(this.parsedValues, this.api, event, 'onSubmit');
       }
     } finally {
       this.isSubmitting = false;
@@ -625,7 +625,7 @@ export default class Formidable<
     }
 
     if (this.handleOn.includes('onChange') && this.args.handler) {
-      this.args.handler(this.parsedValues, this.api);
+      this.args.handler(this.parsedValues, this.api, event, 'onChange');
     }
   }
 
@@ -649,7 +649,7 @@ export default class Formidable<
     }
 
     if (this.handleOn.includes('onBlur') && this.args.handler) {
-      this.args.handler(this.parsedValues, this.api);
+      this.args.handler(this.parsedValues, this.api, event, 'onBlur');
     }
   }
 
@@ -673,7 +673,7 @@ export default class Formidable<
     }
 
     if (this.handleOn.includes('onFocus') && this.args.handler) {
-      this.args.handler(this.parsedValues, this.api);
+      this.args.handler(this.parsedValues, this.api, event, 'onFocus');
     }
   }
 

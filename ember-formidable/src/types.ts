@@ -398,7 +398,12 @@ export interface FormidableArgs<
    * It can be overriden by custom handlers when you register an input,
    * or by the `onSubmit` argument.
    */
-  handler?: (data: Values, api: FormidableApi<Values>) => void;
+  handler?: (
+    data: Values,
+    api: FormidableApi<Values>,
+    event: Event | undefined,
+    eventType: HandlerEvent,
+  ) => void;
 
   /**
    * The initial data the form will use to pre-populate the fields.
