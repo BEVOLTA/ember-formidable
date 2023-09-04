@@ -251,7 +251,7 @@ export interface FormidableApi<Values extends GenericObject = GenericObject> {
   /**
    * This function get the field's error.
    */
-  getError: (field: ValueKey<Values>) => FormidableError;
+  getError: (field: ValueKey<Values>) => FormidableError[];
 
   /**
    * The function allows you to manually set one error.
