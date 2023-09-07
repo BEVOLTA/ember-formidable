@@ -1,7 +1,7 @@
 import Component from '@glimmer/component';
 import { cached } from '@glimmer/tracking';
-import { assert, warn } from '@ember/debug';
-import { action, get } from '@ember/object';
+import { assert } from '@ember/debug';
+import { get } from '@ember/object';
 import { inject as service } from '@ember/service';
 
 import { task } from 'ember-concurrency';
@@ -212,11 +212,10 @@ export default class Formidable<
 
   // --- STATES HANDLERS
 
-  @action
-  rollback(
+  rollback = (
     field?: ValueKey<Values>,
     { keepError, keepDirty, defaultValue }: RollbackContext = {},
-  ): void {
+  ): void => {
     if (field) {
       this.values[field] = (defaultValue ??
         this.rollbackValues[field] ??
@@ -246,40 +245,34 @@ export default class Formidable<
 
       this.isSubmitted = false;
     }
-  }
+  };
 
-  @action
-  getFieldState(name: ValueKey<Values>): FieldState {
+  getFieldState = (name: ValueKey<Values>): FieldState => {
     const isDirty = this.dirtyFields[name] ?? false;
     const isPristine = !isDirty;
     const error = this.errors[name];
     const isInvalid = !_isEmpty(error);
 
     return { isDirty, isPristine, isInvalid, error };
-  }
+  };
 
-  @action
-  getError(field: ValueKey<Values>): any {
+  getError = (field: ValueKey<Values>): any => {
     return get(this.parsedErrors, field);
-  }
+  };
 
-  @action
-  getValue(field: ValueKey<Values>): any {
+  getValue = (field: ValueKey<Values>): any => {
     return get(this.parsedValues, field);
-  }
+  };
 
-  @action
-  getValues(): Values {
+  getValues = (): Values => {
     return this.parsedValues;
-  }
+  };
 
-  @action
-  getDefaultValue(field: ValueKey<Values>): any {
+  getDefaultValue = (field: ValueKey<Values>): any => {
     return get(this.rollbackValues, field);
-  }
+  };
 
-  @action
-  setError(field: ValueKey<Values>, error: string | FormidableError): void {
+  setError = (field: ValueKey<Values>, error: string | FormidableError): void => {
     if (typeof error === 'string') {
       this.errors[field] = [
         ...(this.errors[field] ?? []),
@@ -299,25 +292,22 @@ export default class Formidable<
         },
       ];
     }
-  }
+  };
 
-  @action
-  clearError(field: ValueKey<Values>): void {
+  clearError = (field: ValueKey<Values>): void => {
     if (this.errors[field]) {
       _unset(this.errors, field);
     }
-  }
+  };
 
-  @action
-  clearErrors(): void {
+  clearErrors = (): void => {
     this.errors = new TrackedObject({});
-  }
+  };
 
-  @action
-  unregister(
+  unregister = (
     field: ValueKey<Values>,
     { keepError, keepDirty, keepValue, keepDefaultValue }: UnregisterContext = {},
-  ): void {
+  ): void => {
     const element = this.getDOMElement(field as string);
 
     assert('FORMIDABLE - No input element found to unregister', !!element);
@@ -341,7 +331,7 @@ export default class Formidable<
     if (!keepDefaultValue) {
       _unset(this.rollbackValues, field);
     }
-  }
+  };
 
   rollbackInvalid = task(async (context: RollbackContext = {}): Promise<void> => {
     await this.validate.perform();

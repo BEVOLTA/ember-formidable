@@ -1,6 +1,6 @@
 import { fn } from '@ember/helper';
 import { on } from '@ember/modifier';
-import { click, fillIn, render } from '@ember/test-helpers';
+import { click, fillIn, render, waitFor } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 
 import { Formidable } from 'ember-formidable';
@@ -172,13 +172,20 @@ module('Integration | Component | formidable', function (hooks) {
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='foo' {{api.register 'foo'}} />
           <button id='submit' type='submit'>SUBMIT</button>
-          <p id='is-submitting'>{{api.isSubmitting}}</p>
+          {{#if api.isSubmitting}}
+            <p id='is-submitting'>{{api.isSubmitting}}</p>
+          {{else}}
+            <p id='not-submitting'>{{api.isSubmitting}}</p>
+          {{/if}}
         </form>
       </Formidable>
     </template>);
 
-    assert.dom('#is-submitting').hasText('false');
+    assert.dom('#is-submitting').doesNotExist();
+    assert.dom('#not-submitting').exists();
+
     await click('#submit');
-    assert.dom('#is-submitting').hasText('false');
+    await waitFor('#not-submitting');
+    assert.dom('#not-submitting').exists();
   });
 });
