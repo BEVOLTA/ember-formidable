@@ -195,7 +195,7 @@ export default class Formidable<
     };
   }
 
-  constructor(owner: any, args: FormidableArgs<Values, ValidatorOptions>) {
+  constructor(owner: unknown, args: FormidableArgs<Values, ValidatorOptions>) {
     super(owner, args);
 
     if (this.args.serviceId) {
