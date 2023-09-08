@@ -1,21 +1,29 @@
 # ember-formidable
 
-[Short description of the addon.]
+Form manager for Ember.
 
 ## Compatibility
 
-- Ember.js v3.28 or above
+- Ember.js v4.12 or above
+- `ember-modifier`` 4.1 or above
 - Embroider or ember-auto-import v2
 
 ## Installation
 
-```
+```sh
 ember install ember-formidable
 ```
 
 ## Usage
 
-[Longer description of how to use the addon in apps.]
+```hbs
+<Formidable @values={{data}} @handler={{handler}} as |api|>
+  <form {{on 'submit' api.onSubmit}}>
+    <input type='text' id='foo' {{api.register 'foo'}} />
+    <button id='submit' type='submit'>SUBMIT</button>
+  </form>
+</Formidable>
+```
 
 ## Contributing
 
