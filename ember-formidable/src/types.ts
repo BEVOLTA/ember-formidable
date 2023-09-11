@@ -12,9 +12,7 @@ export type ValueKey<Values extends GenericObject = GenericObject> =
 
 export type RegisterModifier<Values extends GenericObject = GenericObject> = {
   Args: {
-    Positional?: [
-      (Values[ValueKey<Values>] extends Array<unknown> ? string : ValueKey<Values>) | undefined,
-    ];
+    Positional?: [ValueKey<Values> | undefined];
     Named?: RegisterOptions | undefined;
   };
   Element: Element;
