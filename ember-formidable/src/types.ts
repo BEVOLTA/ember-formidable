@@ -2,12 +2,21 @@ import type { FunctionBasedModifier } from 'ember-modifier';
 
 export type HandlerEvent = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
 
-export type GenericObject = Record<string, unknown>;
+export type GenericObject = Record<string, any>;
+
+type ValueIsArray<Values extends GenericObject> =
+  | keyof Values
+  | `${Extract<keyof Values, string>}.${number}`;
+
+type ValueIsObject<Values extends GenericObject> =
+  | keyof Values
+  | `${Extract<keyof Values, string>}.${string}`;
+
 export type ValueKey<Values extends GenericObject = GenericObject> =
   Values[keyof Values] extends Array<unknown>
-    ? keyof Values | `${Extract<keyof Values, string>}.${number}`
+    ? ValueIsArray<Values>
     : Values[keyof Values] extends object
-    ? keyof Values | `${Extract<keyof Values, string>}.${string}`
+    ? ValueIsObject<Values>
     : keyof Values;
 
 export type RegisterModifier<Values extends GenericObject = GenericObject> = {
