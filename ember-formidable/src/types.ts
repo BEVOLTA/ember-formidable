@@ -10,21 +10,6 @@ export type ValueKey<ObjectType extends GenericObject> = {
     : `${Key}`;
 }[keyof ObjectType & (string | number)];
 
-// type ValueIsArray<Values extends GenericObject> =
-//   | keyof Values
-//   | `${Extract<keyof Values, string>}.${number}`;
-
-// type ValueIsObject<Values extends GenericObject> =
-//   | keyof Values
-//   | `${Extract<keyof Values, string>}.${string}`;
-
-// export type ValueKey<Values extends GenericObject = GenericObject> =
-//   Values[keyof Values] extends Array<unknown>
-//     ? ValueIsArray<Values>
-//     : Values[keyof Values] extends object
-//     ? ValueIsObject<Values>
-//     : keyof Values;
-
 export type RegisterModifier<Values extends GenericObject = GenericObject> = {
   Args: {
     Positional?: [ValueKey<Values> | undefined];
@@ -393,8 +378,9 @@ export interface FormidableArgs<
   /**
    * This function validates the field to return a formatted error.
    */
+
   validator?: (
-    values: Values,
+    values: Values | Partial<Values>,
     options: ResolverOptions<Options>,
   ) => FormidableErrors<ValueKey<Values>> | Promise<FormidableErrors<ValueKey<Values>>>;
 

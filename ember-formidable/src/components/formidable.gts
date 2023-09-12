@@ -42,6 +42,8 @@ const DATA_DISABLED = 'data-formidable-disabled';
 
 const UNREGISTERED_ATTRIBUTE = 'data-formidable-unregistered';
 
+type KeyOrUndefined<Values extends GenericObject = GenericObject> = ValueKey<Values> | undefined;
+
 export interface FormidableSignature<
   Values extends GenericObject = GenericObject,
   ValidatorOptions extends GenericObject = GenericObject,
@@ -337,7 +339,7 @@ export default class Formidable<
     await this.validate.perform();
 
     for (const field of Object.keys(this.invalidFields)) {
-      this.rollback(field, context);
+      this.rollback(field as KeyOrUndefined<Values>, context);
     }
   });
 
@@ -354,7 +356,7 @@ export default class Formidable<
       }
 
       if (shouldValidate) {
-        await this.validate.perform(field);
+        await this.validate.perform(field as KeyOrUndefined<Values>);
       }
     },
   );
@@ -371,7 +373,7 @@ export default class Formidable<
       }
 
       if (shouldValidate) {
-        await this.validate.perform(field);
+        await this.validate.perform(field as KeyOrUndefined<Values>);
       }
     },
   );
@@ -469,7 +471,7 @@ export default class Formidable<
       );
 
       // PARSERS
-      this.parsers[name] = {
+      this.parsers[name as ValueKey<Values>] = {
         valueAsNumber,
         valueAsDate,
         valueAsBoolean,
@@ -508,7 +510,7 @@ export default class Formidable<
         setAttribute('required', required);
         setAttribute('name', name as string);
 
-        const value = this.getValue(name);
+        const value = this.getValue(name as ValueKey<Values>);
 
         if (isRadio || isCheckbox) {
           const checked = Array.isArray(value)
@@ -524,12 +526,13 @@ export default class Formidable<
 
       // HANDLERS
       const handleChange = (event: Event): Promise<void> =>
-        this.onChange.perform(name, event, onChange);
+        this.onChange.perform(name as ValueKey<Values>, event, onChange);
 
-      const handleBlur = (event: Event): Promise<void> => this.onBlur.perform(name, event, onBlur);
+      const handleBlur = (event: Event): Promise<void> =>
+        this.onBlur.perform(name as ValueKey<Values>, event, onBlur);
 
       const handleFocus = (event: Event): Promise<void> =>
-        this.onFocus.perform(name, event, onFocus);
+        this.onFocus.perform(name as ValueKey<Values>, event, onFocus);
 
       const preventDefault = (e: Event): void => {
         if (!this.args.shouldUseNativeValidation) {
@@ -537,7 +540,7 @@ export default class Formidable<
         }
       };
 
-      this.nativeValidations[name] = {
+      this.nativeValidations[name as ValueKey<Values>] = {
         required,
         maxLength,
         minLength,
