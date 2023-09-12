@@ -4,20 +4,26 @@ export type HandlerEvent = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
 
 export type GenericObject = Record<string, any>;
 
-type ValueIsArray<Values extends GenericObject> =
-  | keyof Values
-  | `${Extract<keyof Values, string>}.${number}`;
+export type ValueKey<ObjectType extends GenericObject> = {
+  [Key in keyof ObjectType & (string | number)]: ObjectType[Key] extends object
+    ? `${Key}` | `${Key}.${ValueKey<ObjectType[Key]>}`
+    : `${Key}`;
+}[keyof ObjectType & (string | number)];
 
-type ValueIsObject<Values extends GenericObject> =
-  | keyof Values
-  | `${Extract<keyof Values, string>}.${string}`;
+// type ValueIsArray<Values extends GenericObject> =
+//   | keyof Values
+//   | `${Extract<keyof Values, string>}.${number}`;
 
-export type ValueKey<Values extends GenericObject = GenericObject> =
-  Values[keyof Values] extends Array<unknown>
-    ? ValueIsArray<Values>
-    : Values[keyof Values] extends object
-    ? ValueIsObject<Values>
-    : keyof Values;
+// type ValueIsObject<Values extends GenericObject> =
+//   | keyof Values
+//   | `${Extract<keyof Values, string>}.${string}`;
+
+// export type ValueKey<Values extends GenericObject = GenericObject> =
+//   Values[keyof Values] extends Array<unknown>
+//     ? ValueIsArray<Values>
+//     : Values[keyof Values] extends object
+//     ? ValueIsObject<Values>
+//     : keyof Values;
 
 export type RegisterModifier<Values extends GenericObject = GenericObject> = {
   Args: {
