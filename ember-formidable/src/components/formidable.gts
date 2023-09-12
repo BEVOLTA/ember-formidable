@@ -10,6 +10,7 @@ import _cloneDeep from 'lodash/cloneDeep';
 import _isEmpty from 'lodash/isEmpty';
 import _isEqual from 'lodash/isEqual';
 import _set from 'lodash/set';
+import _uniqBy from 'lodash/uniqBy';
 import _unset from 'lodash/unset';
 import { tracked, TrackedObject } from 'tracked-built-ins';
 
@@ -148,12 +149,6 @@ export default class Formidable<
     }, {}) as Values;
   }
 
-  get parsedErrors(): FormidableErrors {
-    return Object.entries(this.errors ?? {}).reduce((obj, [key, value]) => {
-      return _set(obj, key, value);
-    }, {});
-  }
-
   @cached
   get api(): FormidableApi<Values> {
     return {
@@ -171,7 +166,7 @@ export default class Formidable<
       unregister: this.unregister,
       onSubmit: async (e?: SubmitEvent) => await this.submit.perform(e),
       validate: async (field?: ValueKey<Values>) => await this.validate.perform(field),
-      errors: this.parsedErrors,
+      errors: this.errors,
       errorMessages: this.errorMessages,
       getError: this.getError,
       setError: this.setError,
@@ -259,7 +254,7 @@ export default class Formidable<
   };
 
   getError = (field: ValueKey<Values>): any => {
-    return get(this.parsedErrors, field);
+    return get(this.errors, field);
   };
 
   getValue = (field: ValueKey<Values>): any => {
@@ -276,28 +271,42 @@ export default class Formidable<
 
   setError = (field: ValueKey<Values>, error: string | FormidableError): void => {
     if (typeof error === 'string') {
-      this.errors[field] = [
-        ...(this.errors[field] ?? []),
-        {
-          message: error as string,
-          type: 'custom',
-          value: this.getValue(field),
-        },
-      ];
+      this.errors = _set(
+        this.errors,
+        field,
+        _uniqBy(
+          [
+            ...(get(this.errors, field) ?? []),
+            {
+              message: error as string,
+              type: 'custom',
+              value: this.getValue(field),
+            },
+          ],
+          'type',
+        ),
+      );
     } else {
-      this.errors[field] = [
-        ...(this.errors[field] ?? []),
-        {
-          message: error.message,
-          type: error.type ?? 'custom',
-          value: error.value ?? this.getValue(field),
-        },
-      ];
+      this.errors = _set(
+        this.errors,
+        field,
+        _uniqBy(
+          [
+            ...(get(this.errors, field) ?? []),
+            {
+              message: error.message,
+              type: error.type ?? 'custom',
+              value: error.value ?? this.getValue(field),
+            },
+          ],
+          'type',
+        ),
+      );
     }
   };
 
   clearError = (field: ValueKey<Values>): void => {
-    if (this.errors[field]) {
+    if (get(this.errors, field)) {
       _unset(this.errors, field);
     }
   };
