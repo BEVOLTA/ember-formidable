@@ -46,7 +46,7 @@ const userSchema = yup.object({
     .min(3, 'At least 3 hobbies are required.'),
 
   // Mixed type property with one of values allowed
-  gender: yup.mixed().oneOf(['male', 'female', 'other'], 'Invalid gender.'),
+  gender: yup.string().oneOf(['male', 'female', 'other'], 'Invalid gender.'),
 });
 
 // Example usage of the user schema
@@ -65,11 +65,26 @@ const validUser = {
   gender: 'male',
 };
 
+interface IUser {
+  name: string;
+  age: number;
+  email?: string;
+  website?: string | null;
+  createdOn: Date;
+  address: {
+    street: string;
+    city: string;
+    zipCode: string;
+  };
+  hobbies?: string[];
+  gender?: string;
+}
+
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
-  const validator = yupValidator(userSchema);
-  const data = validUser;
+  const validator = yupValidator<IUser>(userSchema);
+  const data: IUser = validUser;
 
   test('Validate -- It should validate', async function (assert) {
     await render(<template>

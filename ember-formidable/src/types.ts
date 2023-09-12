@@ -2,19 +2,17 @@ import type { FunctionBasedModifier } from 'ember-modifier';
 
 export type HandlerEvent = 'onChange' | 'onSubmit' | 'onBlur' | 'onFocus';
 
-export type GenericObject = Record<string, unknown>;
-export type ValueKey<Values extends GenericObject = GenericObject> =
-  Values[keyof Values] extends Array<unknown>
-    ? keyof Values | `${Extract<keyof Values, string>}.${number}`
-    : Values[keyof Values] extends object
-    ? keyof Values | `${Extract<keyof Values, string>}.${string}`
-    : keyof Values;
+export type GenericObject = Record<string, any>;
+
+export type ValueKey<ObjectType extends GenericObject> = {
+  [Key in keyof ObjectType & (string | number)]: ObjectType[Key] extends object
+    ? `${Key}` | `${Key}.${ValueKey<ObjectType[Key]>}`
+    : `${Key}`;
+}[keyof ObjectType & (string | number)];
 
 export type RegisterModifier<Values extends GenericObject = GenericObject> = {
   Args: {
-    Positional?: [
-      (Values[ValueKey<Values>] extends Array<unknown> ? string : ValueKey<Values>) | undefined,
-    ];
+    Positional?: [ValueKey<Values> | undefined];
     Named?: RegisterOptions | undefined;
   };
   Element: Element;
@@ -380,8 +378,9 @@ export interface FormidableArgs<
   /**
    * This function validates the field to return a formatted error.
    */
+
   validator?: (
-    values: Values,
+    values: Values | Partial<Values>,
     options: ResolverOptions<Options>,
   ) => FormidableErrors<ValueKey<Values>> | Promise<FormidableErrors<ValueKey<Values>>>;
 

@@ -26,17 +26,17 @@ export const yupValidator = <
   Values extends GenericObject = GenericObject,
   ValidatorOptions extends GenericObject = GenericObject,
 >(
-  schema: yup.ObjectSchema<Values>,
+  schema: yup.ObjectSchema<Partial<Values> | Values>,
   options: Parameters<(typeof schema)['validate']>[1] &
     ResolverOptions<ValidatorOptions> = {} as ResolverOptions<ValidatorOptions>,
 ): ((
-  values: Values,
+  values: Partial<Values> | Values,
   context: ResolverOptions<ValidatorOptions>,
 ) => Promise<FormidableErrors<ValueKey<Values>>>) => {
   const { mode = 'async', ...schemaOptions } = options;
 
   return async (
-    values: Values,
+    values: Partial<Values> | Values,
     context: ResolverOptions<ValidatorOptions>,
   ): Promise<FormidableErrors<ValueKey<Values>>> => {
     try {

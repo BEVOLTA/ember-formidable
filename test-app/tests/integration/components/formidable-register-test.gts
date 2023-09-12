@@ -83,7 +83,7 @@ module('Integration | Component | formidable', function (hooks) {
       pet: '🐶',
     };
 
-    const handler: FormidableArgs<{ pet: string }>['handler'] = (data) => {
+    const handler: FormidableArgs<typeof data>['handler'] = (data) => {
       assert.strictEqual(data.pet, '🐱');
     };
 

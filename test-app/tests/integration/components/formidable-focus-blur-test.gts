@@ -15,10 +15,6 @@ const userSchema = yup.object({
   name: yup.string().required('Name is required.'),
 });
 
-const validUser = {
-  name: 'John Doe',
-};
-
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
@@ -37,8 +33,8 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('setFocus -- shouldValidate -- Should focus and validate the input when triggered', async function (assert) {
-    const validator = yupValidator(userSchema);
-    const data = { ...validUser, name: '' };
+    const validator = yupValidator<{ name?: string }>(userSchema);
+    const data = { name: '' };
     const validateOn: HandlerEvent[] = ['onFocus'];
 
     const options = { shouldValidate: true };
