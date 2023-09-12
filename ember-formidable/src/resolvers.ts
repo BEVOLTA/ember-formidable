@@ -1,5 +1,8 @@
 import { assert } from '@ember/debug';
 
+import _get from 'lodash/get';
+import _set from 'lodash/set';
+
 import type { FormidableErrors } from './';
 import type { GenericObject, ResolverOptions, ValueKey } from './types';
 import type * as yup from 'yup';
@@ -12,10 +15,10 @@ const formatYupError = (errors: Array<yup.ValidationError>) => {
 
     assert('FORMIDABLE - Error - We could not find any path', !!path);
 
-    if (acc[path]) {
-      acc[path]?.push(formattedError);
+    if (_get(acc, path)) {
+      _set(acc, path, [..._get(acc, path), formattedError]);
     } else {
-      acc[path] = [formattedError];
+      _set(acc, path, [formattedError]);
     }
 
     return acc;

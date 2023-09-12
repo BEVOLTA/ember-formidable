@@ -104,6 +104,26 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#error').hasText('Name is required.');
   });
 
+  test('Validate -- It should validate nested values', async function (assert) {
+    const validateOn: HandlerEvent[] = ['onChange'];
+
+    await render(<template>
+      <Formidable @values={{data}} @validateOn={{validateOn}} @validator={{validator}} as |api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='street' {{api.register 'address.street'}} />
+          <button id='submit' type='submit'>SUBMIT</button>
+          {{#each (api.getError 'address.street') as |error|}}
+            <p id='error'>{{error.message}}</p>
+          {{/each}}
+        </form>
+      </Formidable>
+    </template>);
+
+    assert.dom('#street').hasValue('123 Main St');
+    await fillIn('#street', '');
+    assert.dom('#error').hasText('Street is required.');
+  });
+
   test('clearError -- It should clear an error', async function (assert) {
     await render(<template>
       <Formidable @values={{data}} @validator={{validator}} as |api|>
