@@ -201,9 +201,13 @@ module('Integration | Component | formidable', function (hooks) {
           {{on 'click' (fn api.setValue 'name' '' options)}}
         >CHANGE</button>
         <p id='value'>{{api.getValue 'name'}}</p>
-        {{#each api.errorMessages as |error|}}
-          <p id='error'>{{error}}</p>
-        {{/each}}
+        {{#each-in api.errors as |_key errors|}}
+          {{#each errors as |error|}}
+            <p id='error'>{{error.message}}</p>
+          {{/each}}
+        {{else}}
+          <div id='no-error' />
+        {{/each-in}}
       </Formidable>
     </template>);
 

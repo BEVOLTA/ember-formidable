@@ -111,18 +111,6 @@ export default class Formidable<
     }, {}) as InvalidFields<Values>;
   }
 
-  get errorMessages(): string[] {
-    return (
-      Object.values(this.errors)
-        .flat()
-        // empty errors can happen!
-        .filter((err) => typeof err === 'object' && !_isEmpty(err))
-        .map((err) => {
-          return err?.message;
-        })
-    );
-  }
-
   get isDirty(): boolean {
     return !this.isPristine;
   }
@@ -167,7 +155,6 @@ export default class Formidable<
       onSubmit: async (e?: SubmitEvent) => await this.submit.perform(e),
       validate: async (field?: ValueKey<Values>) => await this.validate.perform(field),
       errors: this.errors,
-      errorMessages: this.errorMessages,
       getError: this.getError,
       setError: this.setError,
       clearError: this.clearError,

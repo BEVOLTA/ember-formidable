@@ -144,9 +144,13 @@ module('Integration | Component | formidable', function (hooks) {
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <button id='submit' type='submit'>SUBMIT</button>
-          {{#each api.errorMessages as |error|}}
-            <p id='error'>{{error}}</p>
-          {{/each}}
+          {{#each-in api.errors as |_key errors|}}
+            {{#each errors as |error|}}
+              <p id='error'>{{error.message}}</p>
+            {{/each}}
+          {{else}}
+            <div id='no-error' />
+          {{/each-in}}
         </form>
       </Formidable>
     </template>);
