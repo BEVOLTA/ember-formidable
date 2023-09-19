@@ -1,7 +1,7 @@
 import { concat, fn } from '@ember/helper';
 import { on } from '@ember/modifier';
 import { get } from '@ember/object';
-import { click, fillIn, render } from '@ember/test-helpers';
+import { click, fillIn, render, waitFor } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 
 import { Formidable } from 'ember-formidable';
@@ -334,6 +334,8 @@ module('Integration | Component | formidable', function (hooks) {
           <button id='submit' type='submit'>SUBMIT</button>
           {{#each api.errorMessages as |error|}}
             <p id='error'>{{error}}</p>
+          {{else}}
+            <div id='no-error' />
           {{/each}}
         </form>
       </Formidable>
@@ -343,6 +345,7 @@ module('Integration | Component | formidable', function (hooks) {
     await click('#submit');
     assert.dom('#error').hasText('Name is required.');
     await fillIn('#name', 'Nicolas Sarkozy');
+    await waitFor('#no-error');
     assert.dom('#error').doesNotExist();
   });
 });
