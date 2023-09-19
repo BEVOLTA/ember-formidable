@@ -56,6 +56,7 @@ jobs:
       - uses: wyvox/action@v1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - run: pnpm dedupe
       - run: pnpm build
       - run: pnpm turbo test --filter test-app
 
