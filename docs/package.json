@@ -48,7 +48,7 @@
     "ember-cli-addon-docs": "git+https://github.com/ember-learn/ember-cli-addon-docs.git#64d25035b07ff9dcf99cf98fd0cb55a48741e6cb",
     "ember-cli-addon-docs-yuidoc": "^1.0.0",
     "ember-cli-app-version": "^6.0.1",
-    "ember-cli-babel": "^8.0.0",
+    "ember-cli-babel": "^7.17.0",
     "ember-cli-dependency-checker": "^3.3.2",
     "ember-cli-deploy": "^2.0.0",
     "ember-cli-deploy-build": "^3.0.0",
