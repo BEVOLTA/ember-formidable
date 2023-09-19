@@ -276,9 +276,7 @@ module('Integration | Component | formidable', function (hooks) {
       foo: { bar: 'DEFAULT' },
     };
 
-    const handler: FormidableArgs<{ foo: { bar: string }; 'foo.bar'?: string }>['handler'] = (
-      data,
-    ) => {
+    const handler: FormidableArgs<typeof data>['handler'] = (data) => {
       assert.strictEqual(data.foo.bar, 'CHANGED');
     };
 
@@ -294,6 +292,33 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#foo').hasValue('DEFAULT');
     await fillIn('#foo', 'CHANGED');
     await click('#submit');
+  });
+
+  test('Values -- Nested deep -- It should update the value ', async function (assert) {
+    const data = {
+      foo: { bar: { baz: "That's deep." } },
+    };
+
+    const handler: FormidableArgs<typeof data>['handler'] = (data) => {
+      assert.strictEqual(data.foo.bar.baz, 'CHANGED');
+    };
+
+    await render(<template>
+      <Formidable @values={{data}} @handler={{handler}} as |api|>
+        <form {{on 'submit' api.onSubmit}}>
+          <input type='text' id='foo' {{api.register 'foo.bar.baz'}} />
+          <button id='submit' type='submit'>SUBMIT</button>
+          {{#if (api.getValue 'foo.bar.baz')}}
+            <p id='fbabaz'>{{api.getValue 'foo.bar.baz'}}</p>
+          {{/if}}
+        </form>
+      </Formidable>
+    </template>);
+
+    assert.dom('#foo').hasValue("That's deep.");
+    await fillIn('#foo', 'CHANGED');
+    await click('#submit');
+    assert.dom('#fbabaz').hasText('CHANGED');
   });
 
   test('Values -- array -- It should update the value ', async function (assert) {
