@@ -36,7 +36,7 @@
   "pnpm": {
     "overrides": {
       "@glimmer/validator": "^0.84.3",
-      "ember-cli-babel": "^7.26.11",
+      "ember-cli-babel": "^8.0.0",
       "@glimmer/reference": "0.84.3"
     },
     "packageExtensions": {
