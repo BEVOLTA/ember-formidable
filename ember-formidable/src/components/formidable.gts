@@ -63,7 +63,7 @@ export default class Formidable<
   @service formidable!: FormidableService;
 
   // --- VALUES
-  values: Values = new TrackedObject(_cloneDeep(this.args.values ?? {})) as Values;
+  values: Values = new TrackedObject(this.args.values ?? {}) as Values;
 
   // --- SUBMIT
   @tracked isSubmitSuccessful: boolean | undefined = undefined;
