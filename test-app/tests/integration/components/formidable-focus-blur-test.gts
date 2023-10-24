@@ -33,8 +33,9 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('setFocus -- shouldValidate -- Should focus and validate the input when triggered', async function (assert) {
-    const validator = yupValidator<{ name?: string }>(userSchema);
     const data = { name: '' };
+    // @ts-expect-error Weird type...
+    const validator = yupValidator(userSchema);
     const validateOn: HandlerEvent[] = ['onFocus'];
 
     const options = { shouldValidate: true };

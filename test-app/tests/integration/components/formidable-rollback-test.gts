@@ -203,6 +203,7 @@ module('Integration | Component | formidable', function (hooks) {
     };
 
     const validator = yupValidator(
+      // @ts-expect-error Weird type...
       yup.object({
         name: yup.string().required('Name is required.'),
         age: yup

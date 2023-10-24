@@ -21,6 +21,7 @@ const validUser = {
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
+  // @ts-expect-error Weird type...
   const validator = yupValidator(userSchema);
   let data = validUser;
 

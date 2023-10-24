@@ -188,6 +188,7 @@ module('Integration | Component | formidable', function (hooks) {
   });
 
   test('SetValue -- shouldValidate -- It should update and validate the field', async function (assert) {
+    // @ts-expect-error Weird type...
     const validator = yupValidator(userSchema);
 
     const data = validUser;
