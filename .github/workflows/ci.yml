@@ -70,8 +70,8 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           pnpm-args: --no-lockfile
-      - run: pnpm dedupe
       - run: pnpm build
+      - run: pnpm dedupe
       - run: pnpm turbo test --filter test-app
 
   try-scenarios:

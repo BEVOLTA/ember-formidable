@@ -23,7 +23,7 @@ module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
   const handleOn: HandlerEvent[] = ['onChange'];
-
+  // @ts-expect-error Weird type...
   const validator = yupValidator(userSchema);
   const data = validUser;
 

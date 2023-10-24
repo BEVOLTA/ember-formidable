@@ -1,7 +1,7 @@
 import Component from '@glimmer/component';
 import { cached } from '@glimmer/tracking';
 import { assert } from '@ember/debug';
-import { get } from '@ember/object';
+import { action, get } from '@ember/object';
 import { inject as service } from '@ember/service';
 
 import { task } from 'ember-concurrency';
@@ -63,7 +63,7 @@ export default class Formidable<
   @service formidable!: FormidableService;
 
   // --- VALUES
-  values: Values = new TrackedObject(_cloneDeep(this.args.values ?? {})) as Values;
+  values: Values = new TrackedObject(this.args.values ?? {}) as Values;
 
   // --- SUBMIT
   @tracked isSubmitSuccessful: boolean | undefined = undefined;
@@ -111,18 +111,6 @@ export default class Formidable<
     }, {}) as InvalidFields<Values>;
   }
 
-  get errorMessages(): string[] {
-    return (
-      Object.values(this.errors)
-        .flat()
-        // empty errors can happen!
-        .filter((err) => typeof err === 'object' && !_isEmpty(err))
-        .map((err) => {
-          return err?.message;
-        })
-    );
-  }
-
   get isDirty(): boolean {
     return !this.isPristine;
   }
@@ -167,7 +155,6 @@ export default class Formidable<
       onSubmit: async (e?: SubmitEvent) => await this.submit.perform(e),
       validate: async (field?: ValueKey<Values>) => await this.validate.perform(field),
       errors: this.errors,
-      errorMessages: this.errorMessages,
       getError: this.getError,
       setError: this.setError,
       clearError: this.clearError,
@@ -207,12 +194,13 @@ export default class Formidable<
     }
   }
 
-  // --- STATES HANDLERS
+  // --- ACTIONS
 
-  rollback = (
+  @action
+  rollback(
     field?: ValueKey<Values>,
     { keepError, keepDirty, defaultValue }: RollbackContext = {},
-  ): void => {
+  ): void {
     if (field) {
       this.values[field] = (defaultValue ??
         this.rollbackValues[field] ??
@@ -242,34 +230,40 @@ export default class Formidable<
 
       this.isSubmitted = false;
     }
-  };
+  }
 
-  getFieldState = (name: ValueKey<Values>): FieldState => {
+  @action
+  getFieldState(name: ValueKey<Values>): FieldState {
     const isDirty = this.dirtyFields[name] ?? false;
     const isPristine = !isDirty;
     const error = this.errors[name];
     const isInvalid = !_isEmpty(error);
 
     return { isDirty, isPristine, isInvalid, error };
-  };
+  }
 
-  getError = (field: ValueKey<Values>): any => {
+  @action
+  getError(field: ValueKey<Values>): FormidableError[] | undefined {
     return get(this.errors, field);
-  };
+  }
 
-  getValue = (field: ValueKey<Values>): any => {
+  @action
+  getValue(field: ValueKey<Values>): any {
     return get(this.parsedValues, field);
-  };
+  }
 
-  getValues = (): Values => {
+  @action
+  getValues(): Values {
     return this.parsedValues;
-  };
+  }
 
-  getDefaultValue = (field: ValueKey<Values>): any => {
+  @action
+  getDefaultValue(field: ValueKey<Values>): any {
     return get(this.rollbackValues, field);
-  };
+  }
 
-  setError = (field: ValueKey<Values>, error: string | FormidableError): void => {
+  @action
+  setError(field: ValueKey<Values>, error: string | FormidableError): void {
     if (typeof error === 'string') {
       this.errors = _set(
         this.errors,
@@ -303,22 +297,25 @@ export default class Formidable<
         ),
       );
     }
-  };
+  }
 
-  clearError = (field: ValueKey<Values>): void => {
+  @action
+  clearError(field: ValueKey<Values>): void {
     if (get(this.errors, field)) {
       _unset(this.errors, field);
     }
-  };
+  }
 
-  clearErrors = (): void => {
+  @action
+  clearErrors(): void {
     this.errors = new TrackedObject({});
-  };
+  }
 
-  unregister = (
+  @action
+  unregister(
     field: ValueKey<Values>,
     { keepError, keepDirty, keepValue, keepDefaultValue }: UnregisterContext = {},
-  ): void => {
+  ): void {
     const element = this.getDOMElement(field as string);
 
     assert('FORMIDABLE - No input element found to unregister', !!element);
@@ -342,7 +339,9 @@ export default class Formidable<
     if (!keepDefaultValue) {
       _unset(this.rollbackValues, field);
     }
-  };
+  }
+
+  // --- TASKS
 
   rollbackInvalid = task(async (context: RollbackContext = {}): Promise<void> => {
     await this.validate.perform();

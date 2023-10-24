@@ -83,6 +83,7 @@ interface IUser {
 module('Integration | Component | formidable', function (hooks) {
   setupRenderingTest(hooks);
 
+  // @ts-expect-error Weird type...
   const validator = yupValidator<IUser>(userSchema);
   const data: IUser = validUser;
 
@@ -254,16 +255,20 @@ module('Integration | Component | formidable', function (hooks) {
     assert.dom('#invalid-email').doesNotExist();
   });
 
-  test('errorMessages -- It should show errors', async function (assert) {
+  test('errors -- It should show errors', async function (assert) {
     await render(<template>
       <Formidable @values={{data}} @validator={{validator}} as |api|>
         <form {{on 'submit' api.onSubmit}}>
           <input type='text' id='name' {{api.register 'name'}} />
           <input type='email' id='email' {{api.register 'email'}} />
           <button id='submit' type='submit'>SUBMIT</button>
-          {{#each api.errorMessages as |error|}}
-            <p id='error'>{{error}}</p>
-          {{/each}}
+          {{#each-in api.errors as |_key errors|}}
+            {{#each errors as |error|}}
+              <p id='error'>{{error.message}}</p>
+            {{/each}}
+          {{else}}
+            <div id='no-error' />
+          {{/each-in}}
         </form>
       </Formidable>
     </template>);
@@ -332,9 +337,13 @@ module('Integration | Component | formidable', function (hooks) {
           <input type='text' id='name' {{api.register 'name'}} />
           <input type='email' id='email' {{api.register 'email'}} />
           <button id='submit' type='submit'>SUBMIT</button>
-          {{#each api.errorMessages as |error|}}
-            <p id='error'>{{error}}</p>
-          {{/each}}
+          {{#each-in api.errors as |_key errors|}}
+            {{#each errors as |error|}}
+              <p id='error'>{{error.message}}</p>
+            {{/each}}
+          {{else}}
+            <div id='no-error' />
+          {{/each-in}}
         </form>
       </Formidable>
     </template>);
